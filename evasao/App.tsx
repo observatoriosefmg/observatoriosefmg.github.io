@@ -251,7 +251,7 @@ const App: React.FC = () => {
   }, 0);
 
   // Mapeia destinos para lista de auditores (inclui 'Destino desconhecido' para sem órgão)
-  const destinationDetails: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
+  const destinationDetails: Record<string, { name: string; date?: string | null; pubDate?: string | null; noEffectDate?: string | null; situation?: string | null; area?: string | null }[]> = {};
   destinationDetails['Destino desconhecido'] = [];
 
 
@@ -259,20 +259,28 @@ const App: React.FC = () => {
     const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
     const key = (org === null || org === undefined) ? 'Destino desconhecido' : String(org).trim() || 'Destino desconhecido';
     const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
-    const date = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
-    const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
+  const date = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
+  const pubDate = rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? rec['DATA PUBLICACAO EXONERAÇÃO'] ?? rec['DATA PUBLICACAO EXONERAÇÃO'] ?? null;
+  const noEffectDate = rec['DATA NOMEAÇÃO SEM EFEITO'] ?? rec['DATA NOMEACAO SEM EFEITO'] ?? rec['DATA NOMEAÇÃO'] ?? rec['Data NOMEAÇÃO SEM EFEITO'] ?? null;
+  const situation = rec['SITUACAO'] ?? rec['SITUAÇÃO'] ?? rec['Situacao'] ?? null;
+  const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
     if (!destinationDetails[key]) destinationDetails[key] = [];
-    destinationDetails[key].push({ name, date, area });
+    destinationDetails[key].push({ name, date, pubDate, noEffectDate, situation, area });
   }
 
   // Ordena nomes dentro de cada destino por data (mais recente primeiro)
   for (const k of Object.keys(destinationDetails)) {
     destinationDetails[k].sort((a, b) => {
-      const da = parseBrazilDate(a.date);
-      const db = parseBrazilDate(b.date);
+      const getKeyDate = (it: any) => {
+        const isDes = it.situation && String(it.situation).toUpperCase().includes('DESISTENTE');
+        return parseBrazilDate(isDes ? it.noEffectDate ?? it.nomeacaoSemEfeito ?? it['DATA NOMEAÇÃO SEM EFEITO'] : it.date);
+      };
+      const da = getKeyDate(a);
+      const db = getKeyDate(b);
+      // itens sem data (null) devem ficar por cima
+      if (!da && db) return -1;
+      if (da && !db) return 1;
       if (da && db) return db.getTime() - da.getTime();
-      if (da && !db) return -1;
-      if (!da && db) return 1;
       return a.name.localeCompare(b.name);
     });
   }
@@ -330,21 +338,39 @@ const App: React.FC = () => {
 
   // Agregação por destino para a área filtrada
   const filteredDestinationMap: Map<string, number> = new Map();
-  const filteredDestinationDetails: Record<string, { name: string; date?: string | null; area?: string | null }[]> = { 'Destino desconhecido': [] };
+  const filteredDestinationDetails: Record<string, { name: string; date?: string | null; pubDate?: string | null; noEffectDate?: string | null; situation?: string | null; area?: string | null }[]> = { 'Destino desconhecido': [] };
   let filteredUnknownCount = 0;
   for (const rec of filteredAuditors) {
     const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
     const key = (org === null || org === undefined || String(org).trim() === '') ? 'Destino desconhecido' : String(org).trim();
     const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
-    const date = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
-    const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
+  const date = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
+  const pubDate = rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? rec['DATA PUBLICACAO EXONERAÇÃO'] ?? rec['DATA PUBLICACAO EXONERAÇÃO'] ?? null;
+  const noEffectDate = rec['DATA NOMEAÇÃO SEM EFEITO'] ?? rec['DATA NOMEACAO SEM EFEITO'] ?? rec['DATA NOMEAÇÃO'] ?? rec['Data NOMEAÇÃO SEM EFEITO'] ?? null;
+  const situation = rec['SITUACAO'] ?? rec['SITUAÇÃO'] ?? rec['Situacao'] ?? null;
+  const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
     filteredDestinationDetails[key] = filteredDestinationDetails[key] ?? [];
-    filteredDestinationDetails[key].push({ name, date, area });
+  filteredDestinationDetails[key].push({ name, date, pubDate, noEffectDate, situation, area });
     if (key === 'Destino desconhecido') {
       filteredUnknownCount += 1;
     } else {
       filteredDestinationMap.set(key, (filteredDestinationMap.get(key) ?? 0) + 1);
     }
+  }
+  // Ordena nomes dentro de cada destino filtrado pelo mesmo critério
+  for (const k of Object.keys(filteredDestinationDetails)) {
+    filteredDestinationDetails[k].sort((a, b) => {
+      const getKeyDate = (it: any) => {
+        const isDes = it.situation && String(it.situation).toUpperCase().includes('DESISTENTE');
+        return parseBrazilDate(isDes ? it.noEffectDate ?? it.nomeacaoSemEfeito ?? it['DATA NOMEAÇÃO SEM EFEITO'] : it.date);
+      };
+      const da = getKeyDate(a);
+      const db = getKeyDate(b);
+      if (!da && db) return -1;
+      if (da && !db) return 1;
+      if (da && db) return db.getTime() - da.getTime();
+      return a.name.localeCompare(b.name);
+    });
   }
   const evasionDataFiltered: EvasionData[] = Array.from(filteredDestinationMap.entries()).map(([destination, count]) => ({ destination, count }));
   if (filteredUnknownCount > 0) evasionDataFiltered.push({ destination: 'Destino desconhecido', count: filteredUnknownCount });
