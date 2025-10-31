@@ -48,23 +48,34 @@ const App: React.FC = () => {
             continue;
           }
 
-          // Agrega registros: considerar apenas destinos (ÓRGÃO). Ignorar registros sem órgão.
+          // Agrega registros: considerar apenas situações que caracterizam evasão.
+          // Incluímos também um bucket "Destino desconhecido" para registros sem órgão.
           const map = new Map<string, number>();
+          let unknownCount = 0;
+
+          const isEvasionSituation = (s: any) => {
+            if (!s) return false;
+            const normalized = String(s).toUpperCase().trim();
+            return normalized === 'NOMEADO E EXONERADO' || normalized === 'DESISTENTE';
+          };
+
           for (const rec of raw) {
             const situacao = rec['SITUACAO'] ?? rec['Situação'] ?? rec['Situacao'];
-            // considerar apenas situações que caracterizam evasão
-            const isEvasion = situacao && String(situacao).toUpperCase().includes('DESIST') || (situacao && String(situacao).toUpperCase().includes('EXONERADO'));
-            if (!isEvasion) continue;
+            if (!isEvasionSituation(situacao)) continue;
 
             const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
-            if (org === null || org === undefined) continue; // pular sem destino
+            if (org === null || org === undefined || String(org).trim() === '') {
+              unknownCount += 1;
+              continue;
+            }
+
             const key = String(org).trim();
-            if (key === '') continue;
             const prev = map.get(key) ?? 0;
             map.set(key, prev + 1);
           }
 
           const aggregated: EvasionData[] = Array.from(map.entries()).map(([destination, count]) => ({ destination, count }));
+          if (unknownCount > 0) aggregated.push({ destination: 'Destino desconhecido', count: unknownCount });
           aggregated.sort((a, b) => b.count - a.count);
 
           if (mounted) setEvasionData(aggregated);
@@ -263,7 +274,7 @@ const App: React.FC = () => {
             />
             <CounterCard 
               value={<span title={totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' as any }).format(totalCost)}</span>} 
-              label={`Custo estimado para o Estado com ${totalEvasions} evasões pós-posse`}
+              label={`Custo estimado para o Estado com ${totalEvasions} evasões`}
               icon={<MoneyIcon />} 
             />
           </section>
@@ -276,7 +287,7 @@ const App: React.FC = () => {
           <section className="bg-slate-800 rounded-xl p-6 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-4">Destinos da Evasão</h2>
             <p className="text-slate-400 mb-6">
-              Esta tabela detalha os órgãos (destinos) para os quais os auditores se transferiram após a posse.
+              Esta tabela detalha os órgãos (destinos) para os quais os auditores se transferiram após a posse ou se mantiveram no órgão desistindo de tomar posse.
               O número total de evasões é de <span className="font-bold text-cyan-400">{totalEvasions}</span>.
             </p>
             <EvasionTable data={evasionData} details={destinationDetails} />
