@@ -2,73 +2,154 @@ import React, { useState, useEffect } from 'react';
 import CounterCard from './components/CounterCard';
 import EvasionTable from './components/EvasionTable';
 import EvasionChart from './components/EvasionChart';
-import { LAST_EVASION_DATE, COST_PER_AUDITOR, EVASION_DATA, AUDITORS_WHO_LEFT_AFTER_POSSE, EVASION_AUDITORS } from './constants';
+import { DEFAULT_LAST_EVASION_DATE, COST_PER_AUDITOR } from './constants';
 import { EvasionData } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faMoneyBill, faUsers } from '@fortawesome/free-solid-svg-icons';
 
 const App: React.FC = () => {
   const [daysSinceLastEvasion, setDaysSinceLastEvasion] = useState(0);
-  const [evasionData, setEvasionData] = useState<EvasionData[]>(EVASION_DATA);
+  const [evasionData, setEvasionData] = useState<EvasionData[]>([]);
+  const [evasionAuditors, setEvasionAuditors] = useState<any[]>([]);
+  const [lastEvasionDate, setLastEvasionDate] = useState<Date | null>(null);
+  const [selectedArea, setSelectedArea] = useState<string>('TODAS');
 
+  // daysSinceLastEvasion will be calculado após carregamento dos dados (quando lastEvasionDate estiver definido).
   useEffect(() => {
+    const ref = lastEvasionDate ?? DEFAULT_LAST_EVASION_DATE;
     const today = new Date();
-    const differenceInTime = today.getTime() - LAST_EVASION_DATE.getTime();
+    const differenceInTime = today.getTime() - ref.getTime();
     const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
     setDaysSinceLastEvasion(differenceInDays);
-  }, []);
+  }, [lastEvasionDate]);
 
-  // Ao montar, tentamos carregar `dados.json` de alguns caminhos possíveis.
+  // Ao montar, tentamos carregar `dados.csv` de alguns caminhos possíveis e parseá-lo.
   useEffect(() => {
     let mounted = true;
 
     const paths = [
-      '/evasao/data/dados.json',
-      '/evasao/dist/data/dados.json',
-      '/evasao/dist/assets/dados.json',
-      '/evasao/dados.json',
-      '/dados.json',
-      'dist/data/dados.json',
-      'assets/dados.json',
+      '/data/dados.csv',
+      '/evasao/data/dados.csv',
+      'data/dados.csv',
+      './data/dados.csv',
+      '/evasao/dist/data/dados.csv',
+      '/evasao/dist/assets/dados.csv',
+      '/evasao/dados.csv',
+      '/dados.csv',
+      'dist/data/dados.csv',
+      'assets/dados.csv',
     ];
+
+    const parseCsv = (text: string) => {
+      // Parser robusto para CSV com separador ';' e suporte a campos entre aspas duplas.
+      const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+      if (lines.length === 0) return [];
+
+      const parseLine = (line: string) => {
+        const parts: string[] = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            // escape de aspas duplas "" dentro de campo
+            if (inQuotes && line[i + 1] === '"') {
+              cur += '"';
+              i++; // pular a segunda aspas
+            } else {
+              inQuotes = !inQuotes;
+            }
+            continue;
+          }
+          if (ch === ';' && !inQuotes) {
+            parts.push(cur);
+            cur = '';
+            continue;
+          }
+          cur += ch;
+        }
+        parts.push(cur);
+        return parts;
+      };
+
+      const headerLine = lines[0];
+      const headers = parseLine(headerLine).map(h => h.trim());
+      const rows: any[] = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        const parts = parseLine(line);
+        // garantir que temos o mesmo número de colunas: preencher com '' quando faltar
+        while (parts.length < headers.length) parts.push('');
+        const obj: Record<string, string> = {};
+        for (let j = 0; j < headers.length; j++) {
+          obj[headers[j]] = parts[j] ? parts[j].trim() : '';
+        }
+
+        // Normalizações para manter compatibilidade com o que o app espera
+        const normalized: Record<string, any> = { ...obj };
+        // Nome
+        if (obj['NOME']) normalized['Nome do Candidato'] = obj['NOME'];
+        if (obj['NOME DO CANDIDATO']) normalized['Nome do Candidato'] = obj['NOME DO CANDIDATO'];
+        // Situação
+        if (obj['SITUAÇÃO']) normalized['SITUACAO'] = obj['SITUAÇÃO'];
+        if (obj['SITUACAO']) normalized['SITUACAO'] = obj['SITUACAO'];
+        // Órgão destino -> mapear para chave 'ÓRGÃO' usada no código
+        if (obj['ÓRGÃO DESTINO']) normalized['ÓRGÃO'] = obj['ÓRGÃO DESTINO'];
+        if (obj['ORGAO DESTINO']) normalized['ÓRGÃO'] = obj['ORGAO DESTINO'];
+        if (obj['ÓRGÃO']) normalized['ÓRGÃO'] = obj['ÓRGÃO'];
+        // Área
+        if (obj['ÁREA']) normalized['ÁREA'] = obj['ÁREA'];
+        if (obj['AREA']) normalized['ÁREA'] = obj['AREA'];
+        // Data exoneração
+        if (obj['DATA EXONERAÇÃO']) normalized['DATA EXONERAÇÃO'] = obj['DATA EXONERAÇÃO'];
+        if (obj['DATA EXONERACAO']) normalized['DATA EXONERAÇÃO'] = obj['DATA EXONERACAO'];
+
+        rows.push(normalized);
+      }
+      return rows;
+    };
 
     async function tryLoad() {
       for (const p of paths) {
         try {
           const res = await fetch(p);
           if (!res.ok) continue;
-          const text = await res.text();
-
-          // O arquivo em `dist` pode conter literais NaN — substituímos por null antes do parse.
-          const sanitized = text.replace(/\bNaN\b/g, 'null');
-          const raw = JSON.parse(sanitized);
-
-          if (!Array.isArray(raw)) {
-            console.warn('dados.json não tem formato esperado (array) em', p);
+          let text = await res.text();
+          // remover BOM se presente
+          text = text.replace(/^\uFEFF/, '');
+          // log do caminho e tamanho do conteúdo para depuração
+          // eslint-disable-next-line no-console
+          console.debug('carregado', p, 'tamanho', text.length);
+          const raw = parseCsv(text);
+          if ((!Array.isArray(raw) || raw.length === 0) && text.trim().length > 0) {
+            // se parse devolveu vazio, registrar um trecho do texto para ajudar depurar
+            // eslint-disable-next-line no-console
+            console.warn('parseCsv retornou array vazio para', p, 'trecho:', text.slice(0, 400));
+          }
+          if (!Array.isArray(raw) || raw.length === 0) {
+            console.warn('dados.csv não tem formato esperado (array) em', p);
             continue;
           }
 
-          // Agrega registros: considerar apenas situações que caracterizam evasão.
-          // Incluímos também um bucket "Destino desconhecido" para registros sem órgão.
-          const map = new Map<string, number>();
-          let unknownCount = 0;
-
+          // Filtrar apenas situações que consideramos evasão
           const isEvasionSituation = (s: any) => {
             if (!s) return false;
             const normalized = String(s).toUpperCase().trim();
             return normalized === 'NOMEADO E EXONERADO' || normalized === 'DESISTENTE';
           };
 
-          for (const rec of raw) {
-            const situacao = rec['SITUACAO'] ?? rec['Situação'] ?? rec['Situacao'];
-            if (!isEvasionSituation(situacao)) continue;
+          const evasionRows = raw.filter(r => isEvasionSituation(r['SITUACAO'] ?? r['SITUAÇÃO'] ?? r['Situacao'] ?? r['Situacao']));
 
+          // Agrega registros: considerar apenas situações que caracterizam evasão.
+          // Incluímos também um bucket "Destino desconhecido" para registros sem órgão.
+          const map = new Map<string, number>();
+          let unknownCount = 0;
+          for (const rec of evasionRows) {
             const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
             if (org === null || org === undefined || String(org).trim() === '') {
               unknownCount += 1;
               continue;
             }
-
             const key = String(org).trim();
             const prev = map.get(key) ?? 0;
             map.set(key, prev + 1);
@@ -78,7 +159,41 @@ const App: React.FC = () => {
           if (unknownCount > 0) aggregated.push({ destination: 'Destino desconhecido', count: unknownCount });
           aggregated.sort((a, b) => b.count - a.count);
 
-          if (mounted) setEvasionData(aggregated);
+          // Determinar última data de exoneração presente nos registros
+          let lastDate: Date | null = null;
+          const parseBrazilDate = (d: any): Date | null => {
+            if (!d || typeof d !== 'string') return null;
+            const parts = d.split('/');
+            if (parts.length !== 3) return null;
+            const day = Number(parts[0]);
+            const month = Number(parts[1]) - 1;
+            const year = Number(parts[2]);
+            if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year)) return null;
+            return new Date(year, month, day);
+          };
+          for (const rec of evasionRows) {
+            const dRaw = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? null;
+            const parsed = parseBrazilDate(dRaw);
+            if (parsed && (!lastDate || parsed.getTime() > lastDate.getTime())) lastDate = parsed;
+          }
+
+          if (mounted) {
+            // Expor os dados lidos para depuração no console do navegador
+            try {
+              (window as any).__EVASION_RAW = evasionRows;
+            } catch (e) {
+              // ignorar se não puder escrever em window
+            }
+            // Publica no console em formato de objeto JavaScript
+            // (ver no DevTools do navegador após carregar a página)
+            // eslint-disable-next-line no-console
+            console.log('dados.csv parsed (evasionRows):', evasionRows);
+
+            setEvasionData(aggregated);
+            setEvasionAuditors(evasionRows);
+            setLastEvasionDate(lastDate ?? null);
+          }
+
           return;
         } catch (err) {
           // tentar próximo caminho
@@ -89,7 +204,7 @@ const App: React.FC = () => {
 
       // nenhum caminho funcionou — manter dados embutidos
       // eslint-disable-next-line no-console
-      console.warn('Não foi possível carregar dados.json; usando dados internos.');
+      console.warn('Não foi possível carregar dados.csv; usando dados internos.');
     }
 
     tryLoad();
@@ -102,7 +217,7 @@ const App: React.FC = () => {
   const totalEvasionsInTable = evasionData.reduce((sum, item) => sum + item.count, 0);
 
   // Total real de auditores que evadiram (inclui também registros sem ÓRGÃO preenchido).
-  const totalEvasions = AUDITORS_WHO_LEFT_AFTER_POSSE;
+  const totalEvasions = evasionAuditors.length;
 
   // helper para parsear datas no formato DD/MM/YYYY
   const parseBrazilDate = (d: any): Date | null => {
@@ -127,7 +242,7 @@ const App: React.FC = () => {
 
   const startWindow = new Date(2024, 0, 1); // Jan 1, 2024
 
-  const totalCost = EVASION_AUDITORS.reduce((sum, rec) => {
+  const totalCost = evasionAuditors.reduce((sum, rec) => {
     const rawDate = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
     const d = parseBrazilDate(rawDate);
     if (!d) return sum; // sem data -> não acumula custos mensais
@@ -140,7 +255,7 @@ const App: React.FC = () => {
   destinationDetails['Destino desconhecido'] = [];
 
 
-  for (const rec of EVASION_AUDITORS) {
+  for (const rec of evasionAuditors) {
     const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
     const key = (org === null || org === undefined) ? 'Destino desconhecido' : String(org).trim() || 'Destino desconhecido';
     const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
@@ -164,7 +279,7 @@ const App: React.FC = () => {
 
   // Conta evasões por área (para mostrar no footer do card)
   const areaCounts: Record<string, number> = {};
-  for (const rec of EVASION_AUDITORS) {
+  for (const rec of evasionAuditors) {
     const area = String(rec['ÁREA'] ?? rec['AREA'] ?? 'Outros');
     areaCounts[area] = (areaCounts[area] ?? 0) + 1;
   }
@@ -178,39 +293,88 @@ const App: React.FC = () => {
     </div>
   );
 
-  // Agregar exonerações por mês usando chave ISO (YYYY-MM) para ordenação correta.
-  // Mantemos um rótulo legível em pt-BR para exibição no gráfico e usamos esse rótulo como chave em `monthlyDetails`.
+  // Agregar exonerações por mês (MM/AAAA) - série total
   const monthlyMapIso: Map<string, number> = new Map();
   const isoToLabel: Record<string, string> = {};
   const monthlyDetails: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
-
-  for (const rec of EVASION_AUDITORS) {
+  for (const rec of evasionAuditors) {
     const rawDate = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
     const d = parseBrazilDate(rawDate);
     if (!d) continue;
-  const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; // e.g. 2024-07
-  // formato de exibição desejado: 'MMM/YYYY' em maiúsculas, ex: 'ABR/2025'
-  const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
-  const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
-
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+    const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
     monthlyMapIso.set(iso, (monthlyMapIso.get(iso) ?? 0) + 1);
     isoToLabel[iso] = displayLabel;
-
-    // preencher detalhes por rótulo de exibição (tooltip espera label legível)
     if (!monthlyDetails[displayLabel]) monthlyDetails[displayLabel] = [];
     const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
     const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
     monthlyDetails[displayLabel].push({ name, date: rawDate, area });
   }
-
-  // Ordena por chave ISO asc (ano/mês) e constrói os pontos do gráfico usando o rótulo legível.
   const monthlyPoints = Array.from(monthlyMapIso.entries())
-    .sort((a, b) => a[0].localeCompare(b[0])) // iso strings ordenam corretamente
+    .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([iso, value]) => ({ label: isoToLabel[iso], value }));
 
-  // Garantir que os detalhes por mês estejam ordenados por data de exoneração (mais antigo primeiro)
-  for (const label of Object.keys(monthlyDetails)) {
-    monthlyDetails[label].sort((a, b) => {
+  // Última exoneração (formatada) — calculada a partir dos dados carregados (ou fallback).
+  const lastExonDateFormatted = (lastEvasionDate ?? DEFAULT_LAST_EVASION_DATE)
+    ? (lastEvasionDate ?? DEFAULT_LAST_EVASION_DATE).toLocaleDateString('pt-BR')
+    : '—';
+
+  // Lista de áreas (para filtro)
+  const areas = ['TODAS', ...Array.from(new Set(evasionAuditors.map(r => String(r['ÁREA'] ?? r['AREA'] ?? 'Outros')))).sort()];
+
+  // Filtrar auditores pela área selecionada
+  const filteredAuditors = selectedArea === 'TODAS'
+    ? evasionAuditors
+    : evasionAuditors.filter(r => String(r['ÁREA'] ?? r['AREA'] ?? 'Outros') === selectedArea);
+
+  // Agregação por destino para a área filtrada
+  const filteredDestinationMap: Map<string, number> = new Map();
+  const filteredDestinationDetails: Record<string, { name: string; date?: string | null; area?: string | null }[]> = { 'Destino desconhecido': [] };
+  let filteredUnknownCount = 0;
+  for (const rec of filteredAuditors) {
+    const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
+    const key = (org === null || org === undefined || String(org).trim() === '') ? 'Destino desconhecido' : String(org).trim();
+    const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
+    const date = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
+    const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
+    filteredDestinationDetails[key] = filteredDestinationDetails[key] ?? [];
+    filteredDestinationDetails[key].push({ name, date, area });
+    if (key === 'Destino desconhecido') {
+      filteredUnknownCount += 1;
+    } else {
+      filteredDestinationMap.set(key, (filteredDestinationMap.get(key) ?? 0) + 1);
+    }
+  }
+  const evasionDataFiltered: EvasionData[] = Array.from(filteredDestinationMap.entries()).map(([destination, count]) => ({ destination, count }));
+  if (filteredUnknownCount > 0) evasionDataFiltered.push({ destination: 'Destino desconhecido', count: filteredUnknownCount });
+  evasionDataFiltered.sort((a, b) => b.count - a.count);
+
+  // Agregação mensal filtrada (mesma lógica de labels MMM/YYYY)
+  const monthlyMapIsoFiltered: Map<string, number> = new Map();
+  const isoToLabelFiltered: Record<string, string> = {};
+  const monthlyDetailsFiltered: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
+  for (const rec of filteredAuditors) {
+    const rawDate = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
+    const d = parseBrazilDate(rawDate);
+    if (!d) continue;
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+    const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
+    monthlyMapIsoFiltered.set(iso, (monthlyMapIsoFiltered.get(iso) ?? 0) + 1);
+    isoToLabelFiltered[iso] = displayLabel;
+    if (!monthlyDetailsFiltered[displayLabel]) monthlyDetailsFiltered[displayLabel] = [];
+    const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
+    const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
+    monthlyDetailsFiltered[displayLabel].push({ name, date: rawDate, area });
+  }
+  const monthlyPointsFiltered = Array.from(monthlyMapIsoFiltered.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([iso, value]) => ({ label: isoToLabelFiltered[iso], value }));
+
+  // Ordenar detalhes mensais filtrados por data asc
+  for (const label of Object.keys(monthlyDetailsFiltered)) {
+    monthlyDetailsFiltered[label].sort((a, b) => {
       const da = parseBrazilDate(a.date);
       const db = parseBrazilDate(b.date);
       if (da && db) return da.getTime() - db.getTime();
@@ -220,13 +384,8 @@ const App: React.FC = () => {
     });
   }
 
-  // Última exoneração (formatada) — usamos LAST_EVASION_DATE exportado por constants.ts
-  const lastExonDateFormatted = LAST_EVASION_DATE
-    ? LAST_EVASION_DATE.toLocaleDateString('pt-BR')
-    : '—';
-
   // Calcular recorde: maior intervalo (em dias) sem exoneração entre datas de exoneração
-  const exonDates: Date[] = EVASION_AUDITORS
+  const exonDates: Date[] = evasionAuditors
     .map(r => parseBrazilDate(r['DATA EXONERAÇÃO'] ?? r['Data Exoneração'] ?? null))
     .filter((d): d is Date => d instanceof Date)
     .sort((a, b) => a.getTime() - b.getTime());
@@ -255,7 +414,7 @@ const App: React.FC = () => {
       <div className="max-w-5xl mx-auto">
         <header className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2">Observatório da Evasão</h1>
-          <p className="text-lg text-cyan-400 font-medium">Auditores Fiscais da Receita Estadual de MG</p>
+          <p className="text-lg text-cyan-400 font-medium">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
         </header>
 
         <main>
@@ -279,9 +438,26 @@ const App: React.FC = () => {
             />
           </section>
 
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white mb-2">Exonerações por mês</h3>
-            <EvasionChart points={monthlyPoints} details={monthlyDetails} />
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-white mb-2">Exonerações por mês</h3>
+
+            <EvasionChart points={monthlyPointsFiltered.length > 0 ? monthlyPointsFiltered : monthlyPoints} details={monthlyDetailsFiltered && Object.keys(monthlyDetailsFiltered).length>0 ? monthlyDetailsFiltered : monthlyDetails} backgroundPoints={monthlyPoints} />
+          </div>
+
+          <div className="mb-4 flex flex-col items-center">
+            <div className="text-sm text-slate-300 mb-2">Filtrar por especialidade:</div>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {areas.map(a => (
+                <button
+                  key={a}
+                  onClick={() => setSelectedArea(a)}
+                  aria-pressed={selectedArea === a}
+                  className={`px-3 py-1 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-cyan-400 ${selectedArea === a ? 'bg-cyan-400 text-slate-900' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
+                >
+                  {a}
+                </button>
+              ))}
+            </div>
           </div>
 
           <section className="bg-slate-800 rounded-xl p-6 shadow-2xl">
@@ -290,7 +466,7 @@ const App: React.FC = () => {
               Esta tabela detalha os órgãos (destinos) para os quais os auditores se transferiram após a posse ou se mantiveram no órgão desistindo de tomar posse.
               O número total de evasões é de <span className="font-bold text-cyan-400">{totalEvasions}</span>.
             </p>
-            <EvasionTable data={evasionData} details={destinationDetails} />
+            <EvasionTable data={selectedArea === 'TODAS' ? evasionData : evasionDataFiltered} details={selectedArea === 'TODAS' ? destinationDetails : filteredDestinationDetails} />
           </section>
         </main>
         
