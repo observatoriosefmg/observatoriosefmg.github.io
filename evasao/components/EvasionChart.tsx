@@ -21,25 +21,48 @@ interface EvasionChartProps {
   points: Point[];
   height?: number;
   details?: Record<string, { name: string; date?: string | null; area?: string | null }[]>;
+  // optional background (total) points to render as faint bars behind the primary points
+  backgroundPoints?: Point[];
 }
 
-const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, details = {} }) => {
-  const labels = points.map(p => p.label);
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: 'Exonerações',
-        data: points.map(p => p.value),
-        backgroundColor: '#06b6d4',
-        borderRadius: 6,
-        // Removemos a espessura fixa para permitir ajuste responsivo.
-        // Ajustamos barPercentage/categoryPercentage para reduzir o espaçamento entre barras.
-        barPercentage: 0.95,
-        categoryPercentage: 0.95,
-      },
-    ],
-  };
+const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, details = {}, backgroundPoints }) => {
+  // Construir datasets: alinhar labels ao background (total) quando disponível
+  // Preferir labels do background (total) para garantir alinhamento vertical entre barras
+  const labels = (backgroundPoints && backgroundPoints.length > 0)
+    ? backgroundPoints.map(p => p.label)
+    : points.map(p => p.label);
+
+  const bgMap = new Map<string, number>((backgroundPoints ?? []).map(p => [p.label, p.value]));
+  const filteredMap = new Map<string, number>(points.map(p => [p.label, p.value]));
+
+  // Construir datasets empilhados: primeiro a série filtrada (opaca) na base, depois o restante (transparente) acima.
+  const datasets: any[] = []; // Declare datasets only once
+
+  // Série filtrada (pode ser igual ao total quando não há filtro)
+  datasets.push({
+    label: 'Exonerações (filtrado)',
+    data: labels.map(l => filteredMap.get(l) ?? 0),
+    backgroundColor: '#06b6d4',
+    borderRadius: 6,
+    barPercentage: 0.95,
+    categoryPercentage: 0.95,
+    stack: 'stack1',
+  });
+
+  // Série restante: total - filtrado (transparente)
+  if (backgroundPoints && backgroundPoints.length > 0) {
+    datasets.push({
+      label: 'Resto',
+      data: labels.map(l => Math.max((bgMap.get(l) ?? 0) - (filteredMap.get(l) ?? 0), 0)),
+      backgroundColor: 'rgba(6,182,212,0.12)',
+      borderRadius: 6,
+      barPercentage: 0.95,
+      categoryPercentage: 0.95,
+      stack: 'stack1',
+    });
+  }
+
+  const data = { labels, datasets };
 
   const options: any = {
     responsive: true,
@@ -92,6 +115,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
         beginAtZero: true,
         ticks: { color: '#94a3b8' },
         grid: { color: '#334155' },
+        stacked: true,
       },
     },
   };
