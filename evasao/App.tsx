@@ -472,7 +472,7 @@ const App: React.FC = () => {
         
         <div className="mt-8 text-sm text-slate-400 space-y-2">
           <p>
-            Esta análise considera apenas os auditores aprovados no último concurso público (Edital 1/2022).
+            Esta análise considera os auditores aprovados no último concurso público (Edital 1/2022) e exonerações pós janeiro de 2024 de auditores veteranos.
           </p>
           <p>
             O cálculo do custo estimado para o Estado considera R$ 30.000 por mês, por auditor, a partir de janeiro de 2024 até o mês da exoneração. Auditores sem data de exoneração não acumulam custo mensal neste cálculo.
