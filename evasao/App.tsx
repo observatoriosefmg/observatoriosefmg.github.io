@@ -481,7 +481,7 @@ const App: React.FC = () => {
           </header>
 
         <main>
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <CounterCard 
               value={daysSinceLastEvasion} 
               label={`Dias sem perder um Auditor Fiscal (Última exoneração: ${lastExonDateFormatted})`}
@@ -496,12 +496,12 @@ const App: React.FC = () => {
               footer={areaFooter}
               isLoading={isLoading}
             />
-            <CounterCard 
+            {/*<CounterCard 
               value={<span title={totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' as any }).format(totalCost)}</span>} 
               label={`Custo estimado para o Estado com ${totalEvasions} evasões`}
               icon={<MoneyIcon />} 
               isLoading={isLoading}
-            />
+            />*/}
           </section>
 
             <div className="mb-6">
