@@ -5,7 +5,7 @@ import EvasionChart from './components/EvasionChart';
 import { DEFAULT_LAST_EVASION_DATE, COST_PER_AUDITOR } from './constants';
 import { EvasionData } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faMoneyBill, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faMoneyBill, faUsers, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 const App: React.FC = () => {
   const [daysSinceLastEvasion, setDaysSinceLastEvasion] = useState(0);
@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [evasionAuditors, setEvasionAuditors] = useState<any[]>([]);
   const [lastEvasionDate, setLastEvasionDate] = useState<Date | null>(null);
   const [selectedArea, setSelectedArea] = useState<string>('TODAS');
+  const [isLoading, setIsLoading] = useState(true);
 
   // daysSinceLastEvasion will be calculado após carregamento dos dados (quando lastEvasionDate estiver definido).
   useEffect(() => {
@@ -181,6 +182,7 @@ const App: React.FC = () => {
             // Expor os dados lidos para depuração no console do navegador
             try {
               (window as any).__EVASION_RAW = evasionRows;
+              (window as any).__ALL_RAW = raw;
             } catch (e) {
               // ignorar se não puder escrever em window
             }
@@ -188,10 +190,13 @@ const App: React.FC = () => {
             // (ver no DevTools do navegador após carregar a página)
             // eslint-disable-next-line no-console
             console.log('dados.csv parsed (evasionRows):', evasionRows);
+            // eslint-disable-next-line no-console
+            console.log('dados.csv parsed (all rows):', raw);
 
             setEvasionData(aggregated);
             setEvasionAuditors(evasionRows);
             setLastEvasionDate(lastDate ?? null);
+            setIsLoading(false);
           }
 
           return;
@@ -205,6 +210,7 @@ const App: React.FC = () => {
       // nenhum caminho funcionou — manter dados embutidos
       // eslint-disable-next-line no-console
       console.warn('Não foi possível carregar dados.csv; usando dados internos.');
+      setIsLoading(false);
     }
 
     tryLoad();
@@ -231,22 +237,29 @@ const App: React.FC = () => {
     return new Date(year, month, day);
   };
 
-  // Calcula custo acumulado por auditor: R$30.000 mensais desde JAN/2024 até a data da exoneração (inclusivo).
+  // Calcula custo acumulado por auditor: R$30.000 mensais desde DATA NOMEAÇÃO + 30 dias até a data da exoneração (inclusivo).
   const monthsBetweenInclusive = (start: Date, end: Date) => {
     if (end.getTime() < start.getTime()) return 0;
     const years = end.getFullYear() - start.getFullYear();
     const months = end.getMonth() - start.getMonth();
-    // +1 para incluir o mês inicial conforme solicitado (jan/2024 até mês da exoneração inclusive)
+    // +1 para incluir o mês inicial conforme solicitado (nomeação+30 dias até mês da exoneração inclusive)
     return years * 12 + months + 1;
   };
 
-  const startWindow = new Date(2024, 0, 1); // Jan 1, 2024
-
   const totalCost = evasionAuditors.reduce((sum, rec) => {
-    const rawDate = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
-    const d = parseBrazilDate(rawDate);
-    if (!d) return sum; // sem data -> não acumula custos mensais
-    const months = monthsBetweenInclusive(startWindow, d);
+    const rawExonDate = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
+    const rawNomeacaoDate = rec['DATA NOMEAÇÃO'] ?? rec['DATA NOMEACAO'] ?? null;
+    
+    const exonDate = parseBrazilDate(rawExonDate);
+    const nomeacaoDate = parseBrazilDate(rawNomeacaoDate);
+    
+    if (!exonDate || !nomeacaoDate) return sum; // sem data -> não acumula custos mensais
+    
+    // Data início do custo: nomeação + 30 dias
+    const startDate = new Date(nomeacaoDate);
+    startDate.setDate(startDate.getDate() + 30);
+    
+    const months = monthsBetweenInclusive(startDate, exonDate);
     return sum + (months * COST_PER_AUDITOR);
   }, 0);
 
@@ -291,13 +304,35 @@ const App: React.FC = () => {
     const area = String(rec['ÁREA'] ?? rec['AREA'] ?? 'Outros');
     areaCounts[area] = (areaCounts[area] ?? 0) + 1;
   }
+
+  // Conta evasões por tipo (exoneração vs desistência)
+  const typeCounts: Record<string, number> = { 'Exonerações': 0, 'Desistências': 0 };
+  for (const rec of evasionAuditors) {
+    const situation = rec['SITUACAO'] ?? rec['SITUAÇÃO'] ?? rec['Situacao'] ?? '';
+    const isDesistente = String(situation).toUpperCase().includes('DESISTENTE');
+    if (isDesistente) {
+      typeCounts['Desistências'] += 1;
+    } else {
+      typeCounts['Exonerações'] += 1;
+    }
+  }
+
   const areaFooter = (
-    <div className="flex flex-wrap gap-3 justify-center">
-      {Object.entries(areaCounts).map(([area, cnt]) => (
-        <div key={area} className="text-xs text-slate-400">
-          {area}: <span className="font-medium text-white">{cnt}</span>
-        </div>
-      ))}
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-3 justify-center">
+        {Object.entries(areaCounts).map(([area, cnt]) => (
+          <div key={area} className="text-xs text-gray-400">
+            {area}: <span className="font-medium text-amber-400">{cnt}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-3 justify-center border-t border-gray-700 pt-2">
+        {Object.entries(typeCounts).map(([type, cnt]) => (
+          <div key={type} className="text-xs text-gray-400">
+            {type}: <span className="font-medium text-amber-400">{cnt}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 
@@ -429,19 +464,21 @@ const App: React.FC = () => {
     }
   }
 
-  const CalendarIcon = () => <FontAwesomeIcon icon={faCalendarAlt} className="h-10 w-10 md:h-12 md:w-12 text-cyan-400" />;
+  const CalendarIcon = () => <FontAwesomeIcon icon={faCalendarAlt} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
 
-  const MoneyIcon = () => <FontAwesomeIcon icon={faMoneyBill} className="h-10 w-10 md:h-12 md:w-12 text-cyan-400" />;
+  const MoneyIcon = () => <FontAwesomeIcon icon={faMoneyBill} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
 
-  const PeopleIcon = () => <FontAwesomeIcon icon={faUsers} className="h-10 w-10 md:h-12 md:w-12 text-cyan-400" />;
+  const PeopleIcon = () => <FontAwesomeIcon icon={faUsers} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-5xl mx-auto">
-        <header className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2">Observatório da Evasão</h1>
-          <p className="text-lg text-cyan-400 font-medium">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
-        </header>
+    <div className="min-h-screen bg-gray-950 text-gray-200 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-5xl mx-auto">
+          <header className="text-center mb-10">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 mb-2 drop-shadow-lg">Observatório da Evasão</h1>
+            <p className="text-lg text-amber-400 font-medium">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
+            
+
+          </header>
 
         <main>
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -449,36 +486,39 @@ const App: React.FC = () => {
               value={daysSinceLastEvasion} 
               label={`Dias sem perder um Auditor Fiscal (Última exoneração: ${lastExonDateFormatted})`}
               icon={<CalendarIcon />} 
-              footer={<div className="text-xs">Nosso recorde é {recordDays} dias</div>}
+              footer={<div className="text-xs text-amber-400">Nosso recorde é {recordDays} dias</div>}
+              isLoading={isLoading}
             />
             <CounterCard
               value={totalEvasions}
               label="Número de evasões"
               icon={<PeopleIcon />}
               footer={areaFooter}
+              isLoading={isLoading}
             />
             <CounterCard 
               value={<span title={totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' as any }).format(totalCost)}</span>} 
               label={`Custo estimado para o Estado com ${totalEvasions} evasões`}
               icon={<MoneyIcon />} 
+              isLoading={isLoading}
             />
           </section>
 
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-white mb-2">Exonerações por mês</h3>
+              <h3 className="text-lg font-semibold text-red-300 mb-2">Exonerações por mês</h3>
 
             <EvasionChart points={monthlyPointsFiltered.length > 0 ? monthlyPointsFiltered : monthlyPoints} details={monthlyDetailsFiltered && Object.keys(monthlyDetailsFiltered).length>0 ? monthlyDetailsFiltered : monthlyDetails} backgroundPoints={monthlyPoints} />
           </div>
 
           <div className="mb-4 flex flex-col items-center">
-            <div className="text-sm text-slate-300 mb-2">Filtrar por especialidade:</div>
+            <div className="text-sm text-gray-300 mb-2">Filtrar por especialidade:</div>
             <div className="flex flex-wrap gap-2 justify-center">
               {areas.map(a => (
                 <button
                   key={a}
                   onClick={() => setSelectedArea(a)}
                   aria-pressed={selectedArea === a}
-                  className={`px-3 py-1 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-cyan-400 ${selectedArea === a ? 'bg-cyan-400 text-slate-900' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
+                  className={`px-3 py-1 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-400 ${selectedArea === a ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'}`}
                 >
                   {a}
                 </button>
@@ -486,29 +526,39 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <section className="bg-slate-800 rounded-xl p-6 shadow-2xl">
-            <h2 className="text-2xl font-bold text-white mb-4">Destinos da Evasão</h2>
-            <p className="text-slate-400 mb-6">
+          <section className="bg-gray-900 rounded-xl p-6 shadow-2xl border border-gray-800">
+            <h2 className="text-2xl font-bold text-red-300 mb-4">Destinos da Evasão</h2>
+            <p className="text-gray-400 mb-6">
               Esta tabela detalha os órgãos (destinos) para os quais os auditores se transferiram após a posse ou se mantiveram no órgão desistindo de tomar posse.
-              O número total de evasões é de <span className="font-bold text-cyan-400">{totalEvasions}</span>.
+              O número total de evasões é de <span className="font-bold text-orange-400">{totalEvasions}</span>.
             </p>
             <EvasionTable data={selectedArea === 'TODAS' ? evasionData : evasionDataFiltered} details={selectedArea === 'TODAS' ? destinationDetails : filteredDestinationDetails} />
           </section>
         </main>
         
-        <div className="mt-8 text-sm text-slate-400 space-y-2">
+        {/* Link para tabela detalhada */}
+        <div className="mt-8 mb-6 text-center">
+          <a 
+            href="/evasao/dist/table.html"
+            className="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-red-600 border border-transparent rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+          >
+            Ver Dados Detalhados →
+          </a>
+        </div>
+
+        <div className="mt-8 text-sm text-gray-400 space-y-2">
           <p>
             Esta análise considera os auditores aprovados no último concurso público (Edital 1/2022) e exonerações pós Janeiro de 2024 de auditores veteranos.
           </p>
           <p>
-            O cálculo do custo estimado para o Estado considera R$ 30.000 por mês, por auditor, a partir de Janeiro de 2024 até o mês da exoneração. Auditores sem data de exoneração não acumulam custo mensal neste cálculo.
+            O cálculo do custo estimado para o Estado considera R$ 30.000 por mês, por auditor, a partir da data de nomeação + 30 dias até o mês da exoneração. Auditores sem data de exoneração ou nomeação não acumulam custo mensal neste cálculo.
           </p>
           <p>
             São contabilizadas tanto exonerações quanto desistências como eventos de evasão.
           </p>
         </div>
 
-        <footer className="text-center mt-6 text-slate-500 text-sm">
+        <footer className="text-center mt-6 text-gray-500 text-sm">
           <p>&copy; {new Date().getFullYear()} Observatório da Evasão. Dados extraídos do Diário Oficial de Minas Gerais.</p>
         </footer>
       </div>

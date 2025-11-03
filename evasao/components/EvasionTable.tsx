@@ -30,15 +30,42 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
   const TooltipPortal: React.FC<{ pos: { left: number; top: number } | null; text: string; visible: boolean }> = ({ pos, text, visible }) => {
     if (!visible || !pos) return null;
 
+    // Calcular posicionamento inteligente
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const tooltipWidth = 200; // Largura estimada do tooltip
+    const tooltipHeight = 40; // Altura estimada do tooltip
+    
+    let left = pos.left;
+    let top = pos.top;
+    let transform = 'translate(-50%, -100%)';
+    
+    // Ajustar horizontalmente se sair da tela
+    if (left - tooltipWidth / 2 < 10) {
+      // Muito à esquerda - alinhar à esquerda
+      left = Math.max(10, pos.left - 20);
+      transform = 'translate(0, -100%)';
+    } else if (left + tooltipWidth / 2 > viewportWidth - 10) {
+      // Muito à direita - alinhar à direita
+      left = Math.min(viewportWidth - 10, pos.left + 20);
+      transform = 'translate(-100%, -100%)';
+    }
+    
+    // Ajustar verticalmente se sair da tela
+    if (top - tooltipHeight < 10) {
+      // Muito acima - posicionar abaixo
+      top = pos.top + 25;
+      transform = transform.replace('-100%', '0');
+    }
+
     return createPortal(
       <div
         role="tooltip"
-        style={{ left: pos.left, top: pos.top, transform: 'translate(-50%, -100%)' }}
-        className="fixed z-[9999] pointer-events-none bg-slate-700 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap"
+        style={{ left, top, transform }}
+        className="fixed z-[9999] pointer-events-none bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg border border-gray-700 max-w-[200px] break-words"
       >
         <div className="relative">
           {text}
-          <div className="absolute left-1/2 -translate-x-1/2 translate-y-1 w-2.5 h-2.5 bg-slate-700 rotate-45" style={{ bottom: '-0.35rem' }} />
         </div>
       </div>,
       document.body
@@ -65,19 +92,19 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
     const hide = () => setVisible(false);
 
     return (
-      <li className="flex justify-between items-center px-4 py-2 bg-slate-900/30 rounded">
+      <li className="flex justify-between items-center px-4 py-2 bg-gray-800/40 rounded border border-gray-700/50">
         <div>
-          <div className="font-medium">{aud.name}</div>
-          <div className="text-xs text-slate-400">{aud.area ?? '—'}</div>
+          <div className="font-medium text-gray-200">{aud.name}</div>
+          <div className="text-xs text-gray-400">{aud.area ?? '—'}</div>
         </div>
 
         <div className="flex items-center gap-3">
           {(() => {
             const isDesistente = aud.situation && String(aud.situation).toUpperCase().includes('DESISTENTE');
             if (isDesistente) {
-              return <span className="text-sm text-slate-400">{aud.noEffectDate ? `Nomeação sem efeito em ${aud.noEffectDate}` : '—'}</span>;
+              return <span className="text-sm text-gray-400">{aud.noEffectDate ? `Nomeação sem efeito em ${aud.noEffectDate}` : '—'}</span>;
             }
-            return <span className="text-sm text-slate-400">{aud.date ? `Exonerado em ${aud.date}` : '—'}</span>;
+            return <span className="text-sm text-gray-400">{aud.date ? `Exonerado em ${aud.date}` : '—'}</span>;
           })()}
 
           <div>
@@ -90,7 +117,7 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
                   onMouseLeave={hide}
                   onFocus={show}
                   onBlur={hide}
-                  className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
                   aria-label={tooltip}
                 >
                   <FontAwesomeIcon icon={faQuestion} className="w-2 h-2 bold-icon" aria-hidden="true" color="#1A2436"/>
@@ -108,13 +135,13 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left table-auto">
-        <thead className="bg-slate-700 text-slate-300 uppercase text-sm">
+        <thead className="bg-gray-800 text-gray-300 uppercase text-sm border-b border-gray-700">
           <tr>
             <th className="px-6 py-3 font-semibold">Órgão de Destino</th>
             <th className="px-6 py-3 font-semibold text-right">Quantidade</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-700">
+        <tbody className="divide-y divide-gray-700">
           {data.map((item, index) => {
             const dest = item.destination;
             const rows = details[dest] ?? [];
@@ -122,20 +149,20 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
 
             return (
               <React.Fragment key={dest + index}>
-                <tr className="hover:bg-slate-700/50 transition-colors duration-200">
+                <tr className="hover:bg-gray-800/60 transition-colors duration-200">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button onClick={() => toggle(dest)} className="text-left w-full flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 text-slate-400 transform ${isOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button onClick={() => toggle(dest)} className="text-left w-full flex items-center gap-2 text-gray-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 text-red-400 transform ${isOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                       <span>{dest}</span>
                     </button>
                   </td>
-                  <td className="px-6 py-4 text-right font-bold text-cyan-400">{item.count}</td>
+                  <td className="px-6 py-4 text-right font-bold text-red-400">{item.count}</td>
                 </tr>
 
                 {isOpen && rows.length > 0 && (
-                  <tr className="bg-slate-800/40">
+                  <tr className="bg-gray-900/60">
                     <td colSpan={2} className="px-6 py-3">
                       <ul className="space-y-2">
                         {rows.map((aud, i) => (
