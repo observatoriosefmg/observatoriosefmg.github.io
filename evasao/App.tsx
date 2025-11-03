@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CounterCard from './components/CounterCard';
 import EvasionTable from './components/EvasionTable';
 import EvasionChart from './components/EvasionChart';
+import CollaborationForm from './components/CollaborationForm';
 import { DEFAULT_LAST_EVASION_DATE, COST_PER_AUDITOR } from './constants';
 import { EvasionData } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -557,6 +558,8 @@ const App: React.FC = () => {
             São contabilizadas tanto exonerações quanto desistências como eventos de evasão.
           </p>
         </div>
+
+        <CollaborationForm />
 
         <footer className="text-center mt-6 text-gray-500 text-sm">
           <p>&copy; {new Date().getFullYear()} Observatório da Evasão. Dados extraídos do Diário Oficial de Minas Gerais.</p>
