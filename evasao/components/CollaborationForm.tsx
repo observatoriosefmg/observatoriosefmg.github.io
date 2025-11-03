@@ -24,7 +24,6 @@ const CollaborationForm: React.FC = () => {
         action="https://formsubmit.co/observatoriosefmg@gmail.com"
         method="POST"
         className="space-y-4"
-        target="_blank"
       >
         {/* Configurações do FormSubmit */}
         <input type="hidden" name="_captcha" value="false" />
