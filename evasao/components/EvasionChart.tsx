@@ -42,7 +42,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
   datasets.push({
     label: 'Exonerações (filtrado)',
     data: labels.map(l => filteredMap.get(l) ?? 0),
-    backgroundColor: '#06b6d4',
+    backgroundColor: '#dc2626',
     borderRadius: 6,
     barPercentage: 0.95,
     categoryPercentage: 0.95,
@@ -54,7 +54,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
     datasets.push({
       label: 'Resto',
       data: labels.map(l => Math.max((bgMap.get(l) ?? 0) - (filteredMap.get(l) ?? 0), 0)),
-      backgroundColor: 'rgba(6,182,212,0.12)',
+      backgroundColor: 'rgba(220,38,38,0.3)',
       borderRadius: 6,
       barPercentage: 0.95,
       categoryPercentage: 0.95,
@@ -108,20 +108,20 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
     },
     scales: {
       x: {
-        ticks: { color: '#cbd5e1', maxRotation: 0, minRotation: 0 },
+        ticks: { color: '#d1d5db', maxRotation: 0, minRotation: 0 },
         grid: { display: false },
       },
       y: {
         beginAtZero: true,
-        ticks: { color: '#94a3b8' },
-        grid: { color: '#334155' },
+        ticks: { color: '#9ca3af' },
+        grid: { color: '#374151' },
         stacked: true,
       },
     },
   };
 
   return (
-    <div style={{ width: '100%', height }} className="bg-slate-800/0 rounded">
+    <div style={{ width: '100%', height }} className="bg-gray-900/50 rounded border border-gray-800">
       <Bar data={data} options={options} />
     </div>
   );
