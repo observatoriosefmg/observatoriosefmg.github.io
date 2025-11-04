@@ -86,7 +86,16 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
         async function loadData() {
             for (const p of paths) {
                 try {
-                    const res = await fetch(p);
+                    // Forçar recarregamento do CSV: cache busting + headers no-cache/no-store
+                    const url = p + (p.includes('?') ? '&' : '?') + `_ts=${Date.now()}`;
+                    const res = await fetch(url, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0',
+                        },
+                    });
                     if (!res.ok) continue;
                     let text = await res.text();
                     text = text.replace(/^\uFEFF/, '');
