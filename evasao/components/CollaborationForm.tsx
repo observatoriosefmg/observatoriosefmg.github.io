@@ -77,7 +77,7 @@ const CollaborationForm: React.FC = () => {
 
         <div className="text-center">
           <p className="text-xs text-gray-400">
-            Suas informações serão tratadas com confidencialidade e utilizadas apenas para fins do observatório após verificação.
+            Suas informações serão tratadas com confidencialidade e utilizadas, após verificação, apenas para fins do observatório.
           </p>
         </div>
       </form>
