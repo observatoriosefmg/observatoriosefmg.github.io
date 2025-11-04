@@ -112,9 +112,10 @@ const App: React.FC = () => {
     };
 
     async function tryLoad() {
+      const makeNoCacheUrl = (url: string) => url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now();
       for (const p of paths) {
         try {
-          const res = await fetch(p);
+          const res = await fetch(makeNoCacheUrl(p), { cache: 'no-store', headers: { 'cache-control': 'no-cache' } as any });
           if (!res.ok) continue;
           let text = await res.text();
           // remover BOM se presente
