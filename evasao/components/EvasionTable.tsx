@@ -11,6 +11,7 @@ interface AuditorDetail {
   noEffectDate?: string | null;
   situation?: string | null;
   area?: string | null;
+  observation?: string | null;
 }
 
 interface EvasionTableProps {
@@ -79,7 +80,9 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
     const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
     const tooltip = aud.pubDate && String(aud.pubDate).trim()
       ? `Exoneração publicada no DOE em ${aud.pubDate}`
-      : 'Exoneração ainda não publicada no DOE';
+      : (aud.observation && String(aud.observation).trim() 
+         ? String(aud.observation).trim()
+         : 'Exoneração ainda não publicada no DOE');
 
     const show = () => {
       const el = btnRef.current;
@@ -108,24 +111,45 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
           })()}
 
           <div>
-            {!(String(aud.situation ?? '').toUpperCase().includes('DESISTENTE')) ? (
-              <>
-                <button
-                  ref={btnRef}
-                  type="button"
-                  onMouseEnter={show}
-                  onMouseLeave={hide}
-                  onFocus={show}
-                  onBlur={hide}
-                  className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                  aria-label={tooltip}
-                >
-                  <FontAwesomeIcon icon={faQuestion} className="w-2 h-2 bold-icon" aria-hidden="true" color="#1A2436"/>
-                </button>
+            {(() => {
+              const isDesistente = String(aud.situation ?? '').toUpperCase().includes('DESISTENTE');
+              
+              let showTooltip = false;
+              let tooltipText = '';
+              
+              if (isDesistente) {
+                // Para desistentes: só mostra se não há data de nomeação sem efeito E há observação
+                showTooltip = !aud.noEffectDate && !!(aud.observation && String(aud.observation).trim());
+                tooltipText = aud.observation && String(aud.observation).trim() 
+                  ? String(aud.observation).trim()
+                  : 'Informação não disponível';
+              } else {
+                // Para exonerados: só mostra se há data de publicação OU (não há data mas há observação)
+                const hasPubDate = !!(aud.pubDate && String(aud.pubDate).trim());
+                const hasObservation = !!(aud.observation && String(aud.observation).trim());
+                showTooltip = hasPubDate || hasObservation;
+                tooltipText = tooltip;
+              }
 
-                <TooltipPortal pos={pos} text={tooltip} visible={visible} />
-              </>
-            ) : null}
+              return showTooltip ? (
+                <>
+                  <button
+                    ref={btnRef}
+                    type="button"
+                    onMouseEnter={show}
+                    onMouseLeave={hide}
+                    onFocus={show}
+                    onBlur={hide}
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    aria-label={tooltipText}
+                  >
+                    <FontAwesomeIcon icon={faQuestion} className="w-2 h-2 bold-icon" aria-hidden="true" color="#1A2436"/>
+                  </button>
+
+                  <TooltipPortal pos={pos} text={tooltipText} visible={visible} />
+                </>
+              ) : null;
+            })()}
           </div>
         </div>
       </li>

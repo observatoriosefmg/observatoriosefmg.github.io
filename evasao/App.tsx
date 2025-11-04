@@ -266,7 +266,7 @@ const App: React.FC = () => {
   }, 0);
 
   // Mapeia destinos para lista de auditores (inclui 'Destino desconhecido' para sem órgão)
-  const destinationDetails: Record<string, { name: string; date?: string | null; pubDate?: string | null; noEffectDate?: string | null; situation?: string | null; area?: string | null }[]> = {};
+  const destinationDetails: Record<string, { name: string; date?: string | null; pubDate?: string | null; noEffectDate?: string | null; situation?: string | null; area?: string | null; observation?: string | null }[]> = {};
   destinationDetails['Destino desconhecido'] = [];
 
 
@@ -279,8 +279,9 @@ const App: React.FC = () => {
   const noEffectDate = rec['DATA NOMEAÇÃO SEM EFEITO'] ?? rec['DATA NOMEACAO SEM EFEITO'] ?? rec['DATA NOMEAÇÃO'] ?? rec['Data NOMEAÇÃO SEM EFEITO'] ?? null;
   const situation = rec['SITUACAO'] ?? rec['SITUAÇÃO'] ?? rec['Situacao'] ?? null;
   const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
+  const observation = rec['OBSERVAÇÃO'] ?? rec['OBSERVACAO'] ?? rec['Observação'] ?? rec['Observacao'] ?? null;
     if (!destinationDetails[key]) destinationDetails[key] = [];
-    destinationDetails[key].push({ name, date, pubDate, noEffectDate, situation, area });
+    destinationDetails[key].push({ name, date, pubDate, noEffectDate, situation, area, observation });
   }
 
   // Ordena nomes dentro de cada destino por data (mais recente primeiro)
@@ -375,7 +376,7 @@ const App: React.FC = () => {
 
   // Agregação por destino para a área filtrada
   const filteredDestinationMap: Map<string, number> = new Map();
-  const filteredDestinationDetails: Record<string, { name: string; date?: string | null; pubDate?: string | null; noEffectDate?: string | null; situation?: string | null; area?: string | null }[]> = { 'Destino desconhecido': [] };
+  const filteredDestinationDetails: Record<string, { name: string; date?: string | null; pubDate?: string | null; noEffectDate?: string | null; situation?: string | null; area?: string | null; observation?: string | null }[]> = { 'Destino desconhecido': [] };
   let filteredUnknownCount = 0;
   for (const rec of filteredAuditors) {
     const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
@@ -386,8 +387,9 @@ const App: React.FC = () => {
   const noEffectDate = rec['DATA NOMEAÇÃO SEM EFEITO'] ?? rec['DATA NOMEACAO SEM EFEITO'] ?? rec['DATA NOMEAÇÃO'] ?? rec['Data NOMEAÇÃO SEM EFEITO'] ?? null;
   const situation = rec['SITUACAO'] ?? rec['SITUAÇÃO'] ?? rec['Situacao'] ?? null;
   const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
+  const observation = rec['OBSERVAÇÃO'] ?? rec['OBSERVACAO'] ?? rec['Observação'] ?? rec['Observacao'] ?? null;
     filteredDestinationDetails[key] = filteredDestinationDetails[key] ?? [];
-  filteredDestinationDetails[key].push({ name, date, pubDate, noEffectDate, situation, area });
+  filteredDestinationDetails[key].push({ name, date, pubDate, noEffectDate, situation, area, observation });
     if (key === 'Destino desconhecido') {
       filteredUnknownCount += 1;
     } else {
