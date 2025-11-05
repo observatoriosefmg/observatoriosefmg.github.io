@@ -46,7 +46,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
   const getRowColor = (situacao: string, index: number) => {
     const baseColors = {
       'EM EXERCÍCIO': 'bg-green-900/30',
-      'NOMEADO E EXONERADO': 'bg-red-900/30',
+      'EXONERADO': 'bg-red-900/30',
       'DESISTENTE': 'bg-yellow-900/30',
       'INAPTO ADMISSIONAL': 'bg-purple-900/30',
       'NÃO NOMEADO': 'bg-gray-900/30',
@@ -54,7 +54,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
 
     const alternateColors = {
       'EM EXERCÍCIO': 'bg-green-800/20',
-      'NOMEADO E EXONERADO': 'bg-red-800/20',
+      'EXONERADO': 'bg-red-800/20',
       'DESISTENTE': 'bg-yellow-800/20',
       'INAPTO ADMISSIONAL': 'bg-purple-800/20',
       'NÃO NOMEADO': 'bg-gray-800/20',
@@ -70,7 +70,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
   const getStatusColor = (situacao: string) => {
     const colors = {
       'EM EXERCÍCIO': 'text-green-400',
-      'NOMEADO E EXONERADO': 'text-red-400',
+      'EXONERADO': 'text-red-400',
       'DESISTENTE': 'text-yellow-400',
       'INAPTO ADMISSIONAL': 'text-purple-400',
       'NÃO NOMEADO': 'text-gray-400',

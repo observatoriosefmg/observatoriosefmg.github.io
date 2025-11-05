@@ -138,7 +138,7 @@ const App: React.FC = () => {
           const isEvasionSituation = (s: any) => {
             if (!s) return false;
             const normalized = String(s).toUpperCase().trim();
-            return normalized === 'NOMEADO E EXONERADO' || normalized === 'DESISTENTE';
+            return normalized === 'EXONERADO' || normalized === 'DESISTENTE';
           };
 
           const evasionRows = raw.filter(r => isEvasionSituation(r['SITUACAO'] ?? r['SITUAÇÃO'] ?? r['Situacao'] ?? r['Situacao']));
