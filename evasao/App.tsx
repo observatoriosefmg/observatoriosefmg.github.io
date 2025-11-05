@@ -561,7 +561,7 @@ const App: React.FC = () => {
             São contabilizadas tanto exonerações quanto desistências como eventos de evasão.
           </p>
           <p>
-            A quantidade de dias sem perder um Auditor Fiscal e o respectivo recorde considera a data de publicação das exonerações.
+            A quantidade de dias sem perder um Auditor Fiscal e o respectivo recorde consideram a data de publicação das exonerações.
           </p>
         </div>
 
