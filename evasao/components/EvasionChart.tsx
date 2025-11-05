@@ -14,6 +14,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 interface Point {
   label: string;
+  tipo: string;
   value: number;
 }
 
@@ -23,9 +24,15 @@ interface EvasionChartProps {
   details?: Record<string, { name: string; date?: string | null; area?: string | null }[]>;
   // optional background (total) points to render as faint bars behind the primary points
   backgroundPoints?: Point[];
+  // pontos específicos para aposentadorias e afastamentos
+  inactivityPoints?: Point[];
+  // detalhes específicos para aposentadorias e afastamentos
+  inactivityDetails?: Record<string, { name: string; date?: string | null; area?: string | null }[]>;
+  // pontos de background para aposentadorias (todas as áreas)
+  backgroundInactivityPoints?: Point[];
 }
 
-const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, details = {}, backgroundPoints }) => {
+const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, details = {}, backgroundPoints, inactivityPoints, inactivityDetails = {}, backgroundInactivityPoints }) => {
   // Construir datasets: alinhar labels ao background (total) quando disponível
   // Preferir labels do background (total) para garantir alinhamento vertical entre barras
   const labels = (backgroundPoints && backgroundPoints.length > 0)
@@ -34,13 +41,15 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
 
   const bgMap = new Map<string, number>((backgroundPoints ?? []).map(p => [p.label, p.value]));
   const filteredMap = new Map<string, number>(points.map(p => [p.label, p.value]));
+  const inactivityMap = new Map<string, number>((inactivityPoints ?? []).map(p => [p.label, p.value]));
+  const backgroundInactivityMap = new Map<string, number>((backgroundInactivityPoints ?? []).map(p => [p.label, p.value]));
 
-  // Construir datasets empilhados: primeiro a série filtrada (opaca) na base, depois o restante (transparente) acima.
-  const datasets: any[] = []; // Declare datasets only once
+  // Construir datasets empilhados
+  const datasets: any[] = [];
 
-  // Série filtrada (pode ser igual ao total quando não há filtro)
+  // Série de exonerações/desistências (vermelha)
   datasets.push({
-    label: 'Exonerações (filtrado)',
+    label: 'Exonerações',
     data: labels.map(l => filteredMap.get(l) ?? 0),
     backgroundColor: '#dc2626',
     borderRadius: 6,
@@ -49,12 +58,37 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
     stack: 'stack1',
   });
 
-  // Série restante: total - filtrado (transparente)
-  if (backgroundPoints && backgroundPoints.length > 0) {
+  // Série de aposentadorias e afastamentos filtradas (dourada)
+  datasets.push({
+    label: 'Aposentadorias e Afastamentos',
+    data: labels.map(l => inactivityMap.get(l) ?? 0),
+    backgroundColor: '#d4af37',
+    borderRadius: 6,
+    barPercentage: 0.95,
+    categoryPercentage: 0.95,
+    stack: 'stack1',
+  });
+
+  // Série de aposentadorias de outras áreas (dourada transparente)
+  if (backgroundInactivityPoints && backgroundInactivityPoints.length > 0) {
     datasets.push({
-      label: 'Resto',
-      data: labels.map(l => Math.max((bgMap.get(l) ?? 0) - (filteredMap.get(l) ?? 0), 0)),
-      backgroundColor: 'rgba(220,38,38,0.3)',
+      label: 'Aposentadorias (outras áreas)',
+      data: labels.map(l => Math.max((backgroundInactivityMap.get(l) ?? 0) - (inactivityMap.get(l) ?? 0), 0)),
+      backgroundColor: 'rgba(212,175,55,0.3)',
+      borderRadius: 6,
+      barPercentage: 0.95,
+      categoryPercentage: 0.95,
+      stack: 'stack1',
+    });
+  }
+
+  // Série restante de exonerações: total - filtrado (transparente)
+  if (backgroundPoints && backgroundPoints.length > 0) {
+    const totalInactivity = backgroundInactivityPoints ? backgroundInactivityMap : new Map();
+    datasets.push({
+      label: 'Exonerações (outras áreas)',
+      data: labels.map(l => Math.max((bgMap.get(l) ?? 0) - (filteredMap.get(l) ?? 0) - (totalInactivity.get(l) ?? 0), 0)),
+      backgroundColor: 'rgba(220,38,38,0.15)',
       borderRadius: 6,
       barPercentage: 0.95,
       categoryPercentage: 0.95,
@@ -68,16 +102,56 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: { 
+        display: true,
+        position: 'top',
+        labels: {
+          color: '#d1d5db',
+          font: {
+            size: 12
+          },
+          padding: 15,
+          usePointStyle: true,
+          filter: function(legendItem: any) {
+            // Ocultar séries de background/transparentes da legenda
+            return !['Exonerações (outras áreas)', 'Aposentadorias (outras áreas)'].includes(legendItem.text);
+          }
+        }
+      },
       title: { display: false },
       tooltip: {
         callbacks: {
-          label: (context: any) => `${context.parsed.y} exonerações`,
+          label: (context: any) => {
+            const datasetLabel = context.dataset.label;
+            const value = context.parsed.y;
+            
+            if (datasetLabel === 'Aposentadorias e Afastamentos') {
+              return `${value} aposentadorias/afastamentos`;
+            } else if (datasetLabel === 'Aposentadorias (outras áreas)') {
+              return `${value} aposentadorias (outras áreas)`;
+            } else if (datasetLabel === 'Exonerações') {
+              return `${value} exonerações/desistências`;
+            } else if (datasetLabel === 'Exonerações (outras áreas)') {
+              return `${value} exonerações (outras áreas)`;
+            } else {
+              return `${value} outros`;
+            }
+          },
           afterBody: (ctx: any) => {
             try {
               const label = ctx[0].label as string;
-              const rows = (details[label] ?? []).slice();
+              const datasetLabel = ctx[0].dataset.label;
+              
+              // Escolher os dados corretos baseado no dataset
+              let rows: any[] = [];
+              if (datasetLabel === 'Aposentadorias e Afastamentos') {
+                rows = (inactivityDetails[label] ?? []).slice();
+              } else if (datasetLabel === 'Exonerações') {
+                rows = (details[label] ?? []).slice();
+              }
+              
               if (rows.length === 0) return [];
+              
               // ordena por data asc (mais antigo primeiro)
               const parseBrazilDate = (d: any): Date | null => {
                 if (!d || typeof d !== 'string') return null;
@@ -89,6 +163,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
                 if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year)) return null;
                 return new Date(year, month, day);
               };
+              
               rows.sort((a: any, b: any) => {
                 const da = parseBrazilDate(a.date);
                 const db = parseBrazilDate(b.date);
@@ -97,6 +172,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
                 if (!da && db) return 1;
                 return a.name.localeCompare(b.name);
               });
+              
               // map to lines like 'Name — DD/MM/YYYY'
               return rows.map((r: any) => `${r.name} — ${r.date ?? '—'}`);
             } catch (e) {
@@ -128,4 +204,4 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
 };
 
 export default EvasionChart;
- 
+

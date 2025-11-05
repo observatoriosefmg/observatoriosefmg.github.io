@@ -1,4 +1,4 @@
-import { EvasionData } from './types';
+import { DadosDestinoEvasao } from './types';
 
 // Custo estimado por auditor que deixa o cargo após a posse (usado no cálculo acumulado a partir de jan/2024).
 export const COST_PER_AUDITOR = 30000;
@@ -8,7 +8,7 @@ export const COST_PER_AUDITOR = 30000;
 // A leitura dos dados passa a ser feita em runtime pelo `App.tsx` a partir de `dados.csv`.
 
 // Valor fallback para a última exoneração quando não houver dados — usado apenas como fallback.
-export const DEFAULT_LAST_EVASION_DATE = new Date('2024-07-15T10:00:00Z');
+export const DATA_INICIO_OBSERVACAO = new Date('2024-01-01T10:00:00Z');
 
-// Tipagem auxiliar exportada para quem quiser reusar a forma de EvasionData.
-export type { EvasionData };
+// Tipagem auxiliar exportada para quem quiser reusar a forma de DadosDestinoEvasao.
+export type { DadosDestinoEvasao };

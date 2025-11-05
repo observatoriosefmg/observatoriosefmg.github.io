@@ -3,27 +3,28 @@ import CounterCard from './components/CounterCard';
 import EvasionTable from './components/EvasionTable';
 import EvasionChart from './components/EvasionChart';
 import CollaborationForm from './components/CollaborationForm';
-import { DEFAULT_LAST_EVASION_DATE, COST_PER_AUDITOR } from './constants';
-import { EvasionData } from './types';
+import { DATA_INICIO_OBSERVACAO, COST_PER_AUDITOR } from './constants';
+import { DadosDestinoEvasao } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faMoneyBill, faUsers, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faMoneyBill, faUsers, faSpinner, faPersonShelter } from '@fortawesome/free-solid-svg-icons';
 
 const App: React.FC = () => {
-  const [daysSinceLastEvasion, setDaysSinceLastEvasion] = useState(0);
-  const [evasionData, setEvasionData] = useState<EvasionData[]>([]);
-  const [evasionAuditors, setEvasionAuditors] = useState<any[]>([]);
-  const [lastEvasionDate, setLastEvasionDate] = useState<Date | null>(null);
-  const [selectedArea, setSelectedArea] = useState<string>('TODAS');
-  const [isLoading, setIsLoading] = useState(true);
+  const [diasDesdeUltimaEvasao, setDiasDesdeUltimaEvasao] = useState(0);
+  const [dadosDestinoEvasao, setDadosDestinoEvasao] = useState<DadosDestinoEvasao[]>([]);
+  const [raw, setRaw] = useState<any[]>([]);
+  const [auditoresEvadidos, setAuditoresEvadidos] = useState<any[]>([]);
+  const [dataUltimaEvasao, setDataUltimaEvasao] = useState<Date | null>(null);
+  const [areaSelecionada, setAreaSelecionada] = useState<string>('TODAS');
+  const [estaCarregando, setEstaCarregando] = useState(true);
 
-  // daysSinceLastEvasion will be calculado após carregamento dos dados (quando lastEvasionDate estiver definido).
+  // diasDesdeUltimaEvasao will be calculado após carregamento dos dados (quando dataUltimaEvasao estiver definido).
   useEffect(() => {
-    const ref = lastEvasionDate ?? DEFAULT_LAST_EVASION_DATE;
+    const ref = dataUltimaEvasao ?? DATA_INICIO_OBSERVACAO;
     const today = new Date();
-    const differenceInTime = today.getTime() - ref.getTime();
-    const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
-    setDaysSinceLastEvasion(differenceInDays);
-  }, [lastEvasionDate]);
+    const diferencaEmMs = today.getTime() - ref.getTime();
+    const diferencaEmDias = Math.floor(diferencaEmMs / (1000 * 3600 * 24));
+    setDiasDesdeUltimaEvasao(diferencaEmDias);
+  }, [dataUltimaEvasao]);
 
   // Ao montar, tentamos carregar `dados.csv` de alguns caminhos possíveis e parseá-lo.
   useEffect(() => {
@@ -77,6 +78,7 @@ const App: React.FC = () => {
       const headerLine = lines[0];
       const headers = parseLine(headerLine).map(h => h.trim());
       const rows: any[] = [];
+
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
         const parts = parseLine(line);
@@ -84,29 +86,9 @@ const App: React.FC = () => {
         while (parts.length < headers.length) parts.push('');
         const obj: Record<string, string> = {};
         for (let j = 0; j < headers.length; j++) {
-          obj[headers[j]] = parts[j] ? parts[j].trim() : '';
+          obj[headers[j]] = parts[j] ? parts[j].trim() : null;
         }
-
-        // Normalizações para manter compatibilidade com o que o app espera
-        const normalized: Record<string, any> = { ...obj };
-        // Nome
-        if (obj['NOME']) normalized['Nome do Candidato'] = obj['NOME'];
-        if (obj['NOME DO CANDIDATO']) normalized['Nome do Candidato'] = obj['NOME DO CANDIDATO'];
-        // Situação
-        if (obj['SITUAÇÃO']) normalized['SITUACAO'] = obj['SITUAÇÃO'];
-        if (obj['SITUACAO']) normalized['SITUACAO'] = obj['SITUACAO'];
-        // Órgão destino -> mapear para chave 'ÓRGÃO' usada no código
-        if (obj['ÓRGÃO DESTINO']) normalized['ÓRGÃO'] = obj['ÓRGÃO DESTINO'];
-        if (obj['ORGAO DESTINO']) normalized['ÓRGÃO'] = obj['ORGAO DESTINO'];
-        if (obj['ÓRGÃO']) normalized['ÓRGÃO'] = obj['ÓRGÃO'];
-        // Área
-        if (obj['ÁREA']) normalized['ÁREA'] = obj['ÁREA'];
-        if (obj['AREA']) normalized['ÁREA'] = obj['AREA'];
-        // Data exoneração
-        if (obj['DATA EXONERAÇÃO']) normalized['DATA EXONERAÇÃO'] = obj['DATA EXONERAÇÃO'];
-        if (obj['DATA EXONERACAO']) normalized['DATA EXONERAÇÃO'] = obj['DATA EXONERACAO'];
-
-        rows.push(normalized);
+        rows.push(obj);
       }
       return rows;
     };
@@ -124,6 +106,7 @@ const App: React.FC = () => {
           // eslint-disable-next-line no-console
           console.debug('carregado', p, 'tamanho', text.length);
           const raw = parseCsv(text);
+
           if ((!Array.isArray(raw) || raw.length === 0) && text.trim().length > 0) {
             // se parse devolveu vazio, registrar um trecho do texto para ajudar depurar
             // eslint-disable-next-line no-console
@@ -135,22 +118,19 @@ const App: React.FC = () => {
           }
 
           // Filtrar apenas situações que consideramos evasão
-          const isEvasionSituation = (s: any) => {
-            if (!s) return false;
-            const normalized = String(s).toUpperCase().trim();
-            return normalized === 'EXONERADO' || normalized === 'DESISTENTE';
-          };
 
-          const evasionRows = raw.filter(r => isEvasionSituation(r['SITUACAO'] ?? r['SITUAÇÃO'] ?? r['Situacao'] ?? r['Situacao']));
+
+          const registrosEvasao = raw.filter(r => ['EXONERADO', 'DESISTENTE'].includes(r['SITUACAO']));
+          const registrosInatividade = raw.filter(r => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']));
 
           // Agrega registros: considerar apenas situações que caracterizam evasão.
           // Incluímos também um bucket "Destino desconhecido" para registros sem órgão.
           const map = new Map<string, number>();
-          let unknownCount = 0;
-          for (const rec of evasionRows) {
-            const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
+          let contagemDesconhecidos = 0;
+          for (const rec of registrosEvasao) {
+            const org = rec['ORGAO_DESTINO'];
             if (org === null || org === undefined || String(org).trim() === '') {
-              unknownCount += 1;
+              contagemDesconhecidos += 1;
               continue;
             }
             const key = String(org).trim();
@@ -158,12 +138,25 @@ const App: React.FC = () => {
             map.set(key, prev + 1);
           }
 
-          const aggregated: EvasionData[] = Array.from(map.entries()).map(([destination, count]) => ({ destination, count }));
-          if (unknownCount > 0) aggregated.push({ destination: 'Destino desconhecido', count: unknownCount });
-          aggregated.sort((a, b) => b.count - a.count);
+          map.set('Aposentados', raw.filter(r => r['SITUACAO'] === 'APOSENTADO').length);
+          map.set('Afastados para aposentadoria', raw.filter(r => r['SITUACAO'] === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA').length);
+
+          const aggregated: DadosDestinoEvasao[] = Array.from(map.entries()).map(([destino, count]) => ({ destino, count }));
+          if (contagemDesconhecidos > 0) aggregated.push({ destino: 'Destino desconhecido', count: contagemDesconhecidos });
+          console.log('Aggregated destinations:', aggregated);
+          aggregated.sort((a, b) => {
+            const ordem = destino => {
+              if (destino === 'Afastados para aposentadoria') return 3;
+              if (destino === 'Aposentados') return 2;
+              return 1; // demais
+            };
+
+            const diff = ordem(a.destino) - ordem(b.destino);
+            return diff !== 0 ? diff : b.count - a.count;
+          });
 
           // Determinar última data de exoneração presente nos registros
-          let lastDate: Date | null = null;
+          let ultimaData: Date | null = null;
           const parseBrazilDate = (d: any): Date | null => {
             if (!d || typeof d !== 'string') return null;
             const parts = d.split('/');
@@ -174,31 +167,37 @@ const App: React.FC = () => {
             if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year)) return null;
             return new Date(year, month, day);
           };
-          for (const rec of evasionRows) {
-            const dRaw = rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? null;
+          for (const rec of registrosEvasao) {
+            const dRaw = rec['DATA_PUBLICACAO_EXONERACAO'] ?? null;
             const parsed = parseBrazilDate(dRaw);
-            if (parsed && (!lastDate || parsed.getTime() > lastDate.getTime())) lastDate = parsed;
+            if (parsed && (!ultimaData || parsed.getTime() > ultimaData.getTime())) ultimaData = parsed;
+          }
+
+          for (const rec of registrosInatividade) {
+            const dRaw = rec['DATA_PUBLICACAO_INATIVIDADE'] ?? null;
+            const parsed = parseBrazilDate(dRaw);
+            if (parsed && (!ultimaData || parsed.getTime() > ultimaData.getTime())) ultimaData = parsed;
           }
 
           if (mounted) {
             // Expor os dados lidos para depuração no console do navegador
             try {
-              (window as any).__EVASION_RAW = evasionRows;
-              (window as any).__ALL_RAW = raw;
+              (window as any).__TODOS_RAW = raw;
             } catch (e) {
               // ignorar se não puder escrever em window
             }
             // Publica no console em formato de objeto JavaScript
             // (ver no DevTools do navegador após carregar a página)
             // eslint-disable-next-line no-console
-            console.log('dados.csv parsed (evasionRows):', evasionRows);
+            console.log('dados.csv parsed (registrosEvasao):', registrosEvasao);
             // eslint-disable-next-line no-console
             console.log('dados.csv parsed (all rows):', raw);
 
-            setEvasionData(aggregated);
-            setEvasionAuditors(evasionRows);
-            setLastEvasionDate(lastDate ?? null);
-            setIsLoading(false);
+            setDadosDestinoEvasao(aggregated);
+            setRaw(raw);
+            setAuditoresEvadidos(registrosEvasao);
+            setDataUltimaEvasao(ultimaData ?? null);
+            setEstaCarregando(false);
           }
 
           return;
@@ -212,7 +211,7 @@ const App: React.FC = () => {
       // nenhum caminho funcionou — manter dados embutidos
       // eslint-disable-next-line no-console
       console.warn('Não foi possível carregar dados.csv; usando dados internos.');
-      setIsLoading(false);
+      setEstaCarregando(false);
     }
 
     tryLoad();
@@ -221,11 +220,11 @@ const App: React.FC = () => {
   }, []);
 
   // Recalcula valores derivados a partir dos dados (podem vir do arquivo `dados.json`).
-  // `evasionData` é a agregação por destino (apenas com ÓRGÃO preenchido).
-  const totalEvasionsInTable = evasionData.reduce((sum, item) => sum + item.count, 0);
+  // `dadosDestinoEvasao` é a agregação por destino (apenas com ÓRGÃO preenchido).
+  const contagemEvasoesNaTabela = dadosDestinoEvasao.reduce((sum, item) => sum + item.count, 0);
 
   // Total real de auditores que evadiram (inclui também registros sem ÓRGÃO preenchido).
-  const totalEvasions = evasionAuditors.length;
+  const contagemEvasoes = auditoresEvadidos.length;
 
   // helper para parsear datas no formato DD/MM/YYYY
   const parseBrazilDate = (d: any): Date | null => {
@@ -248,48 +247,47 @@ const App: React.FC = () => {
     return years * 12 + months + 1;
   };
 
-  const totalCost = evasionAuditors.reduce((sum, rec) => {
-    const rawExonDate = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
-    const rawNomeacaoDate = rec['DATA NOMEAÇÃO'] ?? rec['DATA NOMEACAO'] ?? null;
-    
+  const totalCost = auditoresEvadidos.reduce((sum, rec) => {
+    const rawExonDate = rec['DATA_EXONERACAO'] ?? null;
+    const rawNomeacaoDate = rec['DATA_NOMEACAO'] ?? null;
+
     const exonDate = parseBrazilDate(rawExonDate);
     const nomeacaoDate = parseBrazilDate(rawNomeacaoDate);
-    
+
     if (!exonDate || !nomeacaoDate) return sum; // sem data -> não acumula custos mensais
-    
+
     // Data início do custo: nomeação + 30 dias
     const startDate = new Date(nomeacaoDate);
     startDate.setDate(startDate.getDate() + 30);
-    
+
     const months = monthsBetweenInclusive(startDate, exonDate);
     return sum + (months * COST_PER_AUDITOR);
   }, 0);
 
   // Mapeia destinos para lista de auditores (inclui 'Destino desconhecido' para sem órgão)
-  const destinationDetails: Record<string, { name: string; date?: string | null; pubDate?: string | null; noEffectDate?: string | null; situation?: string | null; area?: string | null; observation?: string | null }[]> = {};
-  destinationDetails['Destino desconhecido'] = [];
+  const destinoDetails: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]> = {};
+  destinoDetails['Destino desconhecido'] = [];
 
 
-  for (const rec of evasionAuditors) {
-    const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
-    const key = (org === null || org === undefined) ? 'Destino desconhecido' : String(org).trim() || 'Destino desconhecido';
-    const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
-  const date = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
-  const pubDate = rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? rec['DATA PUBLICACAO EXONERAÇÃO'] ?? rec['DATA PUBLICACAO EXONERAÇÃO'] ?? null;
-  const noEffectDate = rec['DATA NOMEAÇÃO SEM EFEITO'] ?? rec['DATA NOMEACAO SEM EFEITO'] ?? rec['DATA NOMEAÇÃO'] ?? rec['Data NOMEAÇÃO SEM EFEITO'] ?? null;
-  const situation = rec['SITUACAO'] ?? rec['SITUAÇÃO'] ?? rec['Situacao'] ?? null;
-  const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
-  const observation = rec['OBSERVAÇÃO'] ?? rec['OBSERVACAO'] ?? rec['Observação'] ?? rec['Observacao'] ?? null;
-    if (!destinationDetails[key]) destinationDetails[key] = [];
-    destinationDetails[key].push({ name, date, pubDate, noEffectDate, situation, area, observation });
+
+  for (const rec of raw.filter(r => ['EXONERADO', 'DESISTENTE', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']))) {
+    const org = rec['ORGAO_DESTINO'];
+    const situacao = rec['SITUACAO'] ?? null;
+    const key = situacao === 'APOSENTADO' ? 'Aposentados' : situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA' ? 'Afastados para aposentadoria' : (['EXONERADO', 'DESISTENTE'].includes(situacao) && (org === null || org === undefined || String(org).trim() === '')) ? 'Destino desconhecido' : String(org).trim();
+    const name = rec['NOME'] ?? '';
+    const data = situacao === 'EXONERADO' ? rec['DATA_EXONERACAO'] : situacao === 'DESISTENTE' ? rec['DATA_NOMEACAO_SEM_EFEITO'] : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) ? rec['DATA_INATIVIDADE'] : null;
+    const dataPublicacao = situacao === 'EXONERADO' ? rec['DATA_PUBLICACAO_EXONERACAO'] : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) ? rec['DATA_PUBLICACAO_INATIVIDADE'] : null;
+    const area = rec['AREA'] ?? null;
+    const observacao = rec['OBSERVACAO'] ?? null;
+    if (!destinoDetails[key]) destinoDetails[key] = [];
+    destinoDetails[key].push({ name, data, dataPublicacao, situacao, area, observacao });
   }
 
   // Ordena nomes dentro de cada destino por data (mais recente primeiro)
-  for (const k of Object.keys(destinationDetails)) {
-    destinationDetails[k].sort((a, b) => {
+  for (const k of Object.keys(destinoDetails)) {
+    destinoDetails[k].sort((a, b) => {
       const getKeyDate = (it: any) => {
-        const isDes = it.situation && String(it.situation).toUpperCase().includes('DESISTENTE');
-        return parseBrazilDate(isDes ? it.noEffectDate ?? it.nomeacaoSemEfeito ?? it['DATA NOMEAÇÃO SEM EFEITO'] : it.date);
+        return parseBrazilDate(it.data);
       };
       const da = getKeyDate(a);
       const db = getKeyDate(b);
@@ -302,28 +300,27 @@ const App: React.FC = () => {
   }
 
   // Conta evasões por área (para mostrar no footer do card)
-  const areaCounts: Record<string, number> = {};
-  for (const rec of evasionAuditors) {
-    const area = String(rec['ÁREA'] ?? rec['AREA'] ?? 'Outros');
-    areaCounts[area] = (areaCounts[area] ?? 0) + 1;
+  const contagemAreas: Record<string, number> = {};
+  for (const rec of auditoresEvadidos) {
+    const area = String(rec['AREA'] ?? 'Outros');
+    contagemAreas[area] = (contagemAreas[area] ?? 0) + 1;
   }
 
   // Conta evasões por tipo (exoneração vs desistência)
-  const typeCounts: Record<string, number> = { 'Exonerações': 0, 'Desistências': 0 };
-  for (const rec of evasionAuditors) {
-    const situation = rec['SITUACAO'] ?? rec['SITUAÇÃO'] ?? rec['Situacao'] ?? '';
-    const isDesistente = String(situation).toUpperCase().includes('DESISTENTE');
-    if (isDesistente) {
-      typeCounts['Desistências'] += 1;
-    } else {
-      typeCounts['Exonerações'] += 1;
-    }
-  }
+  const contagemExonerado = auditoresEvadidos.filter(rec => rec['SITUACAO'] && String(rec['SITUACAO']).toUpperCase().includes('EXONERADO')).length;
+  const contagemDesistencia = auditoresEvadidos.filter(rec => rec['SITUACAO'] && String(rec['SITUACAO']).toUpperCase().includes('DESISTENTE')).length;
+
+  const typeCounts: Record<string, number> = { 'Exonerações': contagemExonerado, 'Desistências': contagemDesistencia };
+
+  const contagemInativos = raw.filter(rec => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(rec['SITUACAO'])).length;
+  const contagemAposentado = raw.filter(rec => rec['SITUACAO'] === 'APOSENTADO').length;
+  const contagemAfastamentoPreliminar = raw.filter(rec => rec['SITUACAO'] === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA').length;
+
 
   const areaFooter = (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-3 justify-center">
-        {Object.entries(areaCounts).map(([area, cnt]) => (
+        {Object.entries(contagemAreas).map(([area, cnt]) => (
           <div key={area} className="text-xs text-gray-400">
             {area}: <span className="font-medium text-amber-400">{cnt}</span>
           </div>
@@ -343,8 +340,8 @@ const App: React.FC = () => {
   const monthlyMapIso: Map<string, number> = new Map();
   const isoToLabel: Record<string, string> = {};
   const monthlyDetails: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
-  for (const rec of evasionAuditors) {
-    const rawDate = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
+  for (const rec of auditoresEvadidos) {
+    const rawDate = rec['DATA_EXONERACAO'] ?? null;
     const d = parseBrazilDate(rawDate);
     if (!d) continue;
     const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -353,43 +350,74 @@ const App: React.FC = () => {
     monthlyMapIso.set(iso, (monthlyMapIso.get(iso) ?? 0) + 1);
     isoToLabel[iso] = displayLabel;
     if (!monthlyDetails[displayLabel]) monthlyDetails[displayLabel] = [];
-    const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
-    const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
+    const name = rec['NOME'] ?? '';
+    const area = rec['AREA'] ?? null;
     monthlyDetails[displayLabel].push({ name, date: rawDate, area });
   }
   const monthlyPoints = Array.from(monthlyMapIso.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([iso, value]) => ({ label: isoToLabel[iso], value }));
+    .map(([iso, value]) => ({ label: isoToLabel[iso], value, tipo: 'exoneração' }));
+
+  // Agregar aposentadorias e afastamentos por mês (MM/AAAA)
+  const monthlyInactivityMapIso: Map<string, number> = new Map();
+  const monthlyInactivityDetails: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
+  const auditoresInativos = raw.filter(r => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']));
+  for (const rec of auditoresInativos) {
+    const rawDate = rec['DATA_INATIVIDADE'] ?? null;
+    const d = parseBrazilDate(rawDate);
+    if (!d) continue;
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+    const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
+    monthlyInactivityMapIso.set(iso, (monthlyInactivityMapIso.get(iso) ?? 0) + 1);
+    isoToLabel[iso] = displayLabel;
+    if (!monthlyInactivityDetails[displayLabel]) monthlyInactivityDetails[displayLabel] = [];
+    const name = rec['NOME'] ?? '';
+    const area = rec['AREA'] ?? null;
+    monthlyInactivityDetails[displayLabel].push({ name, date: rawDate, area });
+  }
+  const monthlyInactivityPoints = Array.from(monthlyInactivityMapIso.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([iso, value]) => ({ label: isoToLabel[iso], value, tipo: 'inatividade' }));
+
+  // Criar pontos unificados que incluem todos os meses (exonerações + inatividade)
+  const allMonthlyIsos = new Set([...monthlyMapIso.keys(), ...monthlyInactivityMapIso.keys()]);
+  const monthlyPointsUnified = Array.from(allMonthlyIsos)
+    .sort((a, b) => a.localeCompare(b))
+    .map(iso => ({ 
+      label: isoToLabel[iso], 
+      value: (monthlyMapIso.get(iso) ?? 0) + (monthlyInactivityMapIso.get(iso) ?? 0), 
+      tipo: 'total' 
+    }));
 
   // Última exoneração (formatada) — calculada a partir dos dados carregados (ou fallback).
-  const lastExonDateFormatted = (lastEvasionDate ?? DEFAULT_LAST_EVASION_DATE)
-    ? (lastEvasionDate ?? DEFAULT_LAST_EVASION_DATE).toLocaleDateString('pt-BR')
+  const lastExonDateFormatted = (dataUltimaEvasao ?? DATA_INICIO_OBSERVACAO)
+    ? (dataUltimaEvasao ?? DATA_INICIO_OBSERVACAO).toLocaleDateString('pt-BR')
     : '—';
 
   // Lista de áreas (para filtro)
-  const areas = ['TODAS', ...Array.from(new Set(evasionAuditors.map(r => String(r['ÁREA'] ?? r['AREA'] ?? 'Outros')))).sort()];
+  const areas = ['TODAS', ...Array.from(new Set(auditoresEvadidos.map(r => String(r['AREA'] ?? 'Outros')))).sort()];
 
   // Filtrar auditores pela área selecionada
-  const filteredAuditors = selectedArea === 'TODAS'
-    ? evasionAuditors
-    : evasionAuditors.filter(r => String(r['ÁREA'] ?? r['AREA'] ?? 'Outros') === selectedArea);
+  const auditoresFiltrados = areaSelecionada === 'TODAS'
+    ? raw.filter(r => ['EXONERADO', 'DESISTENTE', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']))
+    : raw.filter(r => ['EXONERADO', 'DESISTENTE', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']) && r['AREA'] === areaSelecionada);
 
   // Agregação por destino para a área filtrada
   const filteredDestinationMap: Map<string, number> = new Map();
-  const filteredDestinationDetails: Record<string, { name: string; date?: string | null; pubDate?: string | null; noEffectDate?: string | null; situation?: string | null; area?: string | null; observation?: string | null }[]> = { 'Destino desconhecido': [] };
+  const filteredDestinationDetails: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]> = { 'Destino desconhecido': [] };
   let filteredUnknownCount = 0;
-  for (const rec of filteredAuditors) {
-    const org = rec['ÓRGÃO'] ?? rec['ORGAO'] ?? rec['Orgao'];
-    const key = (org === null || org === undefined || String(org).trim() === '') ? 'Destino desconhecido' : String(org).trim();
-    const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
-  const date = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
-  const pubDate = rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? rec['DATA PUBLICACAO EXONERAÇÃO'] ?? rec['DATA PUBLICACAO EXONERAÇÃO'] ?? null;
-  const noEffectDate = rec['DATA NOMEAÇÃO SEM EFEITO'] ?? rec['DATA NOMEACAO SEM EFEITO'] ?? rec['DATA NOMEAÇÃO'] ?? rec['Data NOMEAÇÃO SEM EFEITO'] ?? null;
-  const situation = rec['SITUACAO'] ?? rec['SITUAÇÃO'] ?? rec['Situacao'] ?? null;
-  const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
-  const observation = rec['OBSERVAÇÃO'] ?? rec['OBSERVACAO'] ?? rec['Observação'] ?? rec['Observacao'] ?? null;
+  for (const rec of auditoresFiltrados) {
+    const org = rec['ORGAO_DESTINO'];
+    const situacao = rec['SITUACAO'] ?? null;
+    const key = situacao === 'APOSENTADO' ? 'Aposentados' : situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA' ? 'Afastados para aposentadoria' : ['EXONERADO', 'DESISTENTE'].includes(situacao) ? (org === null || org === undefined || String(org).trim() === '') ? 'Destino desconhecido' : String(org).trim() : null;
+    const name = rec['NOME'] ?? '';
+    const data = situacao === 'EXONERADO' ? rec['DATA_EXONERACAO'] : situacao === 'DESISTENTE' ? rec['DATA_NOMEACAO_SEM_EFEITO'] : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) ? rec['DATA_INATIVIDADE'] : null;
+    const dataPublicacao = situacao === 'EXONERADO' ? rec['DATA_PUBLICACAO_EXONERACAO'] : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) ? rec['DATA_PUBLICACAO_INATIVIDADE'] : null;
+    const area = rec['AREA'] ?? null;
+    const observacao = rec['OBSERVACAO'] ?? null;
     filteredDestinationDetails[key] = filteredDestinationDetails[key] ?? [];
-  filteredDestinationDetails[key].push({ name, date, pubDate, noEffectDate, situation, area, observation });
+    filteredDestinationDetails[key].push({ name, data, dataPublicacao, situacao, area, observacao });
     if (key === 'Destino desconhecido') {
       filteredUnknownCount += 1;
     } else {
@@ -400,8 +428,8 @@ const App: React.FC = () => {
   for (const k of Object.keys(filteredDestinationDetails)) {
     filteredDestinationDetails[k].sort((a, b) => {
       const getKeyDate = (it: any) => {
-        const isDes = it.situation && String(it.situation).toUpperCase().includes('DESISTENTE');
-        return parseBrazilDate(isDes ? it.noEffectDate ?? it.nomeacaoSemEfeito ?? it['DATA NOMEAÇÃO SEM EFEITO'] : it.date);
+        const isDes = it.situacao && String(it.situacao).toUpperCase().includes('DESISTENTE');
+        return parseBrazilDate(isDes ? it.dataNomeacaoSemEfeito ?? it.nomeacaoSemEfeito ?? it['DATA_NOMEACAO_SEM_EFEITO'] : it.date);
       };
       const da = getKeyDate(a);
       const db = getKeyDate(b);
@@ -411,16 +439,25 @@ const App: React.FC = () => {
       return a.name.localeCompare(b.name);
     });
   }
-  const evasionDataFiltered: EvasionData[] = Array.from(filteredDestinationMap.entries()).map(([destination, count]) => ({ destination, count }));
-  if (filteredUnknownCount > 0) evasionDataFiltered.push({ destination: 'Destino desconhecido', count: filteredUnknownCount });
-  evasionDataFiltered.sort((a, b) => b.count - a.count);
+  const dadosDestinoEvasaoFiltrado: DadosDestinoEvasao[] = Array.from(filteredDestinationMap.entries()).map(([destino, count]) => ({ destino, count }));
+  if (filteredUnknownCount > 0) dadosDestinoEvasaoFiltrado.push({ destino: 'Destino desconhecido', count: filteredUnknownCount });
+  dadosDestinoEvasaoFiltrado.sort((a, b) => {
+    const ordem = destino => {
+      if (destino === 'Afastados para aposentadoria') return 3;
+      if (destino === 'Aposentados') return 2;
+      return 1; // demais
+    };
 
-  // Agregação mensal filtrada (mesma lógica de labels MMM/YYYY)
+    const diff = ordem(a.destino) - ordem(b.destino);
+    return diff !== 0 ? diff : b.count - a.count;
+  });
+
+  // Agregação mensal filtrada para exonerações/desistências (mesma lógica de labels MMM/YYYY)
   const monthlyMapIsoFiltered: Map<string, number> = new Map();
   const isoToLabelFiltered: Record<string, string> = {};
   const monthlyDetailsFiltered: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
-  for (const rec of filteredAuditors) {
-    const rawDate = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? null;
+  for (const rec of auditoresFiltrados.filter(r => ['EXONERADO', 'DESISTENTE'].includes(r['SITUACAO']))) {
+    const rawDate = rec['DATA_EXONERACAO'] ?? null;
     const d = parseBrazilDate(rawDate);
     if (!d) continue;
     const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -429,13 +466,44 @@ const App: React.FC = () => {
     monthlyMapIsoFiltered.set(iso, (monthlyMapIsoFiltered.get(iso) ?? 0) + 1);
     isoToLabelFiltered[iso] = displayLabel;
     if (!monthlyDetailsFiltered[displayLabel]) monthlyDetailsFiltered[displayLabel] = [];
-    const name = rec['Nome do Candidato'] ?? rec['NOME DO CANDIDATO'] ?? rec['nome'] ?? '';
-    const area = rec['ÁREA'] ?? rec['AREA'] ?? null;
+    const name = rec['NOME'] ?? '';
+    const area = rec['AREA'] ?? null;
     monthlyDetailsFiltered[displayLabel].push({ name, date: rawDate, area });
   }
   const monthlyPointsFiltered = Array.from(monthlyMapIsoFiltered.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([iso, value]) => ({ label: isoToLabelFiltered[iso], value }));
+    .map(([iso, value]) => ({ label: isoToLabelFiltered[iso], value, tipo: 'exoneração' }));
+
+  // Agregação mensal filtrada para aposentadorias e afastamentos
+  const monthlyInactivityMapIsoFiltered: Map<string, number> = new Map();
+  const monthlyInactivityDetailsFiltered: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
+  for (const rec of auditoresFiltrados.filter(r => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']))) {
+    const rawDate = rec['DATA_INATIVIDADE'] ?? null;
+    const d = parseBrazilDate(rawDate);
+    if (!d) continue;
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+    const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
+    monthlyInactivityMapIsoFiltered.set(iso, (monthlyInactivityMapIsoFiltered.get(iso) ?? 0) + 1);
+    isoToLabelFiltered[iso] = displayLabel;
+    if (!monthlyInactivityDetailsFiltered[displayLabel]) monthlyInactivityDetailsFiltered[displayLabel] = [];
+    const name = rec['NOME'] ?? '';
+    const area = rec['AREA'] ?? null;
+    monthlyInactivityDetailsFiltered[displayLabel].push({ name, date: rawDate, area });
+  }
+  const monthlyInactivityPointsFiltered = Array.from(monthlyInactivityMapIsoFiltered.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([iso, value]) => ({ label: isoToLabelFiltered[iso], value, tipo: 'inatividade' }));
+
+  // Criar pontos unificados filtrados que incluem todos os meses (exonerações + inatividade)
+  const allMonthlyIsosFiltered = new Set([...monthlyMapIsoFiltered.keys(), ...monthlyInactivityMapIsoFiltered.keys()]);
+  const monthlyPointsFilteredUnified = Array.from(allMonthlyIsosFiltered)
+    .sort((a, b) => a.localeCompare(b))
+    .map(iso => ({ 
+      label: isoToLabelFiltered[iso], 
+      value: (monthlyMapIsoFiltered.get(iso) ?? 0) + (monthlyInactivityMapIsoFiltered.get(iso) ?? 0), 
+      tipo: 'total' 
+    }));
 
   // Ordenar detalhes mensais filtrados por data asc
   for (const label of Object.keys(monthlyDetailsFiltered)) {
@@ -450,21 +518,22 @@ const App: React.FC = () => {
   }
 
   // Calcular recorde: maior intervalo (em dias) sem exoneração entre datas de exoneração
-  const exonDates: Date[] = evasionAuditors
-    .map(r => parseBrazilDate(r['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? r['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? null))
+  const exonDates: Date[] = raw
+    .map(r => parseBrazilDate(r['DATA_PUBLICACAO_EXONERACAO'] ?? r['DATA_PUBLICACAO_INATIVIDADE'] ?? null))
     .filter((d): d is Date => d instanceof Date)
     .sort((a, b) => a.getTime() - b.getTime());
 
-  let recordDays = 0;
+
+  let diasRecorde = 0;
   if (exonDates.length === 0) {
-    recordDays = 0;
+    diasRecorde = 0;
   } else if (exonDates.length === 1) {
     const now = new Date();
-    recordDays = Math.floor((now.getTime() - exonDates[0].getTime()) / (1000 * 3600 * 24));
+    diasRecorde = Math.floor((now.getTime() - exonDates[0].getTime()) / (1000 * 3600 * 24));
   } else {
     for (let i = 0; i < exonDates.length - 1; i++) {
       const gap = Math.floor((exonDates[i + 1].getTime() - exonDates[i].getTime()) / (1000 * 3600 * 24));
-      if (gap > recordDays) recordDays = gap;
+      if (gap > diasRecorde) diasRecorde = gap;
     }
   }
 
@@ -474,44 +543,68 @@ const App: React.FC = () => {
 
   const PeopleIcon = () => <FontAwesomeIcon icon={faUsers} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
 
+  const InactiveIcon = () => <FontAwesomeIcon icon={faPersonShelter} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-200 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-5xl mx-auto">
-          <header className="text-center mb-10">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 mb-2 drop-shadow-lg">Observatório da Evasão</h1>
-            <p className="text-lg text-amber-400 font-medium">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
-            
+      <div className="max-w-5xl mx-auto">
+        <header className="text-center mb-10">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 mb-2 drop-shadow-lg">Observatório da Evasão</h1>
+          <p className="text-lg text-amber-400 font-medium">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
 
-          </header>
+
+        </header>
 
         <main>
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <CounterCard 
-              value={daysSinceLastEvasion} 
-              label={`Dias sem perder um Auditor Fiscal (Última publicação de exoneração: ${lastExonDateFormatted})`}
-              icon={<CalendarIcon />} 
-              footer={<div className="text-xs text-amber-400">Nosso recorde é {recordDays} dias</div>}
-              isLoading={isLoading}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <CounterCard
+              value={diasDesdeUltimaEvasao}
+              label={`Dias sem perder um Auditor Fiscal`}
+              icon={<CalendarIcon />}
+              footer={<div><div>Por data de publicação.</div><div>Última publicação de exoneração/aposentadoria: {lastExonDateFormatted}</div> <div className="text-xs text-amber-400 mt-2">Nosso recorde é {diasRecorde} dias</div></div>}
+              estaCarregando={estaCarregando}
             />
             <CounterCard
-              value={totalEvasions}
+              value={contagemEvasoes}
               label="Número de evasões"
               icon={<PeopleIcon />}
               footer={areaFooter}
-              isLoading={isLoading}
+              estaCarregando={estaCarregando}
+            />
+            <CounterCard
+              value={contagemInativos}
+              label="Auditores transferidos para inatividade"
+              icon={<InactiveIcon />}
+              footer={
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-400">Desde Janeiro de 2024</div>
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    <div className="text-xs text-gray-400">Aposentados: <span className="font-medium text-amber-400">{contagemAposentado}</span></div>
+                    <div className="text-xs text-gray-400">Afastamento preliminar: <span className="font-medium text-amber-400">{contagemAfastamentoPreliminar}</span></div>
+                  </div>
+                </div>
+              }
+              estaCarregando={estaCarregando}
             />
             {/*<CounterCard 
               value={<span title={totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' as any }).format(totalCost)}</span>} 
-              label={`Custo estimado para o Estado com ${totalEvasions} evasões`}
+              label={`Custo estimado para o Estado com ${contagemEvasoes} evasões`}
               icon={<MoneyIcon />} 
-              isLoading={isLoading}
+              estaCarregando={estaCarregando}
             />*/}
           </section>
 
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-red-300 mb-2">Exonerações por mês</h3>
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-red-300 mb-2">Evasões e Aposentadorias por mês</h3>
 
-            <EvasionChart points={monthlyPointsFiltered.length > 0 ? monthlyPointsFiltered : monthlyPoints} details={monthlyDetailsFiltered && Object.keys(monthlyDetailsFiltered).length>0 ? monthlyDetailsFiltered : monthlyDetails} backgroundPoints={monthlyPoints} />
+            <EvasionChart 
+              points={monthlyPointsFiltered.length > 0 ? monthlyPointsFiltered : monthlyPoints} 
+              details={monthlyDetailsFiltered && Object.keys(monthlyDetailsFiltered).length > 0 ? monthlyDetailsFiltered : monthlyDetails} 
+              backgroundPoints={monthlyPointsUnified} 
+              inactivityPoints={monthlyInactivityPointsFiltered}
+              inactivityDetails={monthlyInactivityDetailsFiltered && Object.keys(monthlyInactivityDetailsFiltered).length > 0 ? monthlyInactivityDetailsFiltered : monthlyInactivityDetails}
+              backgroundInactivityPoints={monthlyInactivityPoints}
+            />
           </div>
 
           <div className="mb-4 flex flex-col items-center">
@@ -520,9 +613,9 @@ const App: React.FC = () => {
               {areas.map(a => (
                 <button
                   key={a}
-                  onClick={() => setSelectedArea(a)}
-                  aria-pressed={selectedArea === a}
-                  className={`px-3 py-1 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-400 ${selectedArea === a ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'}`}
+                  onClick={() => setAreaSelecionada(a)}
+                  aria-pressed={areaSelecionada === a}
+                  className={`px-3 py-1 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-400 ${areaSelecionada === a ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'}`}
                 >
                   {a}
                 </button>
@@ -534,15 +627,15 @@ const App: React.FC = () => {
             <h2 className="text-2xl font-bold text-red-300 mb-4">Destinos da Evasão</h2>
             <p className="text-gray-400 mb-6">
               Esta tabela detalha os órgãos (destinos) para os quais os auditores se transferiram após a posse ou se mantiveram no órgão desistindo de tomar posse.
-              O número total de evasões é de <span className="font-bold text-orange-400">{totalEvasions}</span>.
+              A SEF/MG perdeu <span className="font-bold text-orange-400">{contagemEvasoes + contagemInativos}</span> Auditores desde Janeiro/2024.
             </p>
-            <EvasionTable data={selectedArea === 'TODAS' ? evasionData : evasionDataFiltered} details={selectedArea === 'TODAS' ? destinationDetails : filteredDestinationDetails} />
+            <EvasionTable data={areaSelecionada === 'TODAS' ? dadosDestinoEvasao : dadosDestinoEvasaoFiltrado} details={areaSelecionada === 'TODAS' ? destinoDetails : filteredDestinationDetails} />
           </section>
         </main>
-        
+
         {/* Link para tabela detalhada */}
         <div className="mt-8 mb-6 text-center">
-          <a 
+          <a
             href="/evasao/dist/table.html"
             className="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-red-600 border border-transparent rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
           >

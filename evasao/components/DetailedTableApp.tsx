@@ -3,12 +3,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 interface DetailedTableAppProps { }
 
 const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
-  const [selectedArea, setSelectedArea] = useState<string>('FISCALIZAÇÃO');
-  const [allAuditors, setAllAuditors] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchName, setSearchName] = useState<string>('');
-  const [filterPCD, setFilterPCD] = useState<boolean>(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>('');    // Carregar dados CSV
+    const [areaSelecionada, setAreaSelecionada] = useState<string>('FISCALIZAÇÃO');
+    const [allAuditors, setAllAuditors] = useState<any[]>([]);
+    const [estaCarregando, setEstaCarregando] = useState(true);
+    const [searchName, setSearchName] = useState<string>('');
+    const [filterPCD, setFilterPCD] = useState<boolean>(false);
+    const [selectedStatus, setSelectedStatus] = useState<string>('');    // Carregar dados CSV
     useEffect(() => {
         const paths = [
             '/data/dados.csv',
@@ -64,21 +64,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                 for (let j = 0; j < headers.length; j++) {
                     obj[headers[j]] = parts[j] ? parts[j].trim() : '';
                 }
-
-                const normalized: Record<string, any> = { ...obj };
-                if (obj['NOME']) normalized['Nome do Candidato'] = obj['NOME'];
-                if (obj['NOME DO CANDIDATO']) normalized['Nome do Candidato'] = obj['NOME DO CANDIDATO'];
-                if (obj['SITUAÇÃO']) normalized['SITUACAO'] = obj['SITUAÇÃO'];
-                if (obj['SITUACAO']) normalized['SITUACAO'] = obj['SITUACAO'];
-                if (obj['ÓRGÃO DESTINO']) normalized['ÓRGÃO'] = obj['ÓRGÃO DESTINO'];
-                if (obj['ORGAO DESTINO']) normalized['ÓRGÃO'] = obj['ORGAO DESTINO'];
-                if (obj['ÓRGÃO']) normalized['ÓRGÃO'] = obj['ÓRGÃO'];
-                if (obj['ÁREA']) normalized['ÁREA'] = obj['ÁREA'];
-                if (obj['AREA']) normalized['ÁREA'] = obj['AREA'];
-                if (obj['DATA EXONERAÇÃO']) normalized['DATA EXONERAÇÃO'] = obj['DATA EXONERAÇÃO'];
-                if (obj['DATA EXONERACAO']) normalized['DATA EXONERAÇÃO'] = obj['DATA EXONERACAO'];
-
-                rows.push(normalized);
+                rows.push(obj);
             }
             return rows;
         };
@@ -105,7 +91,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
 
                     console.log('Dados carregados:', raw.length, 'registros');
                     setAllAuditors(raw);
-                    setIsLoading(false);
+                    setEstaCarregando(false);
                     return;
                 } catch (err) {
                     console.debug('Falha ao carregar', p, err);
@@ -113,7 +99,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
             }
 
             console.warn('Não foi possível carregar dados.csv');
-            setIsLoading(false);
+            setEstaCarregando(false);
         }
 
         loadData();
@@ -134,65 +120,95 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
 
     // Ajustar área selecionada quando os dados são carregados
     useEffect(() => {
-        if (areas.length > 0 && !areas.includes(selectedArea)) {
-            setSelectedArea(areas[0]);
+        if (areas.length > 0 && !areas.includes(areaSelecionada)) {
+            setAreaSelecionada(areas[0]);
         }
-    }, [areas, selectedArea]);
+    }, [areas, areaSelecionada]);
 
     // Reset filtro de status quando a área mudar
     useEffect(() => {
         setSelectedStatus('');
-    }, [selectedArea]);
+    }, [areaSelecionada]);
 
-  // Filtrar dados pela área selecionada e busca por nome, ordenar por posição do concurso
-  const filteredData = useMemo(() => {
-    if (!allAuditors || allAuditors.length === 0) return [];
-    
-    let filtered = allAuditors.filter(item => (item['ÁREA'] || item['AREA'] || 'Outros') === selectedArea);
-    
-    // Filtrar por nome se houver busca
-    if (searchName.trim()) {
-      filtered = filtered.filter(item => {
-        const nome = (item['NOME'] || item['Nome do Candidato'] || '').toLowerCase();
-        return nome.includes(searchName.toLowerCase());
-      });
-    }
-    
-    // Filtrar apenas PCDs se ativo
-    if (filterPCD) {
-      filtered = filtered.filter(item => {
-        return (item['PCD'] || '').toUpperCase() === 'SIM';
-      });
-    }
-    
-    // Filtrar por status se selecionado
-    if (selectedStatus) {
-      filtered = filtered.filter(item => {
-        const status = (item['SITUACAO'] || item['SITUAÇÃO'] || 'NÃO NOMEADO').toUpperCase();
-        return status === selectedStatus.toUpperCase();
-      });
-    }
-    
-    return filtered.sort((a, b) => {
-      const posA = parseInt(a['POSIÇÃO CONCURSO'] || a['POSICAO CONCURSO'] || '0');
-      const posB = parseInt(b['POSIÇÃO CONCURSO'] || b['POSICAO CONCURSO'] || '0');
-      return posA - posB;
-    });
-  }, [allAuditors, selectedArea, searchName, filterPCD, selectedStatus]);    // Função para determinar a cor da linha baseada no status e alternância
+    // Filtrar dados pela área selecionada e busca por nome, ordenar por posição do concurso
+    const filteredData = useMemo(() => {
+        if (!allAuditors || allAuditors.length === 0) return [];
+
+        let filtered = allAuditors.filter(item => (item['ÁREA'] || item['AREA'] || 'Outros') === areaSelecionada);
+
+        // Filtrar por nome se houver busca
+        if (searchName.trim()) {
+            filtered = filtered.filter(item => {
+                const nome = (item['NOME'] || item['Nome do Candidato'] || '').toLowerCase();
+                return nome.includes(searchName.toLowerCase());
+            });
+        }
+
+        // Filtrar apenas PCDs se ativo
+        if (filterPCD) {
+            filtered = filtered.filter(item => {
+                return (item['PCD'] || '').toUpperCase() === 'SIM';
+            });
+        }
+
+        // Filtrar por status se selecionado
+        if (selectedStatus) {
+            filtered = filtered.filter(item => {
+                const status = (item['SITUACAO'] || item['SITUAÇÃO'] || '-').toUpperCase();
+                return status === selectedStatus.toUpperCase();
+            });
+        }
+
+        return filtered.sort((a, b) => {
+            // Ordenação especial para VETERANO
+            if (areaSelecionada === 'VETERANO') {
+                // Primeiro por Data Publicação Exoneração (DESC, null last)
+                const dateExonA = a['DATA_PUBLICACAO_EXONERACAO'] || a['DATA PUBLICACAO EXONERAÇÃO'] || '';
+                const dateExonB = b['DATA_PUBLICACAO_EXONERACAO'] || b['DATA PUBLICACAO EXONERAÇÃO'] || '';
+                
+                // Se ambas têm data de exoneração, ordena DESC
+                if (dateExonA && dateExonB) {
+                    const comparison = dateExonB.localeCompare(dateExonA);
+                    if (comparison !== 0) return comparison;
+                }
+                // Se apenas A tem data, A vem primeiro
+                else if (dateExonA && !dateExonB) {
+                    return -1;
+                }
+                // Se apenas B tem data, B vem primeiro
+                else if (!dateExonA && dateExonB) {
+                    return 1;
+                }
+                
+                // Depois por Data Publicação Inatividade (DESC)
+                const dateInatA = a['DATA_PUBLICACAO_INATIVIDADE'] || a['DATA PUBLICACAO INATIVIDADE'] || '';
+                const dateInatB = b['DATA_PUBLICACAO_INATIVIDADE'] || b['DATA PUBLICACAO INATIVIDADE'] || '';
+                
+                return dateInatB.localeCompare(dateInatA);
+            }
+            
+            // Ordenação padrão por posição do concurso
+            const posA = parseInt(a['POSICAO_CONCURSO'] || a['POSICAO CONCURSO'] || '0');
+            const posB = parseInt(b['POSICAO_CONCURSO'] || b['POSICAO CONCURSO'] || '0');
+            return posA - posB;
+        });
+    }, [allAuditors, areaSelecionada, searchName, filterPCD, selectedStatus]);    // Função para determinar a cor da linha baseada no status e alternância
     const getRowColor = (situacao: string, index: number) => {
         const isEven = index % 2 === 0;
-        const status = situacao?.toUpperCase() || 'NÃO NOMEADO';
+        const status = situacao?.toUpperCase() || '-';
 
         // Cores base por status
         const statusColors = {
-            'EM EXERCÍCIO': isEven ? 'bg-green-200' : 'bg-green-200',
-            'EXONERADO': isEven ? 'bg-red-200' : 'bg-red-200',
-            'DESISTENTE': isEven ? 'bg-orange-200' : 'bg-orange-200',
-            'INAPTO ADMISSIONAL': isEven ? 'bg-purple-200' : 'bg-purple-200',
-            'NÃO NOMEADO': isEven ? 'bg-white' : 'bg-gray-200',
+            'EM EXERCÍCIO': isEven ? 'bg-green-200' : 'bg-green-200/75',
+            'EXONERADO': isEven ? 'bg-red-200' : 'bg-red-200/85',
+            'DESISTENTE': isEven ? 'bg-orange-200' : 'bg-orange-200/85',
+            'INAPTO ADMISSIONAL': isEven ? 'bg-fuchsia-200' : 'bg-fuchsia-200/85',
+            'APOSENTADO': isEven ? 'bg-purple-400' : 'bg-purple-400/85',
+            'AFASTAMENTO PRELIMINAR À APOSENTADORIA': isEven ? 'bg-teal-200' : 'bg-teal-200/85',
+            '-': isEven ? 'bg-white' : 'bg-gray-100',
         };
 
-        return statusColors[status] || statusColors['NÃO NOMEADO'];
+        return statusColors[status] || statusColors['-'];
     };
 
     // Função para determinar apenas a cor do texto do status
@@ -202,11 +218,13 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
             'EXONERADO': 'text-red-700',
             'DESISTENTE': 'text-yellow-700',
             'INAPTO ADMISSIONAL': 'text-purple-700',
-            'NÃO NOMEADO': 'text-gray-600',
+            'APOSENTADO': 'text-purple-800',
+            'AFASTAMENTO PRELIMINAR À APOSENTADORIA': 'text-purple-700',
+            '-': 'text-gray-600',
         };
 
-        const status = situacao?.toUpperCase() || 'NÃO NOMEADO';
-        return colors[status] || colors['NÃO NOMEADO'];
+        const status = situacao?.toUpperCase() || '-';
+        return colors[status] || colors['-'];
     };
 
     return (
@@ -235,10 +253,10 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                         {areas.map(area => (
                             <button
                                 key={area}
-                                onClick={() => setSelectedArea(area)}
-                                className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 ${selectedArea === area
-                                        ? 'bg-red-600 text-white shadow-md'
-                                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 shadow-sm'
+                                onClick={() => setAreaSelecionada(area)}
+                                className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 ${areaSelecionada === area
+                                    ? 'bg-red-600 text-white shadow-md'
+                                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 shadow-sm'
                                     }`}
                             >
                                 {area}
@@ -260,24 +278,23 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                 </div>
 
                 {/* Estatísticas do filtro */}
-                {!isLoading && filteredData.length > 0 && (
+                {!estaCarregando && filteredData.length > 0 && (
                     <div className="mb-4 text-center text-sm text-gray-700">
                         <div className="flex flex-wrap gap-2 justify-center items-center">
                             {/* Botão para mostrar todos */}
                             <button
                                 onClick={() => setSelectedStatus('')}
-                                className={`px-2 py-1 rounded text-xs transition-colors ${
-                                    selectedStatus === '' 
-                                        ? 'bg-blue-500 text-white font-semibold' 
+                                className={`px-2 py-1 rounded text-xs transition-colors ${selectedStatus === ''
+                                        ? 'bg-blue-500 text-white font-semibold'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
+                                    }`}
                             >
                                 Todos
                             </button>
                             {/* Status individuais */}
                             {Object.entries(
                                 filteredData.reduce((acc, item) => {
-                                    const status = item['SITUACAO'] || item['SITUAÇÃO'] || 'NÃO NOMEADO';
+                                    const status = item['SITUACAO'] || item['SITUAÇÃO'] || '-';
                                     acc[status] = (acc[status] || 0) + 1;
                                     return acc;
                                 }, {} as Record<string, number>)
@@ -285,11 +302,10 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                 <button
                                     key={status}
                                     onClick={() => setSelectedStatus(selectedStatus === status ? '' : status)}
-                                    className={`px-2 py-1 rounded text-xs transition-colors ${
-                                        selectedStatus === status 
-                                            ? 'bg-red-500 text-white font-semibold' 
+                                    className={`px-2 py-1 rounded text-xs transition-colors ${selectedStatus === status
+                                            ? 'bg-red-500 text-white font-semibold'
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
+                                        }`}
                                 >
                                     {status}: <span className="font-semibold">{count}</span>
                                 </button>
@@ -304,37 +320,53 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                         <table className="w-full text-[10px] border-collapse border border-black">
                             <thead className="bg-white text-gray-700 uppercase text-[10px] sticky top-0 z-50 shadow-sm">
                                 <tr>
-                                    <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Pos.</th>
-                                    <th className="px-1 py-1 text-left font-semibold border border-black bg-white">Nome</th>
-                                    <th className="px-0.5 py-1 text-center font-semibold border border-black bg-white">
-                                        <div className="flex items-center justify-center gap-0.5">
-                                            <span>PCD</span>
-                                            <button
-                                                onClick={() => setFilterPCD(!filterPCD)}
-                                                className={`text-[9px] px-0.5 py-0.5 rounded transition-colors ${
-                                                    filterPCD 
-                                                        ? 'text-blue-600' 
-                                                        : 'text-gray-400 hover:text-gray-600'
-                                                }`}
-                                                title={filterPCD ? 'Mostrar todos' : 'Filtrar apenas PCDs'}
-                                            >
-                                                <i className="fas fa-filter"></i>
-                                            </button>
-                                        </div>
-                                    </th>
-                                    <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Situação</th>
-                                    <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Órgão</th>
-                                    <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Nomeação</th>
-                                    <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Exoneração</th>
-                                    <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Publicação da Exoneração</th>
-                                    <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Nomeação Sem Efeito</th>
-                                    <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Observação</th>
+                                    {areaSelecionada === 'VETERANO' ? (
+                                        // Cabeçalho para área VETERANO
+                                        <>
+                                            <th className="px-1 py-1 text-left font-semibold border border-black bg-white">NOME</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">SITUAÇÃO</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">ÓRGÃO</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">DATA EXONERAÇÃO</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">DATA DE PUBLICAÇÃO DA EXONERAÇÃO</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">DATA INATIVIDADE</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">DATA DE PUBLICAÇÃO DA INATIVIDADE</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">OBSERVAÇÃO</th>
+                                        </>
+                                    ) : (
+                                        // Cabeçalho padrão para outras áreas
+                                        <>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Pos.</th>
+                                            <th className="px-1 py-1 text-left font-semibold border border-black bg-white">Nome</th>
+                                            <th className="px-0.5 py-1 text-center font-semibold border border-black bg-white">
+                                                <div className="flex items-center justify-center gap-0.5">
+                                                    <span>PCD</span>
+                                                    <button
+                                                        onClick={() => setFilterPCD(!filterPCD)}
+                                                        className={`text-[9px] px-0.5 py-0.5 rounded transition-colors ${filterPCD
+                                                                ? 'text-blue-600'
+                                                                : 'text-gray-400 hover:text-gray-600'
+                                                            }`}
+                                                        title={filterPCD ? 'Mostrar todos' : 'Filtrar apenas PCDs'}
+                                                    >
+                                                        <i className="fas fa-filter"></i>
+                                                    </button>
+                                                </div>
+                                            </th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Situação</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Órgão</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Nomeação</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Exoneração</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Publicação da Exoneração</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Nomeação Sem Efeito</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Observação</th>
+                                        </>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-black">
-                                {isLoading ? (
+                                {estaCarregando ? (
                                     <tr>
-                                        <td colSpan={10} className="px-4 py-6 text-center text-orange-600 border border-black">
+                                        <td colSpan={areaSelecionada === 'VETERANO' ? 6 : 10} className="px-4 py-6 text-center text-orange-600 border border-black">
                                             <div className="flex items-center justify-center space-x-2">
                                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
                                                 <span>Carregando dados...</span>
@@ -343,9 +375,9 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                     </tr>
                                 ) : filteredData.length === 0 ? (
                                     <tr>
-                                        <td colSpan={10} className="px-4 py-6 text-center text-gray-500 border border-black">
+                                        <td colSpan={areaSelecionada === 'VETERANO' ? 6 : 10} className="px-4 py-6 text-center text-gray-500 border border-black">
                                             {allAuditors && allAuditors.length > 0
-                                                ? `Nenhum candidato encontrado para a área ${selectedArea}`
+                                                ? `Nenhum candidato encontrado para a área ${areaSelecionada}`
                                                 : 'Nenhum dado disponível. Verifique se o arquivo dados.csv foi carregado.'
                                             }
                                         </td>
@@ -356,36 +388,69 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                             key={`${item['INSCRIÇÃO'] || item['INSCRICAO'] || index}`}
                                             className={`${getRowColor(item['SITUACAO'] || item['SITUAÇÃO'], index)} hover:brightness-95 hover:shadow-md transition-all duration-150`}
                                         >
-                                            <td className="px-1 py-0.5 whitespace-nowrap font-medium text-gray-800 text-[10px] border border-black text-center">
-                                                {item['POSIÇÃO CONCURSO'] || item['POSICAO CONCURSO'] || '-'}
-                                            </td>
-                                            <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
-                                                {item['NOME'] || item['Nome do Candidato'] || '-'}
-                                            </td>
-                                            <td className="px-0.5 py-0.5 whitespace-nowrap text-center text-[10px] border border-black text-gray-700">
-                                                {(item['PCD'] || '').toUpperCase() === 'SIM' ? 'SIM' : 'NÃO'}
-                                            </td>
-                                            <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                {item['SITUACAO'] || item['SITUAÇÃO'] || 'NÃO NOMEADO'}
-                                            </td>
-                                            <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
-                                                {item['ÓRGÃO'] || item['ORGAO'] || '-'}
-                                            </td>
-                                            <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                {item['DATA NOMEAÇÃO'] || item['DATA NOMEACAO'] || '-'}
-                                            </td>
-                                            <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                {item['DATA EXONERAÇÃO'] || item['DATA EXONERACAO'] || '-'}
-                                            </td>
-                                            <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                {item['DATA PUBLICAÇÃO EXONERAÇÃO'] || item['DATA PUBLICACAO EXONERAÇÃO'] || '-'}
-                                            </td>
-                                            <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                {item['DATA NOMEAÇÃO SEM EFEITO'] || item['DATA NOMEACAO SEM EFEITO'] || '-'}
-                                            </td>
-                                            <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
-                                                {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
-                                            </td>
+                                            {areaSelecionada === 'VETERANO' ? (
+                                                // Layout para área VETERANO
+                                                <>
+                                                    <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
+                                                        {item['NOME'] || item['Nome do Candidato'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['SITUACAO'] || item['SITUAÇÃO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['ÓRGÃO'] || item['ORGAO_DESTINO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['DATA_EXONERACAO'] || item['DATA EXONERACAO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['DATA_PUBLICACAO_EXONERACAO'] || item['DATA PUBLICACAO EXONERAÇÃO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['DATA_INATIVIDADE'] || item['DATA INATIVIDADE'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['DATA_PUBLICACAO_INATIVIDADE'] || item['DATA PUBLICACAO INATIVIDADE'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
+                                                        {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
+                                                    </td>
+                                                </>
+                                            ) : (
+                                                // Layout padrão para outras áreas
+                                                <>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap font-medium text-gray-800 text-[10px] border border-black text-center">
+                                                        {item['POSICAO_CONCURSO'] || item['POSICAO CONCURSO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
+                                                        {item['NOME'] || item['Nome do Candidato'] || '-'}
+                                                    </td>
+                                                    <td className="px-0.5 py-0.5 whitespace-nowrap text-center text-[10px] border border-black text-gray-700">
+                                                        {(item['PCD'] || '').toUpperCase() === 'SIM' ? 'SIM' : 'NÃO'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['SITUACAO'] || item['SITUAÇÃO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['ÓRGÃO'] || item['ORGAO_DESTINO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['DATA NOMEAÇÃO'] || item['DATA NOMEACAO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['DATA_EXONERACAO'] || item['DATA EXONERACAO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['DATA_PUBLICACAO_EXONERACAO'] || item['DATA PUBLICACAO EXONERAÇÃO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                        {item['DATA_NOMEACAO_SEM_EFEITO'] || item['DATA NOMEACAO SEM EFEITO'] || '-'}
+                                                    </td>
+                                                    <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
+                                                        {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
+                                                    </td>
+                                                </>
+                                            )}
                                         </tr>
                                     ))
                                 )}

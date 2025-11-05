@@ -1,4 +1,4 @@
-export interface EvasionData {
-  destination: string;
+export interface DadosDestinoEvasao {
+  destino: string;
   count: number;
 }

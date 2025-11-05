@@ -2,11 +2,11 @@ import React, { useState, useMemo } from 'react';
 
 interface DetailedTableProps {
   data: any[];
-  isLoading?: boolean;
+  estaCarregando?: boolean;
 }
 
-const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }) => {
-  const [selectedArea, setSelectedArea] = useState<string>('TODAS');
+const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = false }) => {
+  const [areaSelecionada, setAreaSelecionada] = useState<string>('TODAS');
 
   // Debug: log dos dados recebidos
   console.log('DetailedTable data:', data);
@@ -17,6 +17,8 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
     if (!data || data.length === 0) return ['TODAS'];
     const uniqueAreas = Array.from(new Set(data.map(item => item['ÁREA'] || item['AREA'] || 'Outros')));
     console.log('Areas found:', uniqueAreas);
+    console.log('Selected area:', areaSelecionada);
+    console.log('Is VETERANO selected:', areaSelecionada === 'VETERANO');
     return ['TODAS', ...uniqueAreas.sort()];
   }, [data]);
 
@@ -27,20 +29,20 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
       return [];
     }
     
-    let filtered = selectedArea === 'TODAS' 
+    let filtered = areaSelecionada === 'TODAS' 
       ? data 
-      : data.filter(item => (item['ÁREA'] || item['AREA'] || 'Outros') === selectedArea);
+      : data.filter(item => (item['ÁREA'] || item['AREA'] || 'Outros') === areaSelecionada);
     
     console.log('Filtered data length:', filtered.length);
     console.log('Sample filtered item:', filtered[0]);
     
     // Ordenar por posição do concurso
     return filtered.sort((a, b) => {
-      const posA = parseInt(a['POSIÇÃO CONCURSO'] || a['POSICAO CONCURSO'] || '0');
-      const posB = parseInt(b['POSIÇÃO CONCURSO'] || b['POSICAO CONCURSO'] || '0');
+      const posA = parseInt(a['POSICAO_CONCURSO'] || a['POSICAO CONCURSO'] || '0');
+      const posB = parseInt(b['POSICAO_CONCURSO'] || b['POSICAO CONCURSO'] || '0');
       return posA - posB;
     });
-  }, [data, selectedArea]);
+  }, [data, areaSelecionada]);
 
   // Função para determinar a cor da linha baseada no status
   const getRowColor = (situacao: string, index: number) => {
@@ -49,7 +51,9 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
       'EXONERADO': 'bg-red-900/30',
       'DESISTENTE': 'bg-yellow-900/30',
       'INAPTO ADMISSIONAL': 'bg-purple-900/30',
-      'NÃO NOMEADO': 'bg-gray-900/30',
+      'APOSENTADO': 'bg-purple-400/50',
+      'AFASTAMENTO PRELIMINAR À APOSENTADORIA': 'bg-purple-300/40',
+      '-': 'bg-gray-900/30',
     };
 
     const alternateColors = {
@@ -57,13 +61,15 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
       'EXONERADO': 'bg-red-800/20',
       'DESISTENTE': 'bg-yellow-800/20',
       'INAPTO ADMISSIONAL': 'bg-purple-800/20',
-      'NÃO NOMEADO': 'bg-gray-800/20',
+      'APOSENTADO': 'bg-purple-300/40',
+      'AFASTAMENTO PRELIMINAR À APOSENTADORIA': 'bg-purple-200/30',
+      '-': 'bg-gray-800/20',
     };
 
-    const status = situacao?.toUpperCase() || 'NÃO NOMEADO';
+    const status = situacao?.toUpperCase() || '-';
     const isEven = index % 2 === 0;
     
-    return isEven ? (baseColors[status] || baseColors['NÃO NOMEADO']) : (alternateColors[status] || alternateColors['NÃO NOMEADO']);
+    return isEven ? (baseColors[status] || baseColors['-']) : (alternateColors[status] || alternateColors['-']);
   };
 
   // Função para determinar a cor do texto do status
@@ -73,11 +79,13 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
       'EXONERADO': 'text-red-400',
       'DESISTENTE': 'text-yellow-400',
       'INAPTO ADMISSIONAL': 'text-purple-400',
-      'NÃO NOMEADO': 'text-gray-400',
+      'APOSENTADO': 'text-purple-100',
+      'AFASTAMENTO PRELIMINAR À APOSENTADORIA': 'text-purple-200',
+      '-': 'text-gray-400',
     };
 
-    const status = situacao?.toUpperCase() || 'NÃO NOMEADO';
-    return colors[status] || colors['NÃO NOMEADO'];
+    const status = situacao?.toUpperCase() || '-';
+    return colors[status] || colors['-'];
   };
 
   return (
@@ -99,9 +107,9 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
             {areas.map(area => (
               <button
                 key={area}
-                onClick={() => setSelectedArea(area)}
+                onClick={() => setAreaSelecionada(area)}
                 className={`px-4 py-2 rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 ${
-                  selectedArea === area 
+                  areaSelecionada === area 
                     ? 'bg-red-600 text-white shadow-lg' 
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
                 }`}
@@ -114,10 +122,10 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
 
         {/* Informações do filtro */}
         <div className="mb-4 text-center text-gray-400 text-sm">
-          {isLoading ? (
+          {estaCarregando ? (
             <span className="text-yellow-400">Carregando dados...</span>
           ) : data && data.length > 0 ? (
-            <>Mostrando {filteredData.length} candidatos {selectedArea !== 'TODAS' && `da área ${selectedArea}`}</>
+            <>Mostrando {filteredData.length} candidatos {areaSelecionada !== 'TODAS' && `da área ${areaSelecionada}`}</>
           ) : (
             <span className="text-red-400">Nenhum dado encontrado</span>
           )}
@@ -129,23 +137,42 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
             <table className="w-full text-sm">
               <thead className="bg-gray-800 text-gray-300 uppercase text-xs">
                 <tr>
-                  <th className="px-3 py-3 text-left font-semibold">Posição</th>
-                  <th className="px-3 py-3 text-left font-semibold">Nome</th>
-                  <th className="px-3 py-3 text-left font-semibold">Área</th>
-                  <th className="px-3 py-3 text-left font-semibold">PCD</th>
-                  <th className="px-3 py-3 text-left font-semibold">Situação</th>
-                  <th className="px-3 py-3 text-left font-semibold">Órgão</th>
-                  <th className="px-3 py-3 text-left font-semibold">Data Nomeação</th>
-                  <th className="px-3 py-3 text-left font-semibold">Data Exoneração</th>
-                  <th className="px-3 py-3 text-left font-semibold">Data Pub. Exoneração</th>
-                  <th className="px-3 py-3 text-left font-semibold">Data Nomeação s/ Efeito</th>
-                  <th className="px-3 py-3 text-left font-semibold">Observação</th>
+                  {(() => {
+                    console.log('Rendering header for area:', areaSelecionada);
+                    return areaSelecionada === 'VETERANO';
+                  })() ? (
+                    // Cabeçalho para área VETERANO
+                    <>
+                      <th className="px-3 py-3 text-left font-semibold">Nome</th>
+                      <th className="px-3 py-3 text-left font-semibold">Área</th>
+                      <th className="px-3 py-3 text-left font-semibold">Situação</th>
+                      <th className="px-3 py-3 text-left font-semibold">Órgão</th>
+                      <th className="px-3 py-3 text-left font-semibold">Data Inatividade</th>
+                      <th className="px-3 py-3 text-left font-semibold">Data Pub. Inatividade</th>
+                      <th className="px-3 py-3 text-left font-semibold">Observação</th>
+                    </>
+                  ) : (
+                    // Cabeçalho padrão para outras áreas
+                    <>
+                      <th className="px-3 py-3 text-left font-semibold">Posição</th>
+                      <th className="px-3 py-3 text-left font-semibold">Nome</th>
+                      <th className="px-3 py-3 text-left font-semibold">Área</th>
+                      <th className="px-3 py-3 text-left font-semibold">PCD</th>
+                      <th className="px-3 py-3 text-left font-semibold">Situação</th>
+                      <th className="px-3 py-3 text-left font-semibold">Órgão</th>
+                      <th className="px-3 py-3 text-left font-semibold">Data Nomeação</th>
+                      <th className="px-3 py-3 text-left font-semibold">Data Exoneração</th>
+                      <th className="px-3 py-3 text-left font-semibold">Data Pub. Exoneração</th>
+                      <th className="px-3 py-3 text-left font-semibold">Data Nomeação s/ Efeito</th>
+                      <th className="px-3 py-3 text-left font-semibold">Observação</th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700">
-                {isLoading ? (
+                {estaCarregando ? (
                   <tr>
-                    <td colSpan={11} className="px-6 py-8 text-center text-yellow-400">
+                    <td colSpan={areaSelecionada === 'VETERANO' ? 7 : 11} className="px-6 py-8 text-center text-yellow-400">
                       <div className="flex items-center justify-center space-x-2">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
                         <span>Carregando dados...</span>
@@ -154,9 +181,9 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
                   </tr>
                 ) : filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan={11} className="px-6 py-8 text-center text-gray-400">
+                    <td colSpan={areaSelecionada === 'VETERANO' ? 7 : 11} className="px-6 py-8 text-center text-gray-400">
                       {data && data.length > 0 
-                        ? `Nenhum candidato encontrado para a área ${selectedArea}`
+                        ? `Nenhum candidato encontrado para a área ${areaSelecionada}`
                         : 'Nenhum dado disponível. Verifique se o arquivo dados.csv foi carregado.'
                       }
                     </td>
@@ -167,48 +194,80 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
                       key={`${item['INSCRIÇÃO'] || item['INSCRICAO'] || index}`}
                       className={`${getRowColor(item['SITUACAO'] || item['SITUAÇÃO'], index)} hover:bg-gray-700/50 transition-colors duration-150`}
                     >
-                    <td className="px-3 py-2 whitespace-nowrap font-medium text-amber-400">
-                      {item['POSIÇÃO CONCURSO'] || item['POSICAO CONCURSO'] || '-'}
-                    </td>
-                    <td className="px-3 py-2 font-medium text-gray-200">
-                      {item['NOME'] || item['Nome do Candidato'] || '-'}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-cyan-400">
-                      {item['ÁREA'] || item['AREA'] || 'Outros'}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-center">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        (item['PCD'] || '').toUpperCase() === 'SIM' 
-                          ? 'bg-blue-900/50 text-blue-300' 
-                          : 'bg-gray-800/50 text-gray-400'
-                      }`}>
-                        {item['PCD'] || 'NÃO'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      <span className={`font-medium ${getStatusColor(item['SITUACAO'] || item['SITUAÇÃO'])}`}>
-                        {item['SITUACAO'] || item['SITUAÇÃO'] || 'NÃO NOMEADO'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2">
-                      {item['ÓRGÃO'] || item['ORGAO'] || '-'}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-gray-300">
-                      {item['DATA NOMEAÇÃO'] || item['DATA NOMEACAO'] || '-'}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-gray-300">
-                      {item['DATA EXONERAÇÃO'] || item['DATA EXONERACAO'] || '-'}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-gray-300">
-                      {item['DATA PUBLICAÇÃO EXONERAÇÃO'] || item['DATA PUBLICACAO EXONERAÇÃO'] || '-'}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-gray-300">
-                      {item['DATA NOMEAÇÃO SEM EFEITO'] || item['DATA NOMEACAO SEM EFEITO'] || '-'}
-                    </td>
-                    <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVAÇÃO'] || item['OBSERVACAO'] || ''}>
-                      {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
-                    </td>
-                  </tr>
+                      {areaSelecionada === 'VETERANO' ? (
+                        // Layout para área VETERANO
+                        <>
+                          <td className="px-3 py-2 font-medium text-gray-200">
+                            {item['NOME'] || item['Nome do Candidato'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-cyan-400">
+                            {item['ÁREA'] || item['AREA'] || 'Outros'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            <span className={`font-medium ${getStatusColor(item['SITUACAO'] || item['SITUAÇÃO'])}`}>
+                              {item['SITUACAO'] || item['SITUAÇÃO'] || '-'}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            {item['ÓRGÃO'] || item['ORGAO_DESTINO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-gray-300">
+                            {item['DATA_INATIVIDADE'] || item['DATA INATIVIDADE'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-gray-300">
+                            {item['DATA_PUBLICACAO_INATIVIDADE'] || item['DATA PUBLICACAO INATIVIDADE'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVAÇÃO'] || item['OBSERVACAO'] || ''}>
+                            {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
+                          </td>
+                        </>
+                      ) : (
+                        // Layout padrão para outras áreas
+                        <>
+                          <td className="px-3 py-2 whitespace-nowrap font-medium text-amber-400">
+                            {item['POSICAO_CONCURSO'] || item['POSICAO CONCURSO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 font-medium text-gray-200">
+                            {item['NOME'] || item['Nome do Candidato'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-cyan-400">
+                            {item['ÁREA'] || item['AREA'] || 'Outros'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-center">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              (item['PCD'] || '').toUpperCase() === 'SIM' 
+                                ? 'bg-blue-900/50 text-blue-300' 
+                                : 'bg-gray-800/50 text-gray-400'
+                            }`}>
+                              {item['PCD'] || 'NÃO'}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            <span className={`font-medium ${getStatusColor(item['SITUACAO'] || item['SITUAÇÃO'])}`}>
+                              {item['SITUACAO'] || item['SITUAÇÃO'] || '-'}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            {item['ÓRGÃO'] || item['ORGAO_DESTINO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-gray-300">
+                            {item['DATA NOMEAÇÃO'] || item['DATA NOMEACAO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-gray-300">
+                            {item['DATA_EXONERACAO'] || item['DATA EXONERACAO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-gray-300">
+                            {item['DATA_PUBLICACAO_EXONERACAO'] || item['DATA PUBLICACAO EXONERAÇÃO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-gray-300">
+                            {item['DATA_NOMEACAO_SEM_EFEITO'] || item['DATA NOMEACAO SEM EFEITO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVAÇÃO'] || item['OBSERVACAO'] || ''}>
+                            {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
+                          </td>
+                        </>
+                      )}
+                    </tr>
                   ))
                 )}
               </tbody>
@@ -221,7 +280,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, isLoading = false }
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-2xl mx-auto">
             {Object.entries(
               filteredData.reduce((acc, item) => {
-                const status = item['SITUACAO'] || item['SITUAÇÃO'] || 'NÃO NOMEADO';
+                const status = item['SITUACAO'] || item['SITUAÇÃO'] || '-';
                 acc[status] = (acc[status] || 0) + 1;
                 return acc;
               }, {} as Record<string, number>)

@@ -2,20 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion } from '@fortawesome/free-solid-svg-icons';
-import { EvasionData } from '../types';
+import { DadosDestinoEvasao } from '../types';
 
 interface AuditorDetail {
   name: string;
-  date?: string | null;
-  pubDate?: string | null;
-  noEffectDate?: string | null;
-  situation?: string | null;
+  data?: string | null;
+  dataPublicacao?: string | null;
+  situacao?: string | null;
   area?: string | null;
-  observation?: string | null;
+  observacao?: string | null;
 }
 
 interface EvasionTableProps {
-  data: EvasionData[];
+  data: DadosDestinoEvasao[];
   // detalhes por destino (apenas destinos exibidos na tabela)
   details?: Record<string, AuditorDetail[]>;
 }
@@ -23,8 +22,8 @@ interface EvasionTableProps {
 const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
-  const toggle = (destination: string) => {
-    setOpen(prev => ({ ...prev, [destination]: !prev[destination] }));
+  const toggle = (destino: string) => {
+    setOpen(prev => ({ ...prev, [destino]: !prev[destino] }));
   };
 
   // Tooltip portal component: posiciona o balão no <body> para evitar clipping por overflow
@@ -36,11 +35,11 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
     const viewportHeight = window.innerHeight;
     const tooltipWidth = 200; // Largura estimada do tooltip
     const tooltipHeight = 40; // Altura estimada do tooltip
-    
+
     let left = pos.left;
     let top = pos.top;
     let transform = 'translate(-50%, -100%)';
-    
+
     // Ajustar horizontalmente se sair da tela
     if (left - tooltipWidth / 2 < 10) {
       // Muito à esquerda - alinhar à esquerda
@@ -51,7 +50,7 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
       left = Math.min(viewportWidth - 10, pos.left + 20);
       transform = 'translate(-100%, -100%)';
     }
-    
+
     // Ajustar verticalmente se sair da tela
     if (top - tooltipHeight < 10) {
       // Muito acima - posicionar abaixo
@@ -78,11 +77,15 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
     const btnRef = useRef<HTMLButtonElement | null>(null);
     const [visible, setVisible] = useState(false);
     const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
-    const tooltip = aud.pubDate && String(aud.pubDate).trim()
-      ? `Exoneração publicada no DOE em ${aud.pubDate}`
-      : (aud.observation && String(aud.observation).trim() 
-         ? String(aud.observation).trim()
-         : 'Exoneração ainda não publicada no DOE');
+    console.log(aud);
+    const tooltip =
+      aud.situacao === 'EXONERADO' && aud.dataPublicacao && String(aud.dataPublicacao).trim() ?
+        `Exoneração publicada no DOE em ${aud.dataPublicacao}` :
+        aud.situacao === 'APOSENTADO' && aud.dataPublicacao && String(aud.dataPublicacao).trim() ?
+          `Aposentadoria publicada no DOE em ${aud.dataPublicacao}` :
+          aud.situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA' && aud.dataPublicacao && String(aud.dataPublicacao).trim() ?
+            `Afastamento publicado no DOE em ${aud.dataPublicacao}` :
+            aud.observacao ? String(aud.observacao).trim() : null;
 
     const show = () => {
       const el = btnRef.current;
@@ -103,33 +106,32 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
 
         <div className="flex items-center gap-3">
           {(() => {
-            const isDesistente = aud.situation && String(aud.situation).toUpperCase().includes('DESISTENTE');
+            const isDesistente = aud.situacao && String(aud.situacao).toUpperCase().includes('DESISTENTE');
+            const isAposentado = aud.situacao && String(aud.situacao).toUpperCase().includes('APOSENTADO');
+            const isAfastado = aud.situacao && String(aud.situacao).toUpperCase().includes('AFASTAMENTO PRELIMINAR À APOSENTADORIA');
+
             if (isDesistente) {
-              return <span className="text-sm text-gray-400">{aud.noEffectDate ? `Nomeação sem efeito em ${aud.noEffectDate}` : '—'}</span>;
+              return <span className="text-sm text-gray-400">{aud.data ? `Nomeação sem efeito em ${aud.data}` : '—'}</span>;
             }
-            return <span className="text-sm text-gray-400">{aud.date ? `Exonerado em ${aud.date}` : '—'}</span>;
+            if (isAposentado) {
+              return <span className="text-sm text-gray-400">{aud.data ? `Aposentado em ${aud.data}` : '—'}</span>;
+            }
+            if (isAfastado) {
+              return <span className="text-sm text-gray-400">{aud.data ? `Afastado em ${aud.data}` : '—'}</span>;
+            }
+            return <span className="text-sm text-gray-400">{aud.data ? `Exonerado em ${aud.data}` : '—'}</span>;
           })()}
 
           <div>
             {(() => {
-              const isDesistente = String(aud.situation ?? '').toUpperCase().includes('DESISTENTE');
-              
+
               let showTooltip = false;
               let tooltipText = '';
-              
-              if (isDesistente) {
-                // Para desistentes: só mostra se não há data de nomeação sem efeito E há observação
-                showTooltip = !aud.noEffectDate && !!(aud.observation && String(aud.observation).trim());
-                tooltipText = aud.observation && String(aud.observation).trim() 
-                  ? String(aud.observation).trim()
-                  : 'Informação não disponível';
-              } else {
-                // Para exonerados: só mostra se há data de publicação OU (não há data mas há observação)
-                const hasPubDate = !!(aud.pubDate && String(aud.pubDate).trim());
-                const hasObservation = !!(aud.observation && String(aud.observation).trim());
-                showTooltip = hasPubDate || hasObservation;
-                tooltipText = tooltip;
-              }
+
+              // Para desistentes: só mostra se não há data de nomeação sem efeito E há observação
+              showTooltip = tooltip ? true : false;
+              tooltipText = tooltip;
+
 
               return showTooltip ? (
                 <>
@@ -143,7 +145,7 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
                     className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
                     aria-label={tooltipText}
                   >
-                    <FontAwesomeIcon icon={faQuestion} className="w-2 h-2 bold-icon" aria-hidden="true" color="#1A2436"/>
+                    <FontAwesomeIcon icon={faQuestion} className="w-2 h-2 bold-icon" aria-hidden="true" color="#1A2436" />
                   </button>
 
                   <TooltipPortal pos={pos} text={tooltipText} visible={visible} />
@@ -167,7 +169,7 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
         </thead>
         <tbody className="divide-y divide-gray-700">
           {data.map((item, index) => {
-            const dest = item.destination;
+            const dest = item.destino;
             const rows = details[dest] ?? [];
             const isOpen = !!open[dest];
 
