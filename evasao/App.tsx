@@ -175,7 +175,7 @@ const App: React.FC = () => {
             return new Date(year, month, day);
           };
           for (const rec of evasionRows) {
-            const dRaw = rec['DATA EXONERAÇÃO'] ?? rec['Data Exoneração'] ?? rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? null;
+            const dRaw = rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? rec['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? null;
             const parsed = parseBrazilDate(dRaw);
             if (parsed && (!lastDate || parsed.getTime() > lastDate.getTime())) lastDate = parsed;
           }
@@ -451,7 +451,7 @@ const App: React.FC = () => {
 
   // Calcular recorde: maior intervalo (em dias) sem exoneração entre datas de exoneração
   const exonDates: Date[] = evasionAuditors
-    .map(r => parseBrazilDate(r['DATA EXONERAÇÃO'] ?? r['Data Exoneração'] ?? null))
+    .map(r => parseBrazilDate(r['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? r['DATA PUBLICAÇÃO EXONERAÇÃO'] ?? null))
     .filter((d): d is Date => d instanceof Date)
     .sort((a, b) => a.getTime() - b.getTime());
 
@@ -488,7 +488,7 @@ const App: React.FC = () => {
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <CounterCard 
               value={daysSinceLastEvasion} 
-              label={`Dias sem perder um Auditor Fiscal (Última exoneração: ${lastExonDateFormatted})`}
+              label={`Dias sem perder um Auditor Fiscal (Última publicação de exoneração: ${lastExonDateFormatted})`}
               icon={<CalendarIcon />} 
               footer={<div className="text-xs text-amber-400">Nosso recorde é {recordDays} dias</div>}
               isLoading={isLoading}
@@ -559,6 +559,9 @@ const App: React.FC = () => {
           </p>*/}
           <p>
             São contabilizadas tanto exonerações quanto desistências como eventos de evasão.
+          </p>
+          <p>
+            A quantidade de dias sem perder um Auditor Fiscal e o respectivo recorde considera a data de publicação das exonerações.
           </p>
         </div>
 
