@@ -140,17 +140,17 @@ const App: React.FC = () => {
 
           // Determinar última data de publicação presente nos registros
           let ultimaData: Date | null = null;
-
+          
           for (const rec of dadosParsed) {
             const situacao = rec['SITUACAO'];
             let dRaw: string | null = null;
-
+            
             if (situacao === 'EXONERADO' || situacao === 'DESISTENTE') {
               dRaw = rec['DATA_PUBLICACAO_EXONERACAO'] ?? null;
             } else if (situacao === 'APOSENTADO' || situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA') {
               dRaw = rec['DATA_PUBLICACAO_INATIVIDADE'] ?? null;
             }
-
+            
             const dataAnalisada = analisarDataBrasil(dRaw);
             if (dataAnalisada && (!ultimaData || dataAnalisada.getTime() > ultimaData.getTime())) {
               ultimaData = dataAnalisada;
@@ -206,15 +206,15 @@ const App: React.FC = () => {
     for (const registro of registros) {
       const orgao = registro['ORGAO_DESTINO'];
       const situacao = registro['SITUACAO'] ?? null;
-
+      
       // Regra de negócio para determinar chave do destino
-      const chave = situacao === 'APOSENTADO'
-        ? 'Aposentados'
-        : situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'
-          ? 'Afastados para aposentadoria'
-          : (['EXONERADO', 'DESISTENTE'].includes(situacao) && (orgao === null || orgao === undefined || String(orgao).trim() === ''))
-            ? 'Destino desconhecido'
-            : String(orgao).trim();
+      const chave = situacao === 'APOSENTADO' 
+        ? 'Aposentados' 
+        : situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA' 
+        ? 'Afastados para aposentadoria' 
+        : (['EXONERADO', 'DESISTENTE'].includes(situacao) && (orgao === null || orgao === undefined || String(orgao).trim() === '')) 
+        ? 'Destino desconhecido' 
+        : String(orgao).trim();
 
       // Contagem
       if (chave === 'Destino desconhecido') {
@@ -226,18 +226,18 @@ const App: React.FC = () => {
 
       // Detalhes
       const nome = registro['NOME'] ?? '';
-      const data = situacao === 'EXONERADO'
-        ? registro['DATA_EXONERACAO']
-        : situacao === 'DESISTENTE'
-          ? registro['DATA_NOMEACAO_SEM_EFEITO']
-          : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao)
-            ? registro['DATA_INATIVIDADE']
-            : null;
-      const dataPublicacao = situacao === 'EXONERADO'
-        ? registro['DATA_PUBLICACAO_EXONERACAO']
-        : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao)
-          ? registro['DATA_PUBLICACAO_INATIVIDADE']
-          : null;
+      const data = situacao === 'EXONERADO' 
+        ? registro['DATA_EXONERACAO'] 
+        : situacao === 'DESISTENTE' 
+        ? registro['DATA_NOMEACAO_SEM_EFEITO'] 
+        : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) 
+        ? registro['DATA_INATIVIDADE'] 
+        : null;
+      const dataPublicacao = situacao === 'EXONERADO' 
+        ? registro['DATA_PUBLICACAO_EXONERACAO'] 
+        : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) 
+        ? registro['DATA_PUBLICACAO_INATIVIDADE'] 
+        : null;
       const area = registro['AREA'] ?? null;
       const observacao = registro['OBSERVACAO'] ?? null;
 
@@ -291,14 +291,14 @@ const App: React.FC = () => {
       const dataBruta = registro[campoData] ?? null;
       const dataFormatada = analisarDataBrasil(dataBruta);
       if (!dataFormatada) continue;
-
+      
       const codigoIso = `${dataFormatada.getFullYear()}-${String(dataFormatada.getMonth() + 1).padStart(2, '0')}`;
       const mesAbreviado = dataFormatada.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
       const rotuloExibicao = `${mesAbreviado.toUpperCase()}/${dataFormatada.getFullYear()}`;
-
+      
       mapaMensalIso.set(codigoIso, (mapaMensalIso.get(codigoIso) ?? 0) + 1);
       isoParaRotulo[codigoIso] = rotuloExibicao;
-
+      
       if (!detalhes[rotuloExibicao]) detalhes[rotuloExibicao] = [];
       const nome = registro['NOME'] ?? '';
       const area = registro['AREA'] ?? null;
@@ -354,10 +354,10 @@ const App: React.FC = () => {
 
   // Conta evasões por área (para mostrar no footer do card)
   const contagemAreas: Record<string, number> = {};
-  for (const registro of registrosEvasao) {
-    const area = String(registro['AREA'] ?? 'Outros');
-    contagemAreas[area] = (contagemAreas[area] ?? 0) + 1;
-  }  // Conta evasões por tipo (exoneração vs desistência) - otimizado
+    for (const registro of registrosEvasao) {
+      const area = String(registro['AREA'] ?? 'Outros');
+      contagemAreas[area] = (contagemAreas[area] ?? 0) + 1;
+    }  // Conta evasões por tipo (exoneração vs desistência) - otimizado
   const contagemTipos = registrosEvasao.reduce((acumulador, registro) => {
     const situacao = registro['SITUACAO'];
     if (situacao === 'EXONERADO') {
@@ -483,7 +483,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-950 text-gray-200 p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
         <header className="text-center mb-10">
-          <img src="/evasao/assets/images/observatorio-logo.png" style="max-width: 600px;"></img>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 mb-2 drop-shadow-lg">OBSERVATÓRIO DAS EVASÕES</h1>
           <p className="text-lg text-amber-400 font-medium">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
 
 
@@ -526,10 +526,10 @@ const App: React.FC = () => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-red-300 mb-2">Evasões e Aposentadorias por mês</h3>
 
-            <EvasionChart
-              points={areaSelecionada === 'TODAS' ? pontosMensais : pontosMensaisFiltrados}
-              details={areaSelecionada === 'TODAS' ? detalhesMensais : detalhesMensaisFiltrados}
-              backgroundPoints={pontosMensaisUnificados}
+            <EvasionChart 
+              points={areaSelecionada === 'TODAS' ? pontosMensais : pontosMensaisFiltrados} 
+              details={areaSelecionada === 'TODAS' ? detalhesMensais : detalhesMensaisFiltrados} 
+              backgroundPoints={pontosMensaisUnificados} 
               inactivityPoints={areaSelecionada === 'TODAS' ? pontosMensaisInatividade : pontosMensaisInatividadeFiltrados}
               inactivityDetails={areaSelecionada === 'TODAS' ? detalhesMensaisInatividade : detalhesMensaisInatividadeFiltrados}
               backgroundInactivityPoints={pontosMensaisInatividade}
@@ -558,9 +558,9 @@ const App: React.FC = () => {
               Esta tabela detalha os órgãos (destinos) para os quais os Auditores se transferiram após a exoneração ou que se mantiveram, desistindo de tomar posse na SEF/MG.
               A SEF/MG perdeu <span className="font-bold text-orange-400">{contagemEvasoes + contagemInativos}</span> Auditores desde Janeiro/2024.
             </p>
-            <EvasionTable
-              data={areaSelecionada === 'TODAS' ? dadosDestinoEvasao : dadosDestinoEvasaoFiltrado}
-              details={areaSelecionada === 'TODAS' ? detalhesDestino : detalhesDestinoFiltrados}
+            <EvasionTable 
+              data={areaSelecionada === 'TODAS' ? dadosDestinoEvasao : dadosDestinoEvasaoFiltrado} 
+              details={areaSelecionada === 'TODAS' ? detalhesDestino : detalhesDestinoFiltrados} 
             />
           </section>
         </main>
