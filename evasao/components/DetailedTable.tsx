@@ -53,7 +53,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
       'INAPTO ADMISSIONAL': 'bg-purple-900/30',
       'APOSENTADO': 'bg-purple-400/50',
       'AFASTAMENTO PRELIMINAR À APOSENTADORIA': 'bg-purple-300/40',
-      '-': 'bg-gray-900/30',
+      '???': 'bg-gray-900/30',
     };
 
     const alternateColors = {
@@ -63,13 +63,13 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
       'INAPTO ADMISSIONAL': 'bg-purple-800/20',
       'APOSENTADO': 'bg-purple-300/40',
       'AFASTAMENTO PRELIMINAR À APOSENTADORIA': 'bg-purple-200/30',
-      '-': 'bg-gray-800/20',
+      '???': 'bg-gray-800/20',
     };
 
     const status = situacao?.toUpperCase() || '-';
     const isEven = index % 2 === 0;
     
-    return isEven ? (baseColors[status] || baseColors['-']) : (alternateColors[status] || alternateColors['-']);
+    return isEven ? (baseColors[status] || baseColors['???']) : (alternateColors[status] || alternateColors['???']);
   };
 
   // Função para determinar a cor do texto do status
@@ -81,11 +81,11 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
       'INAPTO ADMISSIONAL': 'text-purple-400',
       'APOSENTADO': 'text-purple-100',
       'AFASTAMENTO PRELIMINAR À APOSENTADORIA': 'text-purple-200',
-      '-': 'text-gray-400',
+      '???': 'text-gray-400',
     };
 
-    const status = situacao?.toUpperCase() || '-';
-    return colors[status] || colors['-'];
+    const status = situacao?.toUpperCase() || '???';
+    return colors[status] || colors['???'];
   };
 
   return (
@@ -191,47 +191,47 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                 ) : (
                   filteredData.map((item, index) => (
                     <tr 
-                      key={`${item['INSCRIÇÃO'] || item['INSCRICAO'] || index}`}
-                      className={`${getRowColor(item['SITUACAO'] || item['SITUAÇÃO'], index)} hover:bg-gray-700/50 transition-colors duration-150`}
+                      key={`${item['INSCRICAO'] || index}`}
+                      className={`${getRowColor(item['SITUACAO'], index)} hover:bg-gray-700/50 transition-colors duration-150`}
                     >
                       {areaSelecionada === 'VETERANO' ? (
                         // Layout para área VETERANO
                         <>
                           <td className="px-3 py-2 font-medium text-gray-200">
-                            {item['NOME'] || item['Nome do Candidato'] || '-'}
+                            {item['NOME'] || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-cyan-400">
-                            {item['ÁREA'] || item['AREA'] || 'Outros'}
+                            {item['AREA'] || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap">
-                            <span className={`font-medium ${getStatusColor(item['SITUACAO'] || item['SITUAÇÃO'])}`}>
-                              {item['SITUACAO'] || item['SITUAÇÃO'] || '-'}
+                            <span className={`font-medium ${getStatusColor(item['SITUACAO'])}`}>
+                              {item['SITUACAO'] || '???'}
                             </span>
                           </td>
                           <td className="px-3 py-2">
-                            {item['ÓRGÃO'] || item['ORGAO_DESTINO'] || '-'}
+                            {item['ORGAO_DESTINO'] || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-gray-300">
-                            {item['DATA_INATIVIDADE'] || item['DATA INATIVIDADE'] || '-'}
+                            {item['DATA_INATIVIDADE'] || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-gray-300">
-                            {item['DATA_PUBLICACAO_INATIVIDADE'] || item['DATA PUBLICACAO INATIVIDADE'] || '-'}
+                            {item['DATA_PUBLICACAO_INATIVIDADE'] ||'-'}
                           </td>
-                          <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVAÇÃO'] || item['OBSERVACAO'] || ''}>
-                            {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
+                          <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVACAO'] || ''}>
+                            {item['OBSERVACAO'] || '-'}
                           </td>
                         </>
                       ) : (
                         // Layout padrão para outras áreas
                         <>
                           <td className="px-3 py-2 whitespace-nowrap font-medium text-amber-400">
-                            {item['POSICAO_CONCURSO'] || item['POSICAO CONCURSO'] || '-'}
+                            {item['POSICAO_CONCURSO'] || '-'}
                           </td>
                           <td className="px-3 py-2 font-medium text-gray-200">
-                            {item['NOME'] || item['Nome do Candidato'] || '-'}
+                            {item['NOME'] || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-cyan-400">
-                            {item['ÁREA'] || item['AREA'] || 'Outros'}
+                            {item['AREA'] || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-center">
                             <span className={`px-2 py-1 rounded text-xs font-medium ${
@@ -244,14 +244,14 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap">
                             <span className={`font-medium ${getStatusColor(item['SITUACAO'] || item['SITUAÇÃO'])}`}>
-                              {item['SITUACAO'] || item['SITUAÇÃO'] || '-'}
+                              {item['SITUACAO'] || item['SITUAÇÃO'] || '???'}
                             </span>
                           </td>
                           <td className="px-3 py-2">
-                            {item['ÓRGÃO'] || item['ORGAO_DESTINO'] || '-'}
+                            {item['ORGAO_DESTINO'] || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-gray-300">
-                            {item['DATA NOMEAÇÃO'] || item['DATA NOMEACAO'] || '-'}
+                            {item['DATA_NOMEACAO'] || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-gray-300">
                             {item['DATA_EXONERACAO'] || item['DATA EXONERACAO'] || '-'}
@@ -262,8 +262,8 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                           <td className="px-3 py-2 whitespace-nowrap text-gray-300">
                             {item['DATA_NOMEACAO_SEM_EFEITO'] || item['DATA NOMEACAO SEM EFEITO'] || '-'}
                           </td>
-                          <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVAÇÃO'] || item['OBSERVACAO'] || ''}>
-                            {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
+                          <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVACAO'] || ''}>
+                            {item['OBSERVACAO'] || '-'}
                           </td>
                         </>
                       )}
@@ -280,7 +280,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-2xl mx-auto">
             {Object.entries(
               filteredData.reduce((acc, item) => {
-                const status = item['SITUACAO'] || item['SITUAÇÃO'] || '-';
+                const status = item['SITUACAO'] || '???';
                 acc[status] = (acc[status] || 0) + 1;
                 return acc;
               }, {} as Record<string, number>)
