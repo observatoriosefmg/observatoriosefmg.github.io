@@ -154,7 +154,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
         // Filtrar por status se selecionado
         if (selectedStatus) {
             filtered = filtered.filter(item => {
-                const status = (item['SITUACAO'] || item['SITUAÇÃO'] || '-').toUpperCase();
+                const status = (item['SITUACAO'] || '???').toUpperCase();
                 return status === selectedStatus.toUpperCase();
             });
         }
@@ -224,7 +224,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
     }, [allAuditors, areaSelecionada, searchName, filterPCD, selectedStatus]);    // Função para determinar a cor da linha baseada no status e alternância
     const getRowColor = (situacao: string, index: number) => {
         const isEven = index % 2 === 0;
-        const status = situacao?.toUpperCase() || '-';
+        const status = situacao?.toUpperCase() || '???';
 
         // Cores base por status
         const statusColors = {
@@ -234,10 +234,10 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
             'INAPTO ADMISSIONAL': isEven ? 'bg-fuchsia-200' : 'bg-fuchsia-200/85',
             'APOSENTADO': isEven ? 'bg-purple-400' : 'bg-purple-400/85',
             'AFASTAMENTO PRELIMINAR À APOSENTADORIA': isEven ? 'bg-teal-200' : 'bg-teal-200/85',
-            '-': isEven ? 'bg-white' : 'bg-gray-100',
+            '???': isEven ? 'bg-white' : 'bg-gray-100',
         };
 
-        return statusColors[status] || statusColors['-'];
+        return statusColors[status] || statusColors['???'];
     };
 
     // Função para determinar apenas a cor do texto do status
@@ -252,8 +252,8 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
             '-': 'text-gray-600',
         };
 
-        const status = situacao?.toUpperCase() || '-';
-        return colors[status] || colors['-'];
+        const status = situacao?.toUpperCase() || '???';
+        return colors[status] || colors['???'];
     };
 
     return (
@@ -323,7 +323,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                             {/* Status individuais */}
                             {Object.entries(
                                 filteredData.reduce((acc, item) => {
-                                    const status = item['SITUACAO'] || item['SITUAÇÃO'] || '-';
+                                    const status = item['SITUACAO'] || '???';
                                     acc[status] = (acc[status] || 0) + 1;
                                     return acc;
                                 }, {} as Record<string, number>)
@@ -414,69 +414,69 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                 ) : (
                                     filteredData.map((item, index) => (
                                         <tr
-                                            key={`${item['INSCRIÇÃO'] || item['INSCRICAO'] || index}`}
-                                            className={`${getRowColor(item['SITUACAO'] || item['SITUAÇÃO'], index)} hover:brightness-95 hover:shadow-md transition-all duration-150`}
+                                            key={`${item['INSCRICAO'] || index}`}
+                                            className={`${getRowColor(item['SITUACAO'], index)} hover:brightness-95 hover:shadow-md transition-all duration-150`}
                                         >
                                             {areaSelecionada === 'VETERANO' ? (
                                                 // Layout para área VETERANO
                                                 <>
                                                     <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
-                                                        {item['NOME'] || item['Nome do Candidato'] || '-'}
+                                                        {item['NOME'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['SITUACAO'] || item['SITUAÇÃO'] || '-'}
+                                                        {item['SITUACAO'] || '???'}
                                                     </td>
                                                     <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['ÓRGÃO'] || item['ORGAO_DESTINO'] || '-'}
+                                                        {item['ORGAO_DESTINO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_EXONERACAO'] || item['DATA EXONERACAO'] || '-'}
+                                                        {item['DATA_EXONERACAO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_PUBLICACAO_EXONERACAO'] || item['DATA PUBLICACAO EXONERAÇÃO'] || '-'}
+                                                        {item['DATA_PUBLICACAO_EXONERACAO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_INATIVIDADE'] || item['DATA INATIVIDADE'] || '-'}
+                                                        {item['DATA_INATIVIDADE'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_PUBLICACAO_INATIVIDADE'] || item['DATA PUBLICACAO INATIVIDADE'] || '-'}
+                                                        {item['DATA_PUBLICACAO_INATIVIDADE'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
-                                                        {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
+                                                        {item['OBSERVACAO'] || '-'}
                                                     </td>
                                                 </>
                                             ) : (
                                                 // Layout padrão para outras áreas
                                                 <>
                                                     <td className="px-1 py-0.5 whitespace-nowrap font-medium text-gray-800 text-[10px] border border-black text-center">
-                                                        {item['POSICAO_CONCURSO'] || item['POSICAO CONCURSO'] || '-'}
+                                                        {item['POSICAO_CONCURSO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
-                                                        {item['NOME'] || item['Nome do Candidato'] || '-'}
+                                                        {item['NOME'] || '-'}
                                                     </td>
                                                     <td className="px-0.5 py-0.5 whitespace-nowrap text-center text-[10px] border border-black text-gray-700">
                                                         {(item['PCD'] || '').toUpperCase() === 'SIM' ? 'SIM' : 'NÃO'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['SITUACAO'] || item['SITUAÇÃO'] || '-'}
+                                                        {item['SITUACAO'] || '???'}
                                                     </td>
                                                     <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['ÓRGÃO'] || item['ORGAO_DESTINO'] || '-'}
+                                                        {item['ORGAO_DESTINO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA NOMEAÇÃO'] || item['DATA NOMEACAO'] || '-'}
+                                                        {item['DATA_NOMEACAO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_EXONERACAO'] || item['DATA EXONERACAO'] || '-'}
+                                                        {item['DATA_EXONERACAO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_PUBLICACAO_EXONERACAO'] || item['DATA PUBLICACAO EXONERAÇÃO'] || '-'}
+                                                        {item['DATA_PUBLICACAO_EXONERACAO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_NOMEACAO_SEM_EFEITO'] || item['DATA NOMEACAO SEM EFEITO'] || '-'}
+                                                        {item['DATA_NOMEACAO_SEM_EFEITO'] || '-'}
                                                     </td>
                                                     <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
-                                                        {item['OBSERVAÇÃO'] || item['OBSERVACAO'] || '-'}
+                                                        {item['OBSERVACAO'] || '-'}
                                                     </td>
                                                 </>
                                             )}
