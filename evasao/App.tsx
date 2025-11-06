@@ -626,7 +626,7 @@ const App: React.FC = () => {
           <section className="bg-gray-900 rounded-xl p-6 shadow-2xl border border-gray-800">
             <h2 className="text-2xl font-bold text-red-300 mb-4">Destinos da Evasão</h2>
             <p className="text-gray-400 mb-6">
-              Esta tabela detalha os órgãos (destinos) para os quais os auditores se transferiram após a posse ou se mantiveram no órgão desistindo de tomar posse.
+              Esta tabela detalha os órgãos (destinos) para os quais os auditores se transferiram após a exoneração ou que se mantiveram, desistindo de tomar posse na SEF/MG.
               A SEF/MG perdeu <span className="font-bold text-orange-400">{contagemEvasoes + contagemInativos}</span> Auditores desde Janeiro/2024.
             </p>
             <EvasionTable data={areaSelecionada === 'TODAS' ? dadosDestinoEvasao : dadosDestinoEvasaoFiltrado} details={areaSelecionada === 'TODAS' ? destinoDetails : filteredDestinationDetails} />
@@ -645,7 +645,7 @@ const App: React.FC = () => {
 
         <div className="mt-8 text-sm text-gray-400 space-y-2">
           <p>
-            Esta análise considera os auditores aprovados no último concurso público (Edital 1/2022) e exonerações pós Janeiro de 2024 de auditores veteranos.
+            Esta análise considera os auditores aprovados no último concurso público (Edital 1/2022) e exonerações, afastamento e aposentadorias de auditores veteranos a partir de Janeiro de 2024.
           </p>
           {/*<p>
             O cálculo do custo estimado para o Estado considera R$ 30.000 por mês, por auditor, a partir da data de nomeação + 30 dias até o mês da exoneração. Auditores sem data de exoneração ou nomeação não acumulam custo mensal neste cálculo.
@@ -654,7 +654,7 @@ const App: React.FC = () => {
             São contabilizadas tanto exonerações quanto desistências como eventos de evasão.
           </p>
           <p>
-            A quantidade de dias sem perder um Auditor Fiscal e o respectivo recorde consideram a data de publicação das exonerações.
+            A quantidade de dias sem perder um Auditor Fiscal e o respectivo recorde consideram a data de publicação das exonerações,afastamentos e aposentadorias.
           </p>
         </div>
 
