@@ -495,7 +495,7 @@ const App: React.FC = () => {
               value={diasDesdeUltimaEvasao ?? 0}
               label={`Dia${(diasDesdeUltimaEvasao ?? 0) > 1 ? 's' : ''} sem perder um Auditor Fiscal`}
               icon={<IconeCalendario />}
-              footer={<div><div>Por data de publicação.</div><div>Última publicação de exoneração, afastamento ou aposentadoria: {dataUltimaExoneracaoFormatada}</div> <div className="text-xs text-amber-400 mt-2">Nosso recorde é {diasRecorde} dias</div></div>}
+              footer={<div><div>Por data de publicação.</div><div>Última publicação de exoneração, afastamento ou aposentadoria: <b>{dataUltimaExoneracaoFormatada}</b></div> <div className="text-xs text-amber-400 mt-2">Nosso recorde é {diasRecorde} dias</div></div>}
               estaCarregando={estaCarregando || diasDesdeUltimaEvasao === null}
             />
             <CounterCard
@@ -584,7 +584,7 @@ const App: React.FC = () => {
             São contabilizadas tanto exonerações quanto desistências como eventos de evasão.
           </p>
           <p>
-            A quantidade de dias sem perder um Auditor Fiscal e o respectivo recorde consideram a data de publicação das exonerações, afastamentos e aposentadorias.
+            A quantidade de dias sem perder um Auditor Fiscal, assim como o respectivo recorde, considera a data de publicação das exonerações, afastamentos e aposentadorias.
           </p>
         </div>
 
