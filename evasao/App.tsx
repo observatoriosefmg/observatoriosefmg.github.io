@@ -482,11 +482,18 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-200 p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
-        <header className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 mb-2 drop-shadow-lg">OBSERVATÓRIO DAS EVASÕES</h1>
-          <p className="text-lg text-amber-400 font-medium">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
-
-
+        <header className="mb-10">
+          <div className="text-center mb-4">
+            <span className="inline-flex flex-col md:flex-row items-center gap-2 md:gap-3">
+              <img 
+                src="assets/images/observatorio-logo-mini.png" 
+                alt="Logo do Observatório" 
+                className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0"
+              />
+              <h1 className="text-4xl md:text-5xl font-extrabold drop-shadow-lg text-center md:text-left whitespace-normal break-words min-w-0 md:inline-block" style={{color: '#E21111'}}>OBSERVATÓRIO DAS EVASÕES</h1>
+            </span>
+          </div>
+          <p className="text-lg text-amber-400 font-medium text-center">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
         </header>
 
         <main>
