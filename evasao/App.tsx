@@ -559,7 +559,7 @@ const App: React.FC = () => {
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <CounterCard
               value={diasDesdeUltimaEvasao}
-              label={`Dias sem perder um Auditor Fiscal`}
+              label={`dia${diasDesdeUltimaEvasao > 1 ? 's' : ''} sem perder um Auditor Fiscal`}
               icon={<CalendarIcon />}
               footer={<div><div>Por data de publicação.</div><div>Última publicação de exoneração/aposentadoria: {lastExonDateFormatted}</div> <div className="text-xs text-amber-400 mt-2">Nosso recorde é {diasRecorde} dias</div></div>}
               estaCarregando={estaCarregando}
