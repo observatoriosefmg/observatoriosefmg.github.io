@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faMoneyBill, faUsers, faSpinner, faPersonShelter } from '@fortawesome/free-solid-svg-icons';
 
 const App: React.FC = () => {
-  const [diasDesdeUltimaEvasao, setDiasDesdeUltimaEvasao] = useState(0);
+  const [diasDesdeUltimaEvasao, setDiasDesdeUltimaEvasao] = useState<number | null>(null);
 
   const [raw, setRaw] = useState<any[]>([]);
 
@@ -527,11 +527,11 @@ const App: React.FC = () => {
         <main>
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <CounterCard
-              value={diasDesdeUltimaEvasao}
-              label={`Dia${diasDesdeUltimaEvasao > 1 ? 's' : ''} sem perder um Auditor Fiscal`}
+              value={diasDesdeUltimaEvasao ?? 0}
+              label={`Dia${(diasDesdeUltimaEvasao ?? 0) > 1 ? 's' : ''} sem perder um Auditor Fiscal`}
               icon={<CalendarIcon />}
-              footer={<div><div>Por data de publicação.</div><div>Última publicação de exoneração/aposentadoria: {lastExonDateFormatted}</div> <div className="text-xs text-amber-400 mt-2">Nosso recorde é {diasRecorde} dias</div></div>}
-              estaCarregando={estaCarregando}
+              footer={<div><div>Por data de publicação.</div><div>Última publicação de exoneração, afastamento ou aposentadoria: {lastExonDateFormatted}</div> <div className="text-xs text-amber-400 mt-2">Nosso recorde é {diasRecorde} dias</div></div>}
+              estaCarregando={estaCarregando || diasDesdeUltimaEvasao === null}
             />
             <CounterCard
               value={contagemEvasoes}
@@ -626,7 +626,7 @@ const App: React.FC = () => {
             São contabilizadas tanto exonerações quanto desistências como eventos de evasão.
           </p>
           <p>
-            A quantidade de dias sem perder um Auditor Fiscal e o respectivo recorde consideram a data de publicação das exonerações,afastamentos e aposentadorias.
+            A quantidade de dias sem perder um Auditor Fiscal e o respectivo recorde consideram a data de publicação das exonerações, afastamentos e aposentadorias.
           </p>
         </div>
 
