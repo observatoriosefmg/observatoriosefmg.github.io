@@ -559,7 +559,7 @@ const App: React.FC = () => {
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <CounterCard
               value={diasDesdeUltimaEvasao}
-              label={`dia${diasDesdeUltimaEvasao > 1 ? 's' : ''} sem perder um Auditor Fiscal`}
+              label={`Dia${diasDesdeUltimaEvasao > 1 ? 's' : ''} sem perder um Auditor Fiscal`}
               icon={<CalendarIcon />}
               footer={<div><div>Por data de publicação.</div><div>Última publicação de exoneração/aposentadoria: {lastExonDateFormatted}</div> <div className="text-xs text-amber-400 mt-2">Nosso recorde é {diasRecorde} dias</div></div>}
               estaCarregando={estaCarregando}
@@ -626,7 +626,7 @@ const App: React.FC = () => {
           <section className="bg-gray-900 rounded-xl p-6 shadow-2xl border border-gray-800">
             <h2 className="text-2xl font-bold text-red-300 mb-4">Destinos da Evasão</h2>
             <p className="text-gray-400 mb-6">
-              Esta tabela detalha os órgãos (destinos) para os quais os auditores se transferiram após a exoneração ou que se mantiveram, desistindo de tomar posse na SEF/MG.
+              Esta tabela detalha os órgãos (destinos) para os quais os Auditores se transferiram após a exoneração ou que se mantiveram, desistindo de tomar posse na SEF/MG.
               A SEF/MG perdeu <span className="font-bold text-orange-400">{contagemEvasoes + contagemInativos}</span> Auditores desde Janeiro/2024.
             </p>
             <EvasionTable data={areaSelecionada === 'TODAS' ? dadosDestinoEvasao : dadosDestinoEvasaoFiltrado} details={areaSelecionada === 'TODAS' ? destinoDetails : filteredDestinationDetails} />
@@ -645,7 +645,7 @@ const App: React.FC = () => {
 
         <div className="mt-8 text-sm text-gray-400 space-y-2">
           <p>
-            Esta análise considera os auditores aprovados no último concurso público (Edital 1/2022) e exonerações, afastamento e aposentadorias de auditores veteranos a partir de Janeiro de 2024.
+            Esta análise considera os Auditores aprovados no último concurso público (Edital 1/2022) e exonerações, afastamento e aposentadorias de Auditores veteranos a partir de Janeiro de 2024.
           </p>
           {/*<p>
             O cálculo do custo estimado para o Estado considera R$ 30.000 por mês, por auditor, a partir da data de nomeação + 30 dias até o mês da exoneração. Auditores sem data de exoneração ou nomeação não acumulam custo mensal neste cálculo.
