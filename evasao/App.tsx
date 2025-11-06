@@ -10,21 +10,29 @@ import { faCalendarAlt, faMoneyBill, faUsers, faSpinner, faPersonShelter } from 
 
 const App: React.FC = () => {
   const [diasDesdeUltimaEvasao, setDiasDesdeUltimaEvasao] = useState(0);
-  const [dadosDestinoEvasao, setDadosDestinoEvasao] = useState<DadosDestinoEvasao[]>([]);
+
   const [raw, setRaw] = useState<any[]>([]);
-  const [auditoresEvadidos, setAuditoresEvadidos] = useState<any[]>([]);
+
   const [dataUltimaEvasao, setDataUltimaEvasao] = useState<Date | null>(null);
   const [areaSelecionada, setAreaSelecionada] = useState<string>('TODAS');
   const [estaCarregando, setEstaCarregando] = useState(true);
 
-  // diasDesdeUltimaEvasao will be calculado após carregamento dos dados (quando dataUltimaEvasao estiver definido).
+  // diasDesdeUltimaEvasao será calculado apenas após carregamento dos dados
   useEffect(() => {
-    const ref = dataUltimaEvasao ?? DATA_INICIO_OBSERVACAO;
-    const today = new Date();
-    const diferencaEmMs = today.getTime() - ref.getTime();
-    const diferencaEmDias = Math.floor(diferencaEmMs / (1000 * 3600 * 24));
-    setDiasDesdeUltimaEvasao(diferencaEmDias);
-  }, [dataUltimaEvasao]);
+    // Só calcular quando os dados estiverem carregados E tivermos uma data
+    if (!estaCarregando && dataUltimaEvasao) {
+      const today = new Date();
+      const diferencaEmMs = today.getTime() - dataUltimaEvasao.getTime();
+      const diferencaEmDias = Math.floor(diferencaEmMs / (1000 * 3600 * 24));
+      setDiasDesdeUltimaEvasao(diferencaEmDias);
+    } else if (!estaCarregando && !dataUltimaEvasao) {
+      // Se não há data de evasão, usar a data de início da observação
+      const today = new Date();
+      const diferencaEmMs = today.getTime() - DATA_INICIO_OBSERVACAO.getTime();
+      const diferencaEmDias = Math.floor(diferencaEmMs / (1000 * 3600 * 24));
+      setDiasDesdeUltimaEvasao(diferencaEmDias);
+    }
+  }, [dataUltimaEvasao, estaCarregando]);
 
   // Ao montar, tentamos carregar `dados.csv` de alguns caminhos possíveis e parseá-lo.
   useEffect(() => {
@@ -117,45 +125,9 @@ const App: React.FC = () => {
             continue;
           }
 
-          // Filtrar apenas situações que consideramos evasão
+          // Dados foram carregados com sucesso
 
-
-          const registrosEvasao = raw.filter(r => ['EXONERADO', 'DESISTENTE'].includes(r['SITUACAO']));
-          const registrosInatividade = raw.filter(r => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']));
-
-          // Agrega registros: considerar apenas situações que caracterizam evasão.
-          // Incluímos também um bucket "Destino desconhecido" para registros sem órgão.
-          const map = new Map<string, number>();
-          let contagemDesconhecidos = 0;
-          for (const rec of registrosEvasao) {
-            const org = rec['ORGAO_DESTINO'];
-            if (org === null || org === undefined || String(org).trim() === '') {
-              contagemDesconhecidos += 1;
-              continue;
-            }
-            const key = String(org).trim();
-            const prev = map.get(key) ?? 0;
-            map.set(key, prev + 1);
-          }
-
-          map.set('Aposentados', raw.filter(r => r['SITUACAO'] === 'APOSENTADO').length);
-          map.set('Afastados para aposentadoria', raw.filter(r => r['SITUACAO'] === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA').length);
-
-          const aggregated: DadosDestinoEvasao[] = Array.from(map.entries()).map(([destino, count]) => ({ destino, count }));
-          if (contagemDesconhecidos > 0) aggregated.push({ destino: 'Destino desconhecido', count: contagemDesconhecidos });
-          console.log('Aggregated destinations:', aggregated);
-          aggregated.sort((a, b) => {
-            const ordem = destino => {
-              if (destino === 'Afastados para aposentadoria') return 3;
-              if (destino === 'Aposentados') return 2;
-              return 1; // demais
-            };
-
-            const diff = ordem(a.destino) - ordem(b.destino);
-            return diff !== 0 ? diff : b.count - a.count;
-          });
-
-          // Determinar última data de exoneração presente nos registros
+          // Determinar última data de publicação presente nos registros
           let ultimaData: Date | null = null;
           const parseBrazilDate = (d: any): Date | null => {
             if (!d || typeof d !== 'string') return null;
@@ -167,16 +139,21 @@ const App: React.FC = () => {
             if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year)) return null;
             return new Date(year, month, day);
           };
-          for (const rec of registrosEvasao) {
-            const dRaw = rec['DATA_PUBLICACAO_EXONERACAO'] ?? null;
+          
+          for (const rec of raw) {
+            const situacao = rec['SITUACAO'];
+            let dRaw: string | null = null;
+            
+            if (situacao === 'EXONERADO' || situacao === 'DESISTENTE') {
+              dRaw = rec['DATA_PUBLICACAO_EXONERACAO'] ?? null;
+            } else if (situacao === 'APOSENTADO' || situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA') {
+              dRaw = rec['DATA_PUBLICACAO_INATIVIDADE'] ?? null;
+            }
+            
             const parsed = parseBrazilDate(dRaw);
-            if (parsed && (!ultimaData || parsed.getTime() > ultimaData.getTime())) ultimaData = parsed;
-          }
-
-          for (const rec of registrosInatividade) {
-            const dRaw = rec['DATA_PUBLICACAO_INATIVIDADE'] ?? null;
-            const parsed = parseBrazilDate(dRaw);
-            if (parsed && (!ultimaData || parsed.getTime() > ultimaData.getTime())) ultimaData = parsed;
+            if (parsed && (!ultimaData || parsed.getTime() > ultimaData.getTime())) {
+              ultimaData = parsed;
+            }
           }
 
           if (mounted) {
@@ -193,9 +170,7 @@ const App: React.FC = () => {
             // eslint-disable-next-line no-console
             console.log('dados.csv parsed (all rows):', raw);
 
-            setDadosDestinoEvasao(aggregated);
             setRaw(raw);
-            setAuditoresEvadidos(registrosEvasao);
             setDataUltimaEvasao(ultimaData ?? null);
             setEstaCarregando(false);
           }
@@ -219,13 +194,6 @@ const App: React.FC = () => {
     return () => { mounted = false; };
   }, []);
 
-  // Recalcula valores derivados a partir dos dados (podem vir do arquivo `dados.json`).
-  // `dadosDestinoEvasao` é a agregação por destino (apenas com ÓRGÃO preenchido).
-  const contagemEvasoesNaTabela = dadosDestinoEvasao.reduce((sum, item) => sum + item.count, 0);
-
-  // Total real de auditores que evadiram (inclui também registros sem ÓRGÃO preenchido).
-  const contagemEvasoes = auditoresEvadidos.length;
-
   // helper para parsear datas no formato DD/MM/YYYY
   const parseBrazilDate = (d: any): Date | null => {
     if (!d || typeof d !== 'string') return null;
@@ -238,6 +206,158 @@ const App: React.FC = () => {
     return new Date(year, month, day);
   };
 
+  // === FUNÇÕES PURAS PARA REGRAS DE NEGÓCIO ===
+
+  // Agrega dados por destino (regra de negócio centralizada)
+  const agregarPorDestino = (registros: any[]): {
+    dadosDestino: DadosDestinoEvasao[];
+    detalhesDestino: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]>;
+  } => {
+    const map = new Map<string, number>();
+    const detalhes: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]> = {
+      'Destino desconhecido': []
+    };
+    let contagemDesconhecidos = 0;
+
+    for (const rec of registros) {
+      const org = rec['ORGAO_DESTINO'];
+      const situacao = rec['SITUACAO'] ?? null;
+      
+      // Regra de negócio para determinar chave do destino
+      const key = situacao === 'APOSENTADO' 
+        ? 'Aposentados' 
+        : situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA' 
+        ? 'Afastados para aposentadoria' 
+        : (['EXONERADO', 'DESISTENTE'].includes(situacao) && (org === null || org === undefined || String(org).trim() === '')) 
+        ? 'Destino desconhecido' 
+        : String(org).trim();
+
+      // Contagem
+      if (key === 'Destino desconhecido') {
+        contagemDesconhecidos += 1;
+      } else {
+        const prev = map.get(key) ?? 0;
+        map.set(key, prev + 1);
+      }
+
+      // Detalhes
+      const name = rec['NOME'] ?? '';
+      const data = situacao === 'EXONERADO' 
+        ? rec['DATA_EXONERACAO'] 
+        : situacao === 'DESISTENTE' 
+        ? rec['DATA_NOMEACAO_SEM_EFEITO'] 
+        : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) 
+        ? rec['DATA_INATIVIDADE'] 
+        : null;
+      const dataPublicacao = situacao === 'EXONERADO' 
+        ? rec['DATA_PUBLICACAO_EXONERACAO'] 
+        : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) 
+        ? rec['DATA_PUBLICACAO_INATIVIDADE'] 
+        : null;
+      const area = rec['AREA'] ?? null;
+      const observacao = rec['OBSERVACAO'] ?? null;
+
+      if (!detalhes[key]) detalhes[key] = [];
+      detalhes[key].push({ name, data, dataPublicacao, situacao, area, observacao });
+    }
+
+    // Converter mapa para array
+    const dadosDestino: DadosDestinoEvasao[] = Array.from(map.entries()).map(([destino, count]) => ({ destino, count }));
+    if (contagemDesconhecidos > 0) {
+      dadosDestino.push({ destino: 'Destino desconhecido', count: contagemDesconhecidos });
+    }
+
+    // Ordenação
+    dadosDestino.sort((a, b) => {
+      const ordem = destino => {
+        if (destino === 'Afastados para aposentadoria') return 3;
+        if (destino === 'Aposentados') return 2;
+        return 1; // demais
+      };
+      const diff = ordem(a.destino) - ordem(b.destino);
+      return diff !== 0 ? diff : b.count - a.count;
+    });
+
+    // Ordenar nomes dentro de cada destino
+    for (const k of Object.keys(detalhes)) {
+      detalhes[k].sort((a, b) => {
+        const getKeyDate = (it: any) => parseBrazilDate(it.data);
+        const da = getKeyDate(a);
+        const db = getKeyDate(b);
+        if (!da && db) return -1;
+        if (da && !db) return 1;
+        if (da && db) return db.getTime() - da.getTime();
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    return { dadosDestino, detalhesDestino: detalhes };
+  };
+
+  // Agrega dados por mês (regra de negócio centralizada)
+  const agregarPorMes = (registros: any[], campoData: string): {
+    pontosMensais: { label: string; value: number; tipo: string }[];
+    detalhesMensais: Record<string, { name: string; date?: string | null; area?: string | null }[]>;
+  } => {
+    const monthlyMapIso: Map<string, number> = new Map();
+    const isoToLabel: Record<string, string> = {};
+    const detalhes: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
+
+    for (const rec of registros) {
+      const rawDate = rec[campoData] ?? null;
+      const d = parseBrazilDate(rawDate);
+      if (!d) continue;
+      
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+      const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
+      
+      monthlyMapIso.set(iso, (monthlyMapIso.get(iso) ?? 0) + 1);
+      isoToLabel[iso] = displayLabel;
+      
+      if (!detalhes[displayLabel]) detalhes[displayLabel] = [];
+      const name = rec['NOME'] ?? '';
+      const area = rec['AREA'] ?? null;
+      detalhes[displayLabel].push({ name, date: rawDate, area });
+    }
+
+    const pontosMensais = Array.from(monthlyMapIso.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([iso, value]) => ({ label: isoToLabel[iso], value, tipo: 'exoneração' }));
+
+    // Ordenar detalhes por data
+    for (const label of Object.keys(detalhes)) {
+      detalhes[label].sort((a, b) => {
+        const da = parseBrazilDate(a.date);
+        const db = parseBrazilDate(b.date);
+        if (da && db) return da.getTime() - db.getTime();
+        if (da && !db) return -1;
+        if (!da && db) return 1;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    return { pontosMensais, detalhesMensais: detalhes };
+  };
+
+  // === APLICAÇÃO DAS REGRAS DE NEGÓCIO ===
+
+  // Conjunto base de dados
+  const todosRegistros = raw.filter(r => ['EXONERADO', 'DESISTENTE', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']));
+  const registrosEvasao = raw.filter(r => ['EXONERADO', 'DESISTENTE'].includes(r['SITUACAO']));
+  const registrosInatividade = raw.filter(r => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']));
+
+  // Dados completos (sem filtro de área)
+  const { dadosDestino: dadosDestinoEvasao, detalhesDestino: destinoDetails } = agregarPorDestino(todosRegistros);
+  const { pontosMensais: monthlyPoints, detalhesMensais: monthlyDetails } = agregarPorMes(registrosEvasao, 'DATA_EXONERACAO');
+  const { pontosMensais: monthlyInactivityPoints, detalhesMensais: monthlyInactivityDetails } = agregarPorMes(registrosInatividade, 'DATA_INATIVIDADE');
+
+  // Totais e métricas básicas
+  const contagemEvasoes = registrosEvasao.length;
+  const contagemInativos = registrosInatividade.length;
+  const contagemAposentado = raw.filter(rec => rec['SITUACAO'] === 'APOSENTADO').length;
+  const contagemAfastamentoPreliminar = raw.filter(rec => rec['SITUACAO'] === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA').length;
+
   // Calcula custo acumulado por auditor: R$30.000 mensais desde DATA NOMEAÇÃO + 30 dias até a data da exoneração (inclusivo).
   const monthsBetweenInclusive = (start: Date, end: Date) => {
     if (end.getTime() < start.getTime()) return 0;
@@ -247,7 +367,7 @@ const App: React.FC = () => {
     return years * 12 + months + 1;
   };
 
-  const totalCost = auditoresEvadidos.reduce((sum, rec) => {
+  const totalCost = registrosEvasao.reduce((sum, rec) => {
     const rawExonDate = rec['DATA_EXONERACAO'] ?? null;
     const rawNomeacaoDate = rec['DATA_NOMEACAO'] ?? null;
 
@@ -264,57 +384,18 @@ const App: React.FC = () => {
     return sum + (months * COST_PER_AUDITOR);
   }, 0);
 
-  // Mapeia destinos para lista de auditores (inclui 'Destino desconhecido' para sem órgão)
-  const destinoDetails: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]> = {};
-  destinoDetails['Destino desconhecido'] = [];
-
-
-
-  for (const rec of raw.filter(r => ['EXONERADO', 'DESISTENTE', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']))) {
-    const org = rec['ORGAO_DESTINO'];
-    const situacao = rec['SITUACAO'] ?? null;
-    const key = situacao === 'APOSENTADO' ? 'Aposentados' : situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA' ? 'Afastados para aposentadoria' : (['EXONERADO', 'DESISTENTE'].includes(situacao) && (org === null || org === undefined || String(org).trim() === '')) ? 'Destino desconhecido' : String(org).trim();
-    const name = rec['NOME'] ?? '';
-    const data = situacao === 'EXONERADO' ? rec['DATA_EXONERACAO'] : situacao === 'DESISTENTE' ? rec['DATA_NOMEACAO_SEM_EFEITO'] : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) ? rec['DATA_INATIVIDADE'] : null;
-    const dataPublicacao = situacao === 'EXONERADO' ? rec['DATA_PUBLICACAO_EXONERACAO'] : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) ? rec['DATA_PUBLICACAO_INATIVIDADE'] : null;
-    const area = rec['AREA'] ?? null;
-    const observacao = rec['OBSERVACAO'] ?? null;
-    if (!destinoDetails[key]) destinoDetails[key] = [];
-    destinoDetails[key].push({ name, data, dataPublicacao, situacao, area, observacao });
-  }
-
-  // Ordena nomes dentro de cada destino por data (mais recente primeiro)
-  for (const k of Object.keys(destinoDetails)) {
-    destinoDetails[k].sort((a, b) => {
-      const getKeyDate = (it: any) => {
-        return parseBrazilDate(it.data);
-      };
-      const da = getKeyDate(a);
-      const db = getKeyDate(b);
-      // itens sem data (null) devem ficar por cima
-      if (!da && db) return -1;
-      if (da && !db) return 1;
-      if (da && db) return db.getTime() - da.getTime();
-      return a.name.localeCompare(b.name);
-    });
-  }
-
   // Conta evasões por área (para mostrar no footer do card)
   const contagemAreas: Record<string, number> = {};
-  for (const rec of auditoresEvadidos) {
+  for (const rec of registrosEvasao) {
     const area = String(rec['AREA'] ?? 'Outros');
     contagemAreas[area] = (contagemAreas[area] ?? 0) + 1;
   }
 
   // Conta evasões por tipo (exoneração vs desistência)
-  const contagemExonerado = auditoresEvadidos.filter(rec => rec['SITUACAO'] && String(rec['SITUACAO']).toUpperCase().includes('EXONERADO')).length;
-  const contagemDesistencia = auditoresEvadidos.filter(rec => rec['SITUACAO'] && String(rec['SITUACAO']).toUpperCase().includes('DESISTENTE')).length;
+  const contagemExonerado = registrosEvasao.filter(rec => rec['SITUACAO'] && String(rec['SITUACAO']).toUpperCase().includes('EXONERADO')).length;
+  const contagemDesistencia = registrosEvasao.filter(rec => rec['SITUACAO'] && String(rec['SITUACAO']).toUpperCase().includes('DESISTENTE')).length;
 
   const typeCounts: Record<string, number> = { 'Exonerações': contagemExonerado, 'Desistências': contagemDesistencia };
-
-  const contagemInativos = raw.filter(rec => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(rec['SITUACAO'])).length;
-  const contagemAposentado = raw.filter(rec => rec['SITUACAO'] === 'APOSENTADO').length;
-  const contagemAfastamentoPreliminar = raw.filter(rec => rec['SITUACAO'] === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA').length;
 
 
   const areaFooter = (
@@ -336,59 +417,45 @@ const App: React.FC = () => {
     </div>
   );
 
-  // Agregar exonerações por mês (MM/AAAA) - série total
-  const monthlyMapIso: Map<string, number> = new Map();
-  const isoToLabel: Record<string, string> = {};
-  const monthlyDetails: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
-  for (const rec of auditoresEvadidos) {
-    const rawDate = rec['DATA_EXONERACAO'] ?? null;
-    const d = parseBrazilDate(rawDate);
-    if (!d) continue;
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
-    const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
-    monthlyMapIso.set(iso, (monthlyMapIso.get(iso) ?? 0) + 1);
-    isoToLabel[iso] = displayLabel;
-    if (!monthlyDetails[displayLabel]) monthlyDetails[displayLabel] = [];
-    const name = rec['NOME'] ?? '';
-    const area = rec['AREA'] ?? null;
-    monthlyDetails[displayLabel].push({ name, date: rawDate, area });
-  }
-  const monthlyPoints = Array.from(monthlyMapIso.entries())
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([iso, value]) => ({ label: isoToLabel[iso], value, tipo: 'exoneração' }));
-
-  // Agregar aposentadorias e afastamentos por mês (MM/AAAA)
-  const monthlyInactivityMapIso: Map<string, number> = new Map();
-  const monthlyInactivityDetails: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
-  const auditoresInativos = raw.filter(r => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']));
-  for (const rec of auditoresInativos) {
-    const rawDate = rec['DATA_INATIVIDADE'] ?? null;
-    const d = parseBrazilDate(rawDate);
-    if (!d) continue;
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
-    const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
-    monthlyInactivityMapIso.set(iso, (monthlyInactivityMapIso.get(iso) ?? 0) + 1);
-    isoToLabel[iso] = displayLabel;
-    if (!monthlyInactivityDetails[displayLabel]) monthlyInactivityDetails[displayLabel] = [];
-    const name = rec['NOME'] ?? '';
-    const area = rec['AREA'] ?? null;
-    monthlyInactivityDetails[displayLabel].push({ name, date: rawDate, area });
-  }
-  const monthlyInactivityPoints = Array.from(monthlyInactivityMapIso.entries())
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([iso, value]) => ({ label: isoToLabel[iso], value, tipo: 'inatividade' }));
-
   // Criar pontos unificados que incluem todos os meses (exonerações + inatividade)
-  const allMonthlyIsos = new Set([...monthlyMapIso.keys(), ...monthlyInactivityMapIso.keys()]);
-  const monthlyPointsUnified = Array.from(allMonthlyIsos)
-    .sort((a, b) => a.localeCompare(b))
-    .map(iso => ({ 
-      label: isoToLabel[iso], 
-      value: (monthlyMapIso.get(iso) ?? 0) + (monthlyInactivityMapIso.get(iso) ?? 0), 
-      tipo: 'total' 
-    }));
+  const createUnifiedPoints = (evasaoPoints: any[], inactivityPoints: any[]) => {
+    const allIsos = new Set([
+      ...evasaoPoints.map(p => {
+        const [monthPart] = p.label.split('/');
+        const [, yearPart] = p.label.split('/');
+        const monthMap: Record<string, string> = {
+          'JAN': '01', 'FEV': '02', 'MAR': '03', 'ABR': '04', 'MAI': '05', 'JUN': '06',
+          'JUL': '07', 'AGO': '08', 'SET': '09', 'OUT': '10', 'NOV': '11', 'DEZ': '12'
+        };
+        return `${yearPart}-${monthMap[monthPart] ?? '01'}`;
+      }),
+      ...inactivityPoints.map(p => {
+        const [monthPart] = p.label.split('/');
+        const [, yearPart] = p.label.split('/');
+        const monthMap: Record<string, string> = {
+          'JAN': '01', 'FEV': '02', 'MAR': '03', 'ABR': '04', 'MAI': '05', 'JUN': '06',
+          'JUL': '07', 'AGO': '08', 'SET': '09', 'OUT': '10', 'NOV': '11', 'DEZ': '12'
+        };
+        return `${yearPart}-${monthMap[monthPart] ?? '01'}`;
+      })
+    ]);
+
+    const evasaoMap = new Map(evasaoPoints.map(p => [p.label, p.value]));
+    const inactivityMap = new Map(inactivityPoints.map(p => [p.label, p.value]));
+
+    return Array.from(allIsos).sort().map(iso => {
+      const [year, month] = iso.split('-');
+      const monthNames = ['', 'JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+      const label = `${monthNames[parseInt(month)]}/${year}`;
+      return {
+        label,
+        value: (evasaoMap.get(label) ?? 0) + (inactivityMap.get(label) ?? 0),
+        tipo: 'total'
+      };
+    });
+  };
+
+  const monthlyPointsUnified = createUnifiedPoints(monthlyPoints, monthlyInactivityPoints);
 
   // Última exoneração (formatada) — calculada a partir dos dados carregados (ou fallback).
   const lastExonDateFormatted = (dataUltimaEvasao ?? DATA_INICIO_OBSERVACAO)
@@ -396,130 +463,34 @@ const App: React.FC = () => {
     : '—';
 
   // Lista de áreas (para filtro)
-  const areas = ['TODAS', ...Array.from(new Set(auditoresEvadidos.map(r => String(r['AREA'] ?? 'Outros')))).sort()];
+  const areas = ['TODAS', ...Array.from(new Set(registrosEvasao.map(r => String(r['AREA'] ?? 'Outros')))).sort()];
 
-  // Filtrar auditores pela área selecionada
-  const auditoresFiltrados = areaSelecionada === 'TODAS'
-    ? raw.filter(r => ['EXONERADO', 'DESISTENTE', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']))
-    : raw.filter(r => ['EXONERADO', 'DESISTENTE', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']) && r['AREA'] === areaSelecionada);
+  // === DADOS FILTRADOS POR ÁREA ===
+  // Aplicar filtro de área ao conjunto de dados, depois aplicar as mesmas regras de negócio
+  const filtrarPorArea = (registros: any[], area: string) => {
+    return area === 'TODAS' ? registros : registros.filter(r => r['AREA'] === area);
+  };
 
-  // Agregação por destino para a área filtrada
-  const filteredDestinationMap: Map<string, number> = new Map();
-  const filteredDestinationDetails: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]> = { 'Destino desconhecido': [] };
-  let filteredUnknownCount = 0;
-  for (const rec of auditoresFiltrados) {
-    const org = rec['ORGAO_DESTINO'];
-    const situacao = rec['SITUACAO'] ?? null;
-    const key = situacao === 'APOSENTADO' ? 'Aposentados' : situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA' ? 'Afastados para aposentadoria' : ['EXONERADO', 'DESISTENTE'].includes(situacao) ? (org === null || org === undefined || String(org).trim() === '') ? 'Destino desconhecido' : String(org).trim() : null;
-    const name = rec['NOME'] ?? '';
-    const data = situacao === 'EXONERADO' ? rec['DATA_EXONERACAO'] : situacao === 'DESISTENTE' ? rec['DATA_NOMEACAO_SEM_EFEITO'] : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) ? rec['DATA_INATIVIDADE'] : null;
-    const dataPublicacao = situacao === 'EXONERADO' ? rec['DATA_PUBLICACAO_EXONERACAO'] : ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(situacao) ? rec['DATA_PUBLICACAO_INATIVIDADE'] : null;
-    const area = rec['AREA'] ?? null;
-    const observacao = rec['OBSERVACAO'] ?? null;
-    filteredDestinationDetails[key] = filteredDestinationDetails[key] ?? [];
-    filteredDestinationDetails[key].push({ name, data, dataPublicacao, situacao, area, observacao });
-    if (key === 'Destino desconhecido') {
-      filteredUnknownCount += 1;
-    } else {
-      filteredDestinationMap.set(key, (filteredDestinationMap.get(key) ?? 0) + 1);
-    }
-  }
-  // Ordena nomes dentro de cada destino filtrado pelo mesmo critério
-  for (const k of Object.keys(filteredDestinationDetails)) {
-    filteredDestinationDetails[k].sort((a, b) => {
-      const getKeyDate = (it: any) => {
-        const isDes = it.situacao && String(it.situacao).toUpperCase().includes('DESISTENTE');
-        return parseBrazilDate(isDes ? it.dataNomeacaoSemEfeito ?? it.nomeacaoSemEfeito ?? it['DATA_NOMEACAO_SEM_EFEITO'] : it.date);
-      };
-      const da = getKeyDate(a);
-      const db = getKeyDate(b);
-      if (!da && db) return -1;
-      if (da && !db) return 1;
-      if (da && db) return db.getTime() - da.getTime();
-      return a.name.localeCompare(b.name);
-    });
-  }
-  const dadosDestinoEvasaoFiltrado: DadosDestinoEvasao[] = Array.from(filteredDestinationMap.entries()).map(([destino, count]) => ({ destino, count }));
-  if (filteredUnknownCount > 0) dadosDestinoEvasaoFiltrado.push({ destino: 'Destino desconhecido', count: filteredUnknownCount });
-  dadosDestinoEvasaoFiltrado.sort((a, b) => {
-    const ordem = destino => {
-      if (destino === 'Afastados para aposentadoria') return 3;
-      if (destino === 'Aposentados') return 2;
-      return 1; // demais
-    };
+  const todosRegistrosFiltrados = filtrarPorArea(todosRegistros, areaSelecionada);
+  const registrosEvasaoFiltrados = filtrarPorArea(registrosEvasao, areaSelecionada);
+  const registrosInatividadeFiltrados = filtrarPorArea(registrosInatividade, areaSelecionada);
 
-    const diff = ordem(a.destino) - ordem(b.destino);
-    return diff !== 0 ? diff : b.count - a.count;
-  });
+  // Aplicar as mesmas regras de negócio aos dados filtrados
+  const { dadosDestino: dadosDestinoEvasaoFiltrado, detalhesDestino: filteredDestinationDetails } = agregarPorDestino(todosRegistrosFiltrados);
+  const { pontosMensais: monthlyPointsFiltered, detalhesMensais: monthlyDetailsFiltered } = agregarPorMes(registrosEvasaoFiltrados, 'DATA_EXONERACAO');
+  const { pontosMensais: monthlyInactivityPointsFiltered, detalhesMensais: monthlyInactivityDetailsFiltered } = agregarPorMes(registrosInatividadeFiltrados, 'DATA_INATIVIDADE');
 
-  // Agregação mensal filtrada para exonerações/desistências (mesma lógica de labels MMM/YYYY)
-  const monthlyMapIsoFiltered: Map<string, number> = new Map();
-  const isoToLabelFiltered: Record<string, string> = {};
-  const monthlyDetailsFiltered: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
-  for (const rec of auditoresFiltrados.filter(r => ['EXONERADO', 'DESISTENTE'].includes(r['SITUACAO']))) {
-    const rawDate = rec['DATA_EXONERACAO'] ?? null;
-    const d = parseBrazilDate(rawDate);
-    if (!d) continue;
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
-    const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
-    monthlyMapIsoFiltered.set(iso, (monthlyMapIsoFiltered.get(iso) ?? 0) + 1);
-    isoToLabelFiltered[iso] = displayLabel;
-    if (!monthlyDetailsFiltered[displayLabel]) monthlyDetailsFiltered[displayLabel] = [];
-    const name = rec['NOME'] ?? '';
-    const area = rec['AREA'] ?? null;
-    monthlyDetailsFiltered[displayLabel].push({ name, date: rawDate, area });
-  }
-  const monthlyPointsFiltered = Array.from(monthlyMapIsoFiltered.entries())
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([iso, value]) => ({ label: isoToLabelFiltered[iso], value, tipo: 'exoneração' }));
-
-  // Agregação mensal filtrada para aposentadorias e afastamentos
-  const monthlyInactivityMapIsoFiltered: Map<string, number> = new Map();
-  const monthlyInactivityDetailsFiltered: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
-  for (const rec of auditoresFiltrados.filter(r => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']))) {
-    const rawDate = rec['DATA_INATIVIDADE'] ?? null;
-    const d = parseBrazilDate(rawDate);
-    if (!d) continue;
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const monthShort = d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
-    const displayLabel = `${monthShort.toUpperCase()}/${d.getFullYear()}`;
-    monthlyInactivityMapIsoFiltered.set(iso, (monthlyInactivityMapIsoFiltered.get(iso) ?? 0) + 1);
-    isoToLabelFiltered[iso] = displayLabel;
-    if (!monthlyInactivityDetailsFiltered[displayLabel]) monthlyInactivityDetailsFiltered[displayLabel] = [];
-    const name = rec['NOME'] ?? '';
-    const area = rec['AREA'] ?? null;
-    monthlyInactivityDetailsFiltered[displayLabel].push({ name, date: rawDate, area });
-  }
-  const monthlyInactivityPointsFiltered = Array.from(monthlyInactivityMapIsoFiltered.entries())
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([iso, value]) => ({ label: isoToLabelFiltered[iso], value, tipo: 'inatividade' }));
-
-  // Criar pontos unificados filtrados que incluem todos os meses (exonerações + inatividade)
-  const allMonthlyIsosFiltered = new Set([...monthlyMapIsoFiltered.keys(), ...monthlyInactivityMapIsoFiltered.keys()]);
-  const monthlyPointsFilteredUnified = Array.from(allMonthlyIsosFiltered)
-    .sort((a, b) => a.localeCompare(b))
-    .map(iso => ({ 
-      label: isoToLabelFiltered[iso], 
-      value: (monthlyMapIsoFiltered.get(iso) ?? 0) + (monthlyInactivityMapIsoFiltered.get(iso) ?? 0), 
-      tipo: 'total' 
-    }));
-
-  // Ordenar detalhes mensais filtrados por data asc
-  for (const label of Object.keys(monthlyDetailsFiltered)) {
-    monthlyDetailsFiltered[label].sort((a, b) => {
-      const da = parseBrazilDate(a.date);
-      const db = parseBrazilDate(b.date);
-      if (da && db) return da.getTime() - db.getTime();
-      if (da && !db) return -1;
-      if (!da && db) return 1;
-      return a.name.localeCompare(b.name);
-    });
-  }
-
-  // Calcular recorde: maior intervalo (em dias) sem exoneração entre datas de exoneração
+  // Calcular recorde: maior intervalo (em dias) sem publicação entre datas de publicação
   const exonDates: Date[] = raw
-    .map(r => parseBrazilDate(r['DATA_PUBLICACAO_EXONERACAO'] ?? r['DATA_PUBLICACAO_INATIVIDADE'] ?? null))
+    .map(r => {
+      const situacao = r['SITUACAO'];
+      if (situacao === 'EXONERADO' || situacao === 'DESISTENTE') {
+        return parseBrazilDate(r['DATA_PUBLICACAO_EXONERACAO']);
+      } else if (situacao === 'APOSENTADO' || situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA') {
+        return parseBrazilDate(r['DATA_PUBLICACAO_INATIVIDADE']);
+      }
+      return null;
+    })
     .filter((d): d is Date => d instanceof Date)
     .sort((a, b) => a.getTime() - b.getTime());
 
@@ -538,8 +509,6 @@ const App: React.FC = () => {
   }
 
   const CalendarIcon = () => <FontAwesomeIcon icon={faCalendarAlt} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
-
-  const MoneyIcon = () => <FontAwesomeIcon icon={faMoneyBill} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
 
   const PeopleIcon = () => <FontAwesomeIcon icon={faUsers} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
 
@@ -598,11 +567,11 @@ const App: React.FC = () => {
             <h3 className="text-lg font-semibold text-red-300 mb-2">Evasões e Aposentadorias por mês</h3>
 
             <EvasionChart 
-              points={monthlyPointsFiltered.length > 0 ? monthlyPointsFiltered : monthlyPoints} 
-              details={monthlyDetailsFiltered && Object.keys(monthlyDetailsFiltered).length > 0 ? monthlyDetailsFiltered : monthlyDetails} 
+              points={areaSelecionada === 'TODAS' ? monthlyPoints : monthlyPointsFiltered} 
+              details={areaSelecionada === 'TODAS' ? monthlyDetails : monthlyDetailsFiltered} 
               backgroundPoints={monthlyPointsUnified} 
-              inactivityPoints={monthlyInactivityPointsFiltered}
-              inactivityDetails={monthlyInactivityDetailsFiltered && Object.keys(monthlyInactivityDetailsFiltered).length > 0 ? monthlyInactivityDetailsFiltered : monthlyInactivityDetails}
+              inactivityPoints={areaSelecionada === 'TODAS' ? monthlyInactivityPoints : monthlyInactivityPointsFiltered}
+              inactivityDetails={areaSelecionada === 'TODAS' ? monthlyInactivityDetails : monthlyInactivityDetailsFiltered}
               backgroundInactivityPoints={monthlyInactivityPoints}
             />
           </div>
@@ -629,7 +598,10 @@ const App: React.FC = () => {
               Esta tabela detalha os órgãos (destinos) para os quais os Auditores se transferiram após a exoneração ou que se mantiveram, desistindo de tomar posse na SEF/MG.
               A SEF/MG perdeu <span className="font-bold text-orange-400">{contagemEvasoes + contagemInativos}</span> Auditores desde Janeiro/2024.
             </p>
-            <EvasionTable data={areaSelecionada === 'TODAS' ? dadosDestinoEvasao : dadosDestinoEvasaoFiltrado} details={areaSelecionada === 'TODAS' ? destinoDetails : filteredDestinationDetails} />
+            <EvasionTable 
+              data={areaSelecionada === 'TODAS' ? dadosDestinoEvasao : dadosDestinoEvasaoFiltrado} 
+              details={areaSelecionada === 'TODAS' ? destinoDetails : filteredDestinationDetails} 
+            />
           </section>
         </main>
 
