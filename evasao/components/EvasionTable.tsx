@@ -113,11 +113,11 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
             if (isDesistente) {
               return <span className="text-sm text-gray-400">{aud.data ? `Nomeação sem efeito em ${aud.data}` : '—'}</span>;
             }
-            if (isAposentado) {
-              return <span className="text-sm text-gray-400">{aud.data ? `Aposentado em ${aud.data}` : '—'}</span>;
-            }
             if (isAfastado) {
               return <span className="text-sm text-gray-400">{aud.data ? `Afastado em ${aud.data}` : '—'}</span>;
+            }
+            if (isAposentado) {
+              return <span className="text-sm text-gray-400">{aud.data ? `Aposentado em ${aud.data}` : '—'}</span>;
             }
             return <span className="text-sm text-gray-400">{aud.data ? `Exonerado em ${aud.data}` : '—'}</span>;
           })()}
