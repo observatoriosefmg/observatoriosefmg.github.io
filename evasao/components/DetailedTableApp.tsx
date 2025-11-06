@@ -159,16 +159,31 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
             });
         }
 
+        // Função auxiliar para converter data brasileira para objeto Date
+        const parseBrazilDate = (dateStr: string): Date | null => {
+            if (!dateStr || typeof dateStr !== 'string') return null;
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return null;
+            const day = Number(parts[0]);
+            const month = Number(parts[1]) - 1; // mês começa em 0
+            const year = Number(parts[2]);
+            if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        };
+
         return filtered.sort((a, b) => {
             // Ordenação especial para VETERANO
             if (areaSelecionada === 'VETERANO') {
                 // Primeiro por Data Publicação Exoneração (DESC, null last)
-                const dateExonA = a['DATA_PUBLICACAO_EXONERACAO'] || a['DATA PUBLICACAO EXONERAÇÃO'] || '';
-                const dateExonB = b['DATA_PUBLICACAO_EXONERACAO'] || b['DATA PUBLICACAO EXONERAÇÃO'] || '';
+                const dateExonStrA = a['DATA_PUBLICACAO_EXONERACAO'] || a['DATA PUBLICACAO EXONERAÇÃO'] || '';
+                const dateExonStrB = b['DATA_PUBLICACAO_EXONERACAO'] || b['DATA PUBLICACAO EXONERAÇÃO'] || '';
                 
-                // Se ambas têm data de exoneração, ordena DESC
+                const dateExonA = parseBrazilDate(dateExonStrA);
+                const dateExonB = parseBrazilDate(dateExonStrB);
+                
+                // Se ambas têm data de exoneração, ordena DESC (mais recente primeiro)
                 if (dateExonA && dateExonB) {
-                    const comparison = dateExonB.localeCompare(dateExonA);
+                    const comparison = dateExonB.getTime() - dateExonA.getTime();
                     if (comparison !== 0) return comparison;
                 }
                 // Se apenas A tem data, A vem primeiro
@@ -181,10 +196,24 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                 }
                 
                 // Depois por Data Publicação Inatividade (DESC)
-                const dateInatA = a['DATA_PUBLICACAO_INATIVIDADE'] || a['DATA PUBLICACAO INATIVIDADE'] || '';
-                const dateInatB = b['DATA_PUBLICACAO_INATIVIDADE'] || b['DATA PUBLICACAO INATIVIDADE'] || '';
+                const dateInatStrA = a['DATA_PUBLICACAO_INATIVIDADE'] || a['DATA PUBLICACAO INATIVIDADE'] || '';
+                const dateInatStrB = b['DATA_PUBLICACAO_INATIVIDADE'] || b['DATA PUBLICACAO INATIVIDADE'] || '';
                 
-                return dateInatB.localeCompare(dateInatA);
+                const dateInatA = parseBrazilDate(dateInatStrA);
+                const dateInatB = parseBrazilDate(dateInatStrB);
+                
+                if (dateInatA && dateInatB) {
+                    return dateInatB.getTime() - dateInatA.getTime();
+                } else if (dateInatA && !dateInatB) {
+                    return -1;
+                } else if (!dateInatA && dateInatB) {
+                    return 1;
+                }
+                
+                // Se não há datas para comparar, manter ordem alfabética por nome
+                const nomeA = (a['NOME'] || '').toString();
+                const nomeB = (b['NOME'] || '').toString();
+                return nomeA.localeCompare(nomeB);
             }
             
             // Ordenação padrão por posição do concurso
