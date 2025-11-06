@@ -483,7 +483,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-950 text-gray-200 p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
         <header className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 mb-2 drop-shadow-lg">OBSERVATÓRIO DA EVASÃO</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 mb-2 drop-shadow-lg">OBSERVATÓRIO DAS EVASÕES</h1>
           <p className="text-lg text-amber-400 font-medium">Auditores Fiscais da Receita Estadual de Minas Gerais</p>
 
 
@@ -591,7 +591,7 @@ const App: React.FC = () => {
         <CollaborationForm />
 
         <footer className="text-center mt-6 text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Observatório da Evasão. Dados extraídos do Diário Oficial de Minas Gerais e outras fontes públicas.</p>
+          <p>&copy; {new Date().getFullYear()} Observatório das Evasões. Dados extraídos do Diário Oficial de Minas Gerais e outras fontes públicas.</p>
         </footer>
       </div>
     </div>

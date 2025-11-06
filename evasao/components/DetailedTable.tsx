@@ -298,7 +298,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
         </div>
 
         <footer className="text-center mt-8 text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Observatório da Evasão. Dados extraídos do Diário Oficial de Minas Gerais.</p>
+          <p>&copy; {new Date().getFullYear()} Observatório das Evasões. Dados extraídos do Diário Oficial de Minas Gerais.</p>
         </footer>
       </div>
     </div>
