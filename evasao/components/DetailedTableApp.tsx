@@ -229,6 +229,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
         // Cores base por status
         const statusColors = {
             'EM EXERCÍCIO': isEven ? 'bg-green-200' : 'bg-green-200/75',
+            'NOMEADO': isEven ? 'bg-blue-200' : 'bg-blue-200/75',
             'EXONERADO': isEven ? 'bg-red-200' : 'bg-red-200/85',
             'DESISTENTE': isEven ? 'bg-orange-200' : 'bg-orange-200/85',
             'INAPTO ADMISSIONAL': isEven ? 'bg-fuchsia-200' : 'bg-fuchsia-200/85',
@@ -244,6 +245,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
     const getStatusTextColor = (situacao: string) => {
         const colors = {
             'EM EXERCÍCIO': 'text-green-700',
+            'NOMEADO': 'text-blue-700',
             'EXONERADO': 'text-red-700',
             'DESISTENTE': 'text-yellow-700',
             'INAPTO ADMISSIONAL': 'text-purple-700',
