@@ -10,6 +10,7 @@ interface AuditorDetail {
   dataPublicacao?: string | null;
   situacao?: string | null;
   area?: string | null;
+  unidade?: string | null;
   observacao?: string | null;
 }
 
@@ -21,6 +22,12 @@ interface EvasionTableProps {
 
 const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
   const [open, setOpen] = useState<Record<string, boolean>>({});
+
+  const [debugOpen, setDebugOpen] = useState(false);
+
+  // Log principal para inspeção rápida no console do browser
+  console.log('EvasionTable data:', data);
+  console.log('EvasionTable details:', details);
 
   const toggle = (destino: string) => {
     setOpen(prev => ({ ...prev, [destino]: !prev[destino] }));
@@ -78,6 +85,10 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
     const [visible, setVisible] = useState(false);
     const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
     console.log(aud);
+
+    const areaUnit = aud.area
+      ? (aud.unidade && String(aud.unidade).trim() ? `${aud.area} - ${aud.unidade}` : aud.area)
+      : '—';
     const tooltip =
       aud.situacao === 'EXONERADO' && aud.dataPublicacao && String(aud.dataPublicacao).trim() ?
         `Exoneração publicada no DOE em ${aud.dataPublicacao}` :
@@ -101,7 +112,7 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
       <li className="flex justify-between items-center px-4 py-2 bg-gray-800/40 rounded border border-gray-700/50">
         <div>
           <div className="font-medium text-gray-200">{aud.name}</div>
-          <div className="text-xs text-gray-400">{aud.area ?? '—'}</div>
+          <div className="text-xs text-gray-400">{areaUnit}</div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -160,6 +171,21 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
 
   return (
     <div className="overflow-x-auto">
+      <div className="mb-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setDebugOpen(d => !d)}
+          className="text-xs text-gray-400 underline"
+        >
+          {debugOpen ? 'Esconder console' : 'Mostrar console'}
+        </button>
+      </div>
+
+      {debugOpen && (
+        <div className="mb-3">
+          <pre className="max-h-60 overflow-auto text-xs bg-gray-900 text-gray-200 p-3 rounded border border-gray-700">{JSON.stringify({ data, details }, null, 2)}</pre>
+        </div>
+      )}
       <table className="w-full text-left table-auto">
         <thead className="bg-gray-800 text-gray-300 uppercase text-sm border-b border-gray-700">
           <tr>

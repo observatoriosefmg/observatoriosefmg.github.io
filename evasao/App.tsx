@@ -195,7 +195,7 @@ const App: React.FC = () => {
   // Agrega dados por destino (regra de negócio centralizada)
   const agregarPorDestino = (registros: any[]): {
     dadosDestino: DadosDestinoEvasao[];
-    detalhesDestino: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]>;
+    detalhesDestino: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; unidade?: string | null; observacao?: string | null }[]>;
   } => {
     const mapa = new Map<string, number>();
     const detalhes: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]> = {
@@ -239,10 +239,11 @@ const App: React.FC = () => {
         ? registro['DATA_PUBLICACAO_INATIVIDADE'] 
         : null;
       const area = registro['AREA'] ?? null;
+      const unidade = registro['UNIDADE'] ?? registro['Unidade'] ?? null;
       const observacao = registro['OBSERVACAO'] ?? null;
 
       if (!detalhes[chave]) detalhes[chave] = [];
-      detalhes[chave].push({ name: nome, data, dataPublicacao, situacao, area, observacao });
+      detalhes[chave].push({ name: nome, data, dataPublicacao, situacao, area, unidade, observacao });
     }
 
     // Converter mapa para array
@@ -281,11 +282,11 @@ const App: React.FC = () => {
   // Agrega dados por mês (regra de negócio centralizada)
   const agregarPorMes = (registros: any[], campoData: string): {
     pontosMensais: { label: string; value: number; tipo: string }[];
-    detalhesMensais: Record<string, { name: string; date?: string | null; area?: string | null }[]>;
+    detalhesMensais: Record<string, { name: string; date?: string | null; area?: string | null; unidade?: string | null }[]>;
   } => {
     const mapaMensalIso: Map<string, number> = new Map();
     const isoParaRotulo: Record<string, string> = {};
-    const detalhes: Record<string, { name: string; date?: string | null; area?: string | null }[]> = {};
+    const detalhes: Record<string, { name: string; date?: string | null; area?: string | null; unidade?: string | null }[]> = {};
 
     for (const registro of registros) {
       const dataBruta = registro[campoData] ?? null;
@@ -302,7 +303,8 @@ const App: React.FC = () => {
       if (!detalhes[rotuloExibicao]) detalhes[rotuloExibicao] = [];
       const nome = registro['NOME'] ?? '';
       const area = registro['AREA'] ?? null;
-      detalhes[rotuloExibicao].push({ name: nome, date: dataBruta, area });
+      const unidade = registro['UNIDADE'] ?? registro['Unidade'] ?? null;
+      detalhes[rotuloExibicao].push({ name: nome, date: dataBruta, area, unidade });
     }
 
     const pontosMensais = Array.from(mapaMensalIso.entries())
