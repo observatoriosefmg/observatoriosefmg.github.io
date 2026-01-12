@@ -198,7 +198,7 @@ const App: React.FC = () => {
     detalhesDestino: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; unidade?: string | null; observacao?: string | null }[]>;
   } => {
     const mapa = new Map<string, number>();
-    const detalhes: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; observacao?: string | null }[]> = {
+    const detalhes: Record<string, { name: string; data?: string | null; dataPublicacao?: string | null; dataNomeacaoSemEfeito?: string | null; situacao?: string | null; area?: string | null; unidade?: string | null; observacao?: string | null }[]> = {
       'Destino desconhecido': []
     };
     let contagemDesconhecidos = 0;
