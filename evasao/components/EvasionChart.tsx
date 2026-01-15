@@ -33,11 +33,24 @@ interface EvasionChartProps {
 }
 
 const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, details = {}, backgroundPoints, inactivityPoints, inactivityDetails = {}, backgroundInactivityPoints }) => {
+  // Detectar se é gráfico por unidade
+  const isUnidadeChart = points.length > 0 && points[0].tipo === 'unidade';
+  
+  // Função para truncar labels em gráficos de unidade
+  const truncateLabel = (label: string, maxLength: number = 15): string => {
+    if (isUnidadeChart && label.length > maxLength) {
+      return label.substring(0, maxLength) + '...';
+    }
+    return label;
+  };
+  
   // Construir datasets: alinhar labels ao background (total) quando disponível
   // Preferir labels do background (total) para garantir alinhamento vertical entre barras
-  const labels = (backgroundPoints && backgroundPoints.length > 0)
+  const baseLabels = (backgroundPoints && backgroundPoints.length > 0)
     ? backgroundPoints.map(p => p.label)
     : points.map(p => p.label);
+  
+  const labels = baseLabels.map(label => truncateLabel(label));
 
   const bgMap = new Map<string, number>((backgroundPoints ?? []).map(p => [p.label, p.value]));
   const filteredMap = new Map<string, number>(points.map(p => [p.label, p.value]));
@@ -50,7 +63,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
   // Série de exonerações/desistências (vermelha)
   datasets.push({
     label: 'Exonerações',
-    data: labels.map(l => filteredMap.get(l) ?? 0),
+    data: baseLabels.map(l => filteredMap.get(l) ?? 0),
     backgroundColor: '#dc2626',
     borderRadius: 6,
     barPercentage: 0.95,
@@ -61,7 +74,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
   // Série de aposentadorias e afastamentos filtradas (dourada)
   datasets.push({
     label: 'Aposentadorias e Afastamentos',
-    data: labels.map(l => inactivityMap.get(l) ?? 0),
+    data: baseLabels.map(l => inactivityMap.get(l) ?? 0),
     backgroundColor: '#d4af37',
     borderRadius: 6,
     barPercentage: 0.95,
@@ -73,7 +86,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
   if (backgroundInactivityPoints && backgroundInactivityPoints.length > 0) {
     datasets.push({
       label: 'Aposentadorias (outras áreas)',
-      data: labels.map(l => Math.max((backgroundInactivityMap.get(l) ?? 0) - (inactivityMap.get(l) ?? 0), 0)),
+      data: baseLabels.map(l => Math.max((backgroundInactivityMap.get(l) ?? 0) - (inactivityMap.get(l) ?? 0), 0)),
       backgroundColor: 'rgba(212,175,55,0.3)',
       borderRadius: 6,
       barPercentage: 0.95,
@@ -87,7 +100,7 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
     const totalInactivity = backgroundInactivityPoints ? backgroundInactivityMap : new Map();
     datasets.push({
       label: 'Exonerações (outras áreas)',
-      data: labels.map(l => Math.max((bgMap.get(l) ?? 0) - (filteredMap.get(l) ?? 0) - (totalInactivity.get(l) ?? 0), 0)),
+      data: baseLabels.map(l => Math.max((bgMap.get(l) ?? 0) - (filteredMap.get(l) ?? 0) - (totalInactivity.get(l) ?? 0), 0)),
       backgroundColor: 'rgba(220,38,38,0.15)',
       borderRadius: 6,
       barPercentage: 0.95,
@@ -121,6 +134,16 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
       title: { display: false },
       tooltip: {
         callbacks: {
+          title: (context: any) => {
+            // Se for gráfico de unidades, mostrar o nome completo da unidade no tooltip
+            if (isUnidadeChart && context.length > 0) {
+              const labelTruncado = context[0].label as string;
+              // Encontrar o label original correspondente ao truncado
+              const labelOriginal = baseLabels[context[0].dataIndex];
+              return labelOriginal || labelTruncado;
+            }
+            return context.length > 0 ? context[0].label : '';
+          },
           label: (context: any) => {
             const datasetLabel = context.dataset.label;
             const value = context.parsed.y;
@@ -139,15 +162,17 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
           },
           afterBody: (ctx: any) => {
             try {
-              const label = ctx[0].label as string;
+              // Usar o label original para buscar os detalhes
+              const labelTruncado = ctx[0].label as string;
+              const labelOriginal = isUnidadeChart ? baseLabels[ctx[0].dataIndex] : labelTruncado;
               const datasetLabel = ctx[0].dataset.label;
               
               // Escolher os dados corretos baseado no dataset
               let rows: any[] = [];
               if (datasetLabel === 'Aposentadorias e Afastamentos') {
-                rows = (inactivityDetails[label] ?? []).slice();
+                rows = (inactivityDetails[labelOriginal] ?? []).slice();
               } else if (datasetLabel === 'Exonerações') {
-                rows = (details[label] ?? []).slice();
+                rows = (details[labelOriginal] ?? []).slice();
               }
               
               if (rows.length === 0) return [];
@@ -184,7 +209,11 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
     },
     scales: {
       x: {
-        ticks: { color: '#d1d5db', maxRotation: 0, minRotation: 0 },
+        ticks: { 
+          color: '#d1d5db', 
+          maxRotation: isUnidadeChart ? 90 : 0, 
+          minRotation: isUnidadeChart ? 90 : 0 
+        },
         grid: { display: false },
       },
       y: {

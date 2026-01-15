@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [dataUltimaEvasao, setDataUltimaEvasao] = useState<Date | null>(null);
   const [areaSelecionada, setAreaSelecionada] = useState<string>('TODAS');
   const [estaCarregando, setEstaCarregando] = useState(true);
+  const [mostrarPorUnidade, setMostrarPorUnidade] = useState(false);
 
   // helper para parsear datas no formato DD/MM/YYYY
   const analisarDataBrasil = (d: any): Date | null => {
@@ -326,17 +327,89 @@ const App: React.FC = () => {
     return { pontosMensais, detalhesMensais: detalhes };
   };
 
+  // Agrega dados por unidade (regra de negócio centralizada)
+  const agregarPorUnidade = (registrosEvasao: any[], registrosInatividade: any[]): {
+    pontosUnidadeEvasao: { label: string; value: number; tipo: string }[];
+    pontosUnidadeInatividade: { label: string; value: number; tipo: string }[];
+    detalhesUnidade: Record<string, { name: string; date?: string | null; area?: string | null; unidade?: string | null }[]>;
+  } => {
+    const mapaUnidadeEvasao: Map<string, number> = new Map();
+    const mapaUnidadeInatividade: Map<string, number> = new Map();
+    const detalhes: Record<string, { name: string; date?: string | null; area?: string | null; unidade?: string | null }[]> = {};
+
+    // Processar exonerações
+    for (const registro of registrosEvasao) {
+      const unidade = String(registro['UNIDADE'] ?? registro['Unidade'] ?? 'Unidade desconhecida').trim();
+      
+      if (unidade === '') {
+        continue;
+      }
+
+      mapaUnidadeEvasao.set(unidade, (mapaUnidadeEvasao.get(unidade) ?? 0) + 1);
+      
+      if (!detalhes[unidade]) detalhes[unidade] = [];
+      const nome = registro['NOME'] ?? '';
+      const area = registro['AREA'] ?? null;
+      const dataBruta = registro['DATA_EXONERACAO'] ?? null;
+      detalhes[unidade].push({ name: nome, date: dataBruta, area, unidade });
+    }
+
+    // Processar inatividades
+    for (const registro of registrosInatividade) {
+      const unidade = String(registro['UNIDADE'] ?? registro['Unidade'] ?? 'Unidade desconhecida').trim();
+      
+      if (unidade === '') {
+        continue;
+      }
+
+      mapaUnidadeInatividade.set(unidade, (mapaUnidadeInatividade.get(unidade) ?? 0) + 1);
+      
+      if (!detalhes[unidade]) detalhes[unidade] = [];
+      const nome = registro['NOME'] ?? '';
+      const area = registro['AREA'] ?? null;
+      const dataBruta = registro['DATA_INATIVIDADE'] ?? null;
+      detalhes[unidade].push({ name: nome, date: dataBruta, area, unidade });
+    }
+
+    // Obter todas as unidades únicas
+    const todasUnidades = new Set([...mapaUnidadeEvasao.keys(), ...mapaUnidadeInatividade.keys()]);
+
+    // Criar array com informações de cada unidade
+    const unidadesComTotais = Array.from(todasUnidades)
+      .map(unidade => ({
+        unidade,
+        totalEvasao: mapaUnidadeEvasao.get(unidade) ?? 0,
+        totalInatividade: mapaUnidadeInatividade.get(unidade) ?? 0,
+        total: (mapaUnidadeEvasao.get(unidade) ?? 0) + (mapaUnidadeInatividade.get(unidade) ?? 0)
+      }))
+      .sort((a, b) => b.total - a.total); // Ordenar por total (maior primeiro)
+
+    // Criar os dois arrays de pontos, ambos com a mesma ordem (por total)
+    const pontosUnidadeEvasaoSeparados = unidadesComTotais.map(item => ({ label: item.unidade, value: item.totalEvasao, tipo: 'unidade' }));
+    const pontosUnidadeInatividadeSeparados = unidadesComTotais.map(item => ({ label: item.unidade, value: item.totalInatividade, tipo: 'unidade' }));
+
+    // Ordenar detalhes por nome
+    for (const unidade of Object.keys(detalhes)) {
+      detalhes[unidade].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return { pontosUnidadeEvasao: pontosUnidadeEvasaoSeparados, pontosUnidadeInatividade: pontosUnidadeInatividadeSeparados, detalhesUnidade: detalhes };
+  };
+
   // === APLICAÇÃO DAS REGRAS DE NEGÓCIO ===
 
   // Conjunto base de dados
   const todosRegistros = dadosBrutos.filter(r => ['EXONERADO', 'DESISTENTE', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']));
   const registrosEvasao = dadosBrutos.filter(r => ['EXONERADO', 'DESISTENTE'].includes(r['SITUACAO']));
+  const registrosEvasaoComUnidade = dadosBrutos.filter(r => r['SITUACAO'] === 'EXONERADO'); // Apenas exonerados têm unidade
   const registrosInatividade = dadosBrutos.filter(r => ['APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'].includes(r['SITUACAO']));
 
   // Dados completos (sem filtro de área)
   const { dadosDestino: dadosDestinoEvasao, detalhesDestino: detalhesDestino } = agregarPorDestino(todosRegistros);
   const { pontosMensais: pontosMensais, detalhesMensais: detalhesMensais } = agregarPorMes(registrosEvasao, 'DATA_EXONERACAO');
   const { pontosMensais: pontosMensaisInatividade, detalhesMensais: detalhesMensaisInatividade } = agregarPorMes(registrosInatividade, 'DATA_INATIVIDADE');
+  const { pontosUnidadeEvasao: pontosUnidadeEvasaoDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividades, detalhesUnidade: detalhesUnidadeEvasao } = agregarPorUnidade(registrosEvasaoComUnidade, registrosInatividade);
+  const detalhesUnidadeInatividade = detalhesUnidadeEvasao;
 
   // Totais e métricas básicas
   const contagemEvasoes = registrosEvasao.length;
@@ -440,13 +513,15 @@ const App: React.FC = () => {
 
   const todosRegistrosFiltrados = filtrarPorArea(todosRegistros, areaSelecionada);
   const registrosEvasaoFiltrados = filtrarPorArea(registrosEvasao, areaSelecionada);
+  const registrosEvasaoComUnidadeFiltrados = filtrarPorArea(registrosEvasaoComUnidade, areaSelecionada);
   const registrosInatividadeFiltrados = filtrarPorArea(registrosInatividade, areaSelecionada);
 
   // Aplicar as mesmas regras de negócio aos dados filtrados
   const { dadosDestino: dadosDestinoEvasaoFiltrado, detalhesDestino: detalhesDestinoFiltrados } = agregarPorDestino(todosRegistrosFiltrados);
   const { pontosMensais: pontosMensaisFiltrados, detalhesMensais: detalhesMensaisFiltrados } = agregarPorMes(registrosEvasaoFiltrados, 'DATA_EXONERACAO');
   const { pontosMensais: pontosMensaisInatividadeFiltrados, detalhesMensais: detalhesMensaisInatividadeFiltrados } = agregarPorMes(registrosInatividadeFiltrados, 'DATA_INATIVIDADE');
-
+  const { pontosUnidadeEvasao: pontosUnidadeEvasaoFiltradosDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividadeFiltradosDetalhados, detalhesUnidade: detalhesUnidadeEvasaoFiltrados } = agregarPorUnidade(registrosEvasaoComUnidadeFiltrados, registrosInatividadeFiltrados);
+  const detalhesUnidadeInatividadeFiltrados = detalhesUnidadeEvasaoFiltrados;
   // Calcular recorde: maior intervalo (em dias) sem publicação entre datas de publicação
   const datasExoneracao: Date[] = dadosBrutos
     .map(r => {
@@ -533,16 +608,37 @@ const App: React.FC = () => {
           </section>
 
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-red-300 mb-2">Evasões e Aposentadorias por mês</h3>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+              <h3 className="text-lg font-semibold text-red-300">
+                {mostrarPorUnidade ? 'Evasões e Aposentadorias por Unidade' : 'Evasões e Aposentadorias por mês'}
+              </h3>
+              <button
+                onClick={() => setMostrarPorUnidade(!mostrarPorUnidade)}
+                className="px-4 py-2 rounded bg-amber-500 text-black font-bold hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-300 transition-colors"
+              >
+                {mostrarPorUnidade ? 'Ver por mês' : 'Ver por Unidade'}
+              </button>
+            </div>
 
-            <EvasionChart 
-              points={areaSelecionada === 'TODAS' ? pontosMensais : pontosMensaisFiltrados} 
-              details={areaSelecionada === 'TODAS' ? detalhesMensais : detalhesMensaisFiltrados} 
-              backgroundPoints={pontosMensaisUnificados} 
-              inactivityPoints={areaSelecionada === 'TODAS' ? pontosMensaisInatividade : pontosMensaisInatividadeFiltrados}
-              inactivityDetails={areaSelecionada === 'TODAS' ? detalhesMensaisInatividade : detalhesMensaisInatividadeFiltrados}
-              backgroundInactivityPoints={pontosMensaisInatividade}
-            />
+            {mostrarPorUnidade ? (
+              <EvasionChart 
+                points={areaSelecionada === 'TODAS' ? pontosUnidadeEvasaoDetalhados : pontosUnidadeEvasaoFiltradosDetalhados} 
+                details={areaSelecionada === 'TODAS' ? detalhesUnidadeEvasao : detalhesUnidadeEvasaoFiltrados} 
+                inactivityPoints={areaSelecionada === 'TODAS' ? pontosUnidadeInatividades : pontosUnidadeInatividadeFiltradosDetalhados}
+                inactivityDetails={areaSelecionada === 'TODAS' ? detalhesUnidadeInatividade : detalhesUnidadeInatividadeFiltrados}
+                height={400}
+              />
+            ) : (
+              <EvasionChart 
+                points={areaSelecionada === 'TODAS' ? pontosMensais : pontosMensaisFiltrados} 
+                details={areaSelecionada === 'TODAS' ? detalhesMensais : detalhesMensaisFiltrados} 
+                backgroundPoints={pontosMensaisUnificados} 
+                inactivityPoints={areaSelecionada === 'TODAS' ? pontosMensaisInatividade : pontosMensaisInatividadeFiltrados}
+                inactivityDetails={areaSelecionada === 'TODAS' ? detalhesMensaisInatividade : detalhesMensaisInatividadeFiltrados}
+                backgroundInactivityPoints={pontosMensaisInatividade}
+                height={220}
+              />
+            )}
           </div>
 
           <div className="mb-4 flex flex-col items-center">
