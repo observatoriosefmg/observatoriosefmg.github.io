@@ -26,8 +26,6 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
   const [debugOpen, setDebugOpen] = useState(false);
 
   // Log principal para inspeção rápida no console do browser
-  console.log('EvasionTable data:', data);
-  console.log('EvasionTable details:', details);
 
   const toggle = (destino: string) => {
     setOpen(prev => ({ ...prev, [destino]: !prev[destino] }));
@@ -84,7 +82,6 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
     const btnRef = useRef<HTMLButtonElement | null>(null);
     const [visible, setVisible] = useState(false);
     const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
-    console.log(aud);
 
     const areaUnit = aud.area
       ? (aud.unidade && String(aud.unidade).trim() ? `${aud.area} - ${aud.unidade}` : aud.area)
