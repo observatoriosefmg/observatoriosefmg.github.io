@@ -332,10 +332,12 @@ const App: React.FC = () => {
     pontosUnidadeEvasao: { label: string; value: number; tipo: string }[];
     pontosUnidadeInatividade: { label: string; value: number; tipo: string }[];
     detalhesUnidade: Record<string, { name: string; date?: string | null; area?: string | null; unidade?: string | null }[]>;
+    detalhesUnidadeInatividade: Record<string, { name: string; date?: string | null; area?: string | null; unidade?: string | null }[]>;
   } => {
     const mapaUnidadeEvasao: Map<string, number> = new Map();
     const mapaUnidadeInatividade: Map<string, number> = new Map();
     const detalhes: Record<string, { name: string; date?: string | null; area?: string | null; unidade?: string | null }[]> = {};
+    const detalhesInatividade: Record<string, { name: string; date?: string | null; area?: string | null; unidade?: string | null }[]> = {};
 
     // Processar exonerações
     for (const registro of registrosEvasao) {
@@ -364,11 +366,11 @@ const App: React.FC = () => {
 
       mapaUnidadeInatividade.set(unidade, (mapaUnidadeInatividade.get(unidade) ?? 0) + 1);
       
-      if (!detalhes[unidade]) detalhes[unidade] = [];
+      if (!detalhesInatividade[unidade]) detalhesInatividade[unidade] = [];
       const nome = registro['NOME'] ?? '';
       const area = registro['AREA'] ?? null;
       const dataBruta = registro['DATA_INATIVIDADE'] ?? null;
-      detalhes[unidade].push({ name: nome, date: dataBruta, area, unidade });
+      detalhesInatividade[unidade].push({ name: nome, date: dataBruta, area, unidade });
     }
 
     // Obter todas as unidades únicas
@@ -392,8 +394,11 @@ const App: React.FC = () => {
     for (const unidade of Object.keys(detalhes)) {
       detalhes[unidade].sort((a, b) => a.name.localeCompare(b.name));
     }
+    for (const unidade of Object.keys(detalhesInatividade)) {
+      detalhesInatividade[unidade].sort((a, b) => a.name.localeCompare(b.name));
+    }
 
-    return { pontosUnidadeEvasao: pontosUnidadeEvasaoSeparados, pontosUnidadeInatividade: pontosUnidadeInatividadeSeparados, detalhesUnidade: detalhes };
+    return { pontosUnidadeEvasao: pontosUnidadeEvasaoSeparados, pontosUnidadeInatividade: pontosUnidadeInatividadeSeparados, detalhesUnidade: detalhes, detalhesUnidadeInatividade: detalhesInatividade };
   };
 
   // === APLICAÇÃO DAS REGRAS DE NEGÓCIO ===
@@ -408,8 +413,7 @@ const App: React.FC = () => {
   const { dadosDestino: dadosDestinoEvasao, detalhesDestino: detalhesDestino } = agregarPorDestino(todosRegistros);
   const { pontosMensais: pontosMensais, detalhesMensais: detalhesMensais } = agregarPorMes(registrosEvasao, 'DATA_EXONERACAO');
   const { pontosMensais: pontosMensaisInatividade, detalhesMensais: detalhesMensaisInatividade } = agregarPorMes(registrosInatividade, 'DATA_INATIVIDADE');
-  const { pontosUnidadeEvasao: pontosUnidadeEvasaoDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividades, detalhesUnidade: detalhesUnidadeEvasao } = agregarPorUnidade(registrosEvasaoComUnidade, registrosInatividade);
-  const detalhesUnidadeInatividade = detalhesUnidadeEvasao;
+  const { pontosUnidadeEvasao: pontosUnidadeEvasaoDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividades, detalhesUnidade: detalhesUnidadeEvasao, detalhesUnidadeInatividade } = agregarPorUnidade(registrosEvasaoComUnidade, registrosInatividade);
 
   // Totais e métricas básicas
   const contagemEvasoes = registrosEvasao.length;
@@ -520,8 +524,7 @@ const App: React.FC = () => {
   const { dadosDestino: dadosDestinoEvasaoFiltrado, detalhesDestino: detalhesDestinoFiltrados } = agregarPorDestino(todosRegistrosFiltrados);
   const { pontosMensais: pontosMensaisFiltrados, detalhesMensais: detalhesMensaisFiltrados } = agregarPorMes(registrosEvasaoFiltrados, 'DATA_EXONERACAO');
   const { pontosMensais: pontosMensaisInatividadeFiltrados, detalhesMensais: detalhesMensaisInatividadeFiltrados } = agregarPorMes(registrosInatividadeFiltrados, 'DATA_INATIVIDADE');
-  const { pontosUnidadeEvasao: pontosUnidadeEvasaoFiltradosDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividadeFiltradosDetalhados, detalhesUnidade: detalhesUnidadeEvasaoFiltrados } = agregarPorUnidade(registrosEvasaoComUnidadeFiltrados, registrosInatividadeFiltrados);
-  const detalhesUnidadeInatividadeFiltrados = detalhesUnidadeEvasaoFiltrados;
+  const { pontosUnidadeEvasao: pontosUnidadeEvasaoFiltradosDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividadeFiltradosDetalhados, detalhesUnidade: detalhesUnidadeEvasaoFiltrados, detalhesUnidadeInatividade: detalhesUnidadeInatividadeFiltrados } = agregarPorUnidade(registrosEvasaoComUnidadeFiltrados, registrosInatividadeFiltrados);
   // Calcular recorde: maior intervalo (em dias) sem publicação entre datas de publicação
   const datasExoneracao: Date[] = dadosBrutos
     .map(r => {
@@ -610,7 +613,7 @@ const App: React.FC = () => {
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
               <h3 className="text-lg font-semibold text-red-300">
-                {mostrarPorUnidade ? 'Evasões e Aposentadorias por Unidade' : 'Evasões e Aposentadorias por mês'}
+                {mostrarPorUnidade ? 'Exonerações e Aposentadorias por Unidade' : 'Exonerações e Aposentadorias por mês'}
               </h3>
               <button
                 onClick={() => setMostrarPorUnidade(!mostrarPorUnidade)}

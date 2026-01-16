@@ -150,30 +150,46 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
             
             if (datasetLabel === 'Aposentadorias e Afastamentos') {
               return `${value} aposentadorias/afastamentos`;
-            } else if (datasetLabel === 'Aposentadorias (outras áreas)') {
-              return `${value} aposentadorias (outras áreas)`;
             } else if (datasetLabel === 'Exonerações') {
-              return `${value} exonerações/desistências`;
-            } else if (datasetLabel === 'Exonerações (outras áreas)') {
-              return `${value} exonerações (outras áreas)`;
+              return `${value} exonerações`;
             } else {
               return `${value} outros`;
             }
           },
           afterBody: (ctx: any) => {
+
+
             try {
-              // Usar o label original para buscar os detalhes
-              const labelTruncado = ctx[0].label as string;
-              const labelOriginal = isUnidadeChart ? baseLabels[ctx[0].dataIndex] : labelTruncado;
-              const datasetLabel = ctx[0].dataset.label;
+              if (!ctx || ctx.length === 0) return [];
+              
+              // Para gráficos de unidade com apenas 2 datasets, encontrar qual está sendo apontado
+              // verificando qual é o dataset renderizado por último (mais próximo do mouse nas barras empilhadas)
+              let targetContext = ctx[0];
+              
+              if (isUnidadeChart && ctx.length > 1) {
+                // Nos gráficos de unidade, os datasets estão em ordem: Exonerações (idx 0), Aposentadorias (idx 1)
+                // O dataset sendo apontado é o que tem maior datasetIndex entre os visíveis
+                const maxDatasetIndex = Math.max(...ctx.map((c: any) => c.datasetIndex));
+                targetContext = ctx.find((c: any) => c.datasetIndex === maxDatasetIndex) || ctx[0];
+              }
+              
+              const labelTruncado = targetContext.label as string;
+              const labelOriginal = isUnidadeChart ? baseLabels[targetContext.dataIndex] : labelTruncado;
+              const datasetLabel = targetContext.dataset.label;
+              
+              let rows: any[] = [];
               
               // Escolher os dados corretos baseado no dataset
-              let rows: any[] = [];
               if (datasetLabel === 'Aposentadorias e Afastamentos') {
                 rows = (inactivityDetails[labelOriginal] ?? []).slice();
               } else if (datasetLabel === 'Exonerações') {
                 rows = (details[labelOriginal] ?? []).slice();
               }
+
+              console.log(inactivityDetails);
+              console.log(details);
+
+              console.log(rows);
               
               if (rows.length === 0) return [];
               
