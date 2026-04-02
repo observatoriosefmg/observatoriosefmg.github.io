@@ -3,6 +3,8 @@ import CounterCard from './components/CounterCard';
 import EvasionTable from './components/EvasionTable';
 import EvasionChart from './components/EvasionChart';
 import CollaborationForm from './components/CollaborationForm';
+import AnnouncementModal from './components/AnnouncementModal';
+import AprovadosOutrosConcursosTable from './components/AprovadosOutrosConcursosTable';
 import { DATA_INICIO_OBSERVACAO } from './constants';
 import { DadosDestinoEvasao } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -401,6 +403,56 @@ const App: React.FC = () => {
     return { pontosUnidadeEvasao: pontosUnidadeEvasaoSeparados, pontosUnidadeInatividade: pontosUnidadeInatividadeSeparados, detalhesUnidade: detalhes, detalhesUnidadeInatividade: detalhesInatividade };
   };
 
+  // Agrupa dados de aprovados em outros concursos por concurso/órgão
+  const agregarPorAprovacaoOutroConcurso = (registros: any[]): {
+    dadosAprovado: { concurso: string; count: number }[];
+    detalhesAprovado: Record<string, { name: string; area?: string | null; unidade?: string | null }[]>;
+  } => {
+    const mapaConcursos = new Map<string, number>();
+    const detalhes: Record<string, { name: string; area?: string | null; unidade?: string | null }[]> = {};
+
+    for (const registro of registros) {
+      const aprovadoOutroConcurso = registro['APROVADO_OUTRO_CONCURSO'];
+      
+      // Se não tem dados de aprovação em outro concurso, pula
+      if (!aprovadoOutroConcurso || String(aprovadoOutroConcurso).trim() === '') {
+        continue;
+      }
+
+      // Nome do auditor
+      const nome = registro['NOME'] ?? '';
+      const area = registro['AREA'] ?? null;
+      const unidade = registro['UNIDADE'] ?? registro['Unidade'] ?? null;
+
+      // Separar múltiplos concursos por vírgula
+      const concursos = String(aprovadoOutroConcurso)
+        .split(',')
+        .map(c => c.trim())
+        .filter(c => c !== '');
+
+      // Para cada concurso, criar uma entrada
+      for (const concurso of concursos) {
+        const anterior = mapaConcursos.get(concurso) ?? 0;
+        mapaConcursos.set(concurso, anterior + 1);
+
+        if (!detalhes[concurso]) detalhes[concurso] = [];
+        detalhes[concurso].push({ name: nome, area, unidade });
+      }
+    }
+
+    // Converter mapa para array e ordenar por contagem decrescente
+    const dadosAprovado = Array.from(mapaConcursos.entries())
+      .map(([concurso, count]) => ({ concurso, count }))
+      .sort((a, b) => b.count - a.count);
+
+    // Ordenar detalhes de cada concurso por nome
+    for (const concurso of Object.keys(detalhes)) {
+      detalhes[concurso].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return { dadosAprovado, detalhesAprovado: detalhes };
+  };
+
   // === APLICAÇÃO DAS REGRAS DE NEGÓCIO ===
 
   // Conjunto base de dados
@@ -414,6 +466,7 @@ const App: React.FC = () => {
   const { pontosMensais: pontosMensais, detalhesMensais: detalhesMensais } = agregarPorMes(registrosEvasao, 'DATA_EXONERACAO');
   const { pontosMensais: pontosMensaisInatividade, detalhesMensais: detalhesMensaisInatividade } = agregarPorMes(registrosInatividade, 'DATA_INATIVIDADE');
   const { pontosUnidadeEvasao: pontosUnidadeEvasaoDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividades, detalhesUnidade: detalhesUnidadeEvasao, detalhesUnidadeInatividade } = agregarPorUnidade(registrosEvasaoComUnidade, registrosInatividade);
+  const { dadosAprovado: dadosAprovadoOutrosConcursos, detalhesAprovado: detalhesAprovadoOutrosConcursos } = agregarPorAprovacaoOutroConcurso(dadosBrutos);
 
   // Totais e métricas básicas
   const contagemEvasoes = registrosEvasao.length;
@@ -561,6 +614,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-200 p-4 sm:p-6 lg:p-8">
+      <AnnouncementModal />
       <div className="max-w-5xl mx-auto">
         <header className="mb-10">
           <div className="text-center mb-4">
@@ -671,6 +725,21 @@ const App: React.FC = () => {
               details={areaSelecionada === 'TODAS' ? detalhesDestino : detalhesDestinoFiltrados} 
             />
           </section>
+
+          {/* Nova seção: Auditores Aguardando Nomeação */}
+          {dadosAprovadoOutrosConcursos.length > 0 && (
+            <section className="bg-gray-900 rounded-xl p-6 shadow-2xl border border-gray-800 mt-8">
+              <h2 className="text-2xl font-bold text-amber-400 mb-4">Auditores Aguardando Nomeação</h2>
+              <p className="text-gray-400 mb-6">
+                Esta tabela apresenta os Auditores Fiscais que foram aprovados em outros concursos e estão aguardando suas nomeações. 
+                Um auditor pode aparecer em mais de um concurso caso tenha sido aprovado em múltiplas seleções.
+              </p>
+              <AprovadosOutrosConcursosTable 
+                data={dadosAprovadoOutrosConcursos}
+                details={detalhesAprovadoOutrosConcursos}
+              />
+            </section>
+          )}
         </main>
 
         {/* Link para tabela detalhada */}
