@@ -90,7 +90,7 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
           <div className="font-medium text-gray-200">{aud.name}</div>
           <div className="text-xs text-gray-400">{areaUnit}</div>
         </div>
-        <span className="text-sm text-gray-400">Aguardando nomeação</span>
+        <span className="text-sm text-gray-400"></span>
       </li>
     );
   };
