@@ -8,7 +8,7 @@ import AprovadosOutrosConcursosTable from './components/AprovadosOutrosConcursos
 import { DATA_INICIO_OBSERVACAO } from './constants';
 import { DadosDestinoEvasao } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faUsers, faPersonShelter } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faUsers, faPersonShelter, faHourglassEnd } from '@fortawesome/free-solid-svg-icons';
 
 const App: React.FC = () => {
   const [diasDesdeUltimaEvasao, setDiasDesdeUltimaEvasao] = useState<number | null>(null);
@@ -412,10 +412,11 @@ const App: React.FC = () => {
     const detalhes: Record<string, { name: string; area?: string | null; unidade?: string | null }[]> = {};
 
     for (const registro of registros) {
+      const situacao = registro['SITUACAO'];
       const aprovadoOutroConcurso = registro['APROVADO_OUTRO_CONCURSO'];
       
-      // Se não tem dados de aprovação em outro concurso, pula
-      if (!aprovadoOutroConcurso || String(aprovadoOutroConcurso).trim() === '') {
+      // Apenas auditores em exercício com dados de aprovação em outro concurso
+      if (situacao !== 'EM EXERCÍCIO' || !aprovadoOutroConcurso || String(aprovadoOutroConcurso).trim() === '') {
         continue;
       }
 
@@ -440,10 +441,24 @@ const App: React.FC = () => {
       }
     }
 
-    // Converter mapa para array e ordenar por contagem decrescente
+    // Converter mapa para array e ordenar por:
+    // 1. Primeiro: órgãos que NÃO terminam com "(CR)"
+    // 2. Depois: órgãos que terminam com "(CR)"
+    // 3. Dentro de cada grupo: ordenar por contagem decrescente
     const dadosAprovado = Array.from(mapaConcursos.entries())
       .map(([concurso, count]) => ({ concurso, count }))
-      .sort((a, b) => b.count - a.count);
+      .sort((a, b) => {
+        const aTerminaCR = a.concurso.trim().endsWith('(CR)');
+        const bTerminaCR = b.concurso.trim().endsWith('(CR)');
+        
+        // Se uma termina com (CR) e a outra não, as que não terminam vem primeiro
+        if (aTerminaCR !== bTerminaCR) {
+          return aTerminaCR ? 1 : -1;
+        }
+        
+        // Se ambas têm o mesmo padrão de terminação, ordena por contagem (maior para menor)
+        return b.count - a.count;
+      });
 
     // Ordenar detalhes de cada concurso por nome
     for (const concurso of Object.keys(detalhes)) {
@@ -451,6 +466,25 @@ const App: React.FC = () => {
     }
 
     return { dadosAprovado, detalhesAprovado: detalhes };
+  };
+
+  // Conta auditores em exercício que estão aguardando nomeação em outros concursos
+  // Cada auditor é contado apenas uma vez, mesmo que esteja aguardando em múltiplos concursos
+  const contarAuditoresEmExercicioAguardandoNomeacao = (registros: any[]): number => {
+    const auditoresUnicos = new Set<string>();
+    
+    for (const registro of registros) {
+      const situacao = registro['SITUACAO'];
+      const aprovadoOutroConcurso = registro['APROVADO_OUTRO_CONCURSO'];
+      
+      // Apenas auditores em exercício com aprovação em outro concurso
+      if (situacao === 'EM EXERCÍCIO' && aprovadoOutroConcurso && String(aprovadoOutroConcurso).trim() !== '') {
+        const nome = registro['NOME'] ?? '';
+        auditoresUnicos.add(nome);
+      }
+    }
+    
+    return auditoresUnicos.size;
   };
 
   // === APLICAÇÃO DAS REGRAS DE NEGÓCIO ===
@@ -471,6 +505,7 @@ const App: React.FC = () => {
   // Totais e métricas básicas
   const contagemEvasoes = registrosEvasao.length;
   const contagemInativos = registrosInatividade.length;
+  const contagemAuditoresEmExercicioAguardandoNomeacao = contarAuditoresEmExercicioAguardandoNomeacao(dadosBrutos);
   // Contagem otimizada de aposentados e afastamentos
   const { contagemAposentado, contagemAfastamentoPreliminar } = dadosBrutos.reduce((acumulador, registro) => {
     const situacao = registro['SITUACAO'];
@@ -578,6 +613,8 @@ const App: React.FC = () => {
   const { pontosMensais: pontosMensaisFiltrados, detalhesMensais: detalhesMensaisFiltrados } = agregarPorMes(registrosEvasaoFiltrados, 'DATA_EXONERACAO');
   const { pontosMensais: pontosMensaisInatividadeFiltrados, detalhesMensais: detalhesMensaisInatividadeFiltrados } = agregarPorMes(registrosInatividadeFiltrados, 'DATA_INATIVIDADE');
   const { pontosUnidadeEvasao: pontosUnidadeEvasaoFiltradosDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividadeFiltradosDetalhados, detalhesUnidade: detalhesUnidadeEvasaoFiltrados, detalhesUnidadeInatividade: detalhesUnidadeInatividadeFiltrados } = agregarPorUnidade(registrosEvasaoComUnidadeFiltrados, registrosInatividadeFiltrados);
+  const { dadosAprovado: dadosAprovadoOutrosCursosFiltrados, detalhesAprovado: detalhesAprovadoOutrosCursosFiltrados } = areaSelecionada === 'TODAS' ? { dadosAprovado: dadosAprovadoOutrosConcursos, detalhesAprovado: detalhesAprovadoOutrosConcursos } : agregarPorAprovacaoOutroConcurso(filtrarPorArea(dadosBrutos, areaSelecionada));
+  
   // Calcular recorde: maior intervalo (em dias) sem publicação entre datas de publicação
   const datasExoneracao: Date[] = dadosBrutos
     .map(r => {
@@ -612,6 +649,8 @@ const App: React.FC = () => {
 
   const IconeInativo = () => <FontAwesomeIcon icon={faPersonShelter} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
 
+  const IconeAguardandoNomeacao = () => <FontAwesomeIcon icon={faHourglassEnd} className="h-10 w-10 md:h-12 md:w-12 text-red-400" />;
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-200 p-4 sm:p-6 lg:p-8">
       <AnnouncementModal />
@@ -631,7 +670,7 @@ const App: React.FC = () => {
         </header>
 
         <main>
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <CounterCard
               value={diasDesdeUltimaEvasao ?? 0}
               label={`Dia${(diasDesdeUltimaEvasao ?? 0) > 1 ? 's' : ''} sem perder um Auditor Fiscal`}
@@ -657,6 +696,17 @@ const App: React.FC = () => {
                     <div className="text-xs text-gray-400">Aposentados: <span className="font-medium text-amber-400">{contagemAposentado}</span></div>
                     <div className="text-xs text-gray-400">Afastamento preliminar: <span className="font-medium text-amber-400">{contagemAfastamentoPreliminar}</span></div>
                   </div>
+                </div>
+              }
+              estaCarregando={estaCarregando}
+            />
+            <CounterCard
+              value={contagemAuditoresEmExercicioAguardandoNomeacao}
+              label="Auditores em exercício aguardando nomeação em outros concursos"
+              icon={<IconeAguardandoNomeacao />}
+              footer={
+                <div className="text-xs text-gray-400">
+                  <span>Cada Auditor é contado uma única vez, ainda que tenha sido aprovado em múltiplos concursos.</span>
                 </div>
               }
               estaCarregando={estaCarregando}
@@ -731,12 +781,12 @@ const App: React.FC = () => {
             <section className="bg-gray-900 rounded-xl p-6 shadow-2xl border border-gray-800 mt-8">
               <h2 className="text-2xl font-bold text-amber-400 mb-4">Auditores Aguardando Nomeação</h2>
               <p className="text-gray-400 mb-6">
-                Esta tabela apresenta os Auditores Fiscais que foram aprovados em outros concursos e estão aguardando suas nomeações. 
-                Um auditor pode aparecer em mais de um concurso caso tenha sido aprovado em múltiplas seleções.
+                Esta tabela apresenta os Auditores Fiscais Em Exercício na SEF/MG que foram aprovados em outros concursos e estão aguardando suas nomeações. 
+                Um Auditor pode aparecer em mais de um órgão caso tenha sido aprovado em múltiplos concursos.
               </p>
               <AprovadosOutrosConcursosTable 
-                data={dadosAprovadoOutrosConcursos}
-                details={detalhesAprovadoOutrosConcursos}
+                data={dadosAprovadoOutrosCursosFiltrados}
+                details={detalhesAprovadoOutrosCursosFiltrados}
               />
             </section>
           )}

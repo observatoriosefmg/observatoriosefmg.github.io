@@ -25,7 +25,7 @@ const AnnouncementModal: React.FC = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-gray-900 rounded-lg shadow-2xl max-w-md w-full mx-4 border border-gray-700 p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-red-400">📢 Novidade em Breve</h2>
+          <h2 className="text-2xl font-bold text-red-400">📢 Novidade</h2>
           <button
             onClick={closeModal}
             className="text-gray-400 hover:text-gray-200 transition-colors"
@@ -37,11 +37,11 @@ const AnnouncementModal: React.FC = () => {
 
         <div className="space-y-4 text-gray-300">
           <p>
-            Em breve, o Observatório das Evasões passará a rastrear também os <span className="font-semibold text-amber-400">Auditores Fiscais aprovados em outros concursos</span> que estão aguardando nomeação.
+            O Observatório das Evasões agora rastreia também os Auditores Fiscais da SEF/MG aprovados em outros concursos que estão <span className="font-semibold text-amber-400">aguardando nomeação</span>.
           </p>
 
           <p>
-            Se você tem informações sobre auditores que já foram aprovados em concursos, <span className="font-semibold text-amber-400">entre em contato conosco</span>! Seus dados são importantes para manter este observatório atualizado.
+            Se você tem informações sobre auditores que já foram aprovados em outros concursos, <span className="font-semibold text-amber-400">entre em contato conosco</span>! Suas informações são importantes para manter este observatório atualizado.
           </p>
 
           <div className="bg-gray-800 rounded p-3 border-l-4 border-amber-500">
