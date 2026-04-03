@@ -150,6 +150,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                       <th className="px-3 py-3 text-left font-semibold">Data Inatividade</th>
                       <th className="px-3 py-3 text-left font-semibold">Data Pub. Inatividade</th>
                       <th className="px-3 py-3 text-left font-semibold">Observação</th>
+                      <th className="px-3 py-3 text-left font-semibold">Aguardando nomeação</th>
                     </>
                   ) : (
                     // Cabeçalho padrão para outras áreas
@@ -165,6 +166,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                       <th className="px-3 py-3 text-left font-semibold">Data Pub. Exoneração</th>
                       <th className="px-3 py-3 text-left font-semibold">Data Nomeação s/ Efeito</th>
                       <th className="px-3 py-3 text-left font-semibold">Observação</th>
+                      <th className="px-3 py-3 text-left font-semibold">Aguardando nomeação</th>
                     </>
                   )}
                 </tr>
@@ -172,7 +174,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
               <tbody className="divide-y divide-gray-700">
                 {estaCarregando ? (
                   <tr>
-                    <td colSpan={areaSelecionada === 'VETERANO' ? 7 : 11} className="px-6 py-8 text-center text-yellow-400">
+                    <td colSpan={areaSelecionada === 'VETERANO' ? 8 : 12} className="px-6 py-8 text-center text-yellow-400">
                       <div className="flex items-center justify-center space-x-2">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
                         <span>Carregando dados...</span>
@@ -181,7 +183,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                   </tr>
                 ) : filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan={areaSelecionada === 'VETERANO' ? 7 : 11} className="px-6 py-8 text-center text-gray-400">
+                    <td colSpan={areaSelecionada === 'VETERANO' ? 8 : 12} className="px-6 py-8 text-center text-gray-400">
                       {data && data.length > 0 
                         ? `Nenhum candidato encontrado para a área ${areaSelecionada}`
                         : 'Nenhum dado disponível. Verifique se o arquivo dados.csv foi carregado.'
@@ -219,6 +221,18 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                           </td>
                           <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVACAO'] || ''}>
                             {item['OBSERVACAO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            {(() => {
+                              const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
+                              return aguardando ? (
+                                <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">
+                                  Sim
+                                </span>
+                              ) : (
+                                '-'
+                              );
+                            })()}
                           </td>
                         </>
                       ) : (
@@ -264,6 +278,18 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                           </td>
                           <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVACAO'] || ''}>
                             {item['OBSERVACAO'] || '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            {(() => {
+                              const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
+                              return aguardando ? (
+                                <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">
+                                  Sim
+                                </span>
+                              ) : (
+                                '-'
+                              );
+                            })()}
                           </td>
                         </>
                       )}
