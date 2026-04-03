@@ -362,6 +362,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                             <th className="px-1 py-1 text-center font-semibold border border-black bg-white">DATA INATIVIDADE</th>
                                             <th className="px-1 py-1 text-center font-semibold border border-black bg-white">DATA DE PUBLICAÇÃO DA INATIVIDADE</th>
                                             <th className="px-1 py-1 text-center font-semibold border border-black bg-white">OBSERVAÇÃO</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">AGUARDANDO NOMEAÇÃO</th>
                                         </>
                                     ) : (
                                         // Cabeçalho padrão para outras áreas
@@ -390,6 +391,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                             <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Publicação da Exoneração</th>
                                             <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Data de Nomeação Sem Efeito</th>
                                             <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Observação</th>
+                                            <th className="px-1 py-1 text-center font-semibold border border-black bg-white">Aguardando nomeação</th>
                                         </>
                                     )}
                                 </tr>
@@ -397,7 +399,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                             <tbody className="divide-y divide-black">
                                 {estaCarregando ? (
                                     <tr>
-                                        <td colSpan={areaSelecionada === 'VETERANO' ? 6 : 10} className="px-4 py-6 text-center text-orange-600 border border-black">
+                                        <td colSpan={areaSelecionada === 'VETERANO' ? 7 : 11} className="px-4 py-6 text-center text-orange-600 border border-black">
                                             <div className="flex items-center justify-center space-x-2">
                                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
                                                 <span>Carregando dados...</span>
@@ -406,7 +408,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                     </tr>
                                 ) : filteredData.length === 0 ? (
                                     <tr>
-                                        <td colSpan={areaSelecionada === 'VETERANO' ? 6 : 10} className="px-4 py-6 text-center text-gray-500 border border-black">
+                                        <td colSpan={areaSelecionada === 'VETERANO' ? 7 : 11} className="px-4 py-6 text-center text-gray-500 border border-black">
                                             {allAuditors && allAuditors.length > 0
                                                 ? `Nenhum candidato encontrado para a área ${areaSelecionada}`
                                                 : 'Nenhum dado disponível. Verifique se o arquivo dados.csv foi carregado.'
@@ -446,6 +448,15 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                                     <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
                                                         {item['OBSERVACAO'] || '-'}
                                                     </td>
+                                                    <td className={`px-1 py-0.5 whitespace-nowrap text-[10px] border border-black text-center ${(() => {
+                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
+                                                        return aguardando ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
+                                                    })()}`}>
+                                                        {(() => {
+                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
+                                                            return aguardando ? item['APROVADO_OUTRO_CONCURSO'] : '-';
+                                                        })()}
+                                                    </td>
                                                 </>
                                             ) : (
                                                 // Layout padrão para outras áreas
@@ -479,6 +490,15 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                                     </td>
                                                     <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
                                                         {item['OBSERVACAO'] || '-'}
+                                                    </td>
+                                                    <td className={`px-1 py-0.5 whitespace-nowrap text-[10px] border border-black text-center ${(() => {
+                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
+                                                        return aguardando ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
+                                                    })()}`}>
+                                                        {(() => {
+                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
+                                                            return aguardando ? item['APROVADO_OUTRO_CONCURSO'] : '-';
+                                                        })()}
                                                     </td>
                                                 </>
                                             )}
