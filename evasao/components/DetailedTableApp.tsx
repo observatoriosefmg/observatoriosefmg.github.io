@@ -9,6 +9,20 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
     const [searchName, setSearchName] = useState<string>('');
     const [filterPCD, setFilterPCD] = useState<boolean>(false);
     const [selectedStatus, setSelectedStatus] = useState<string>('');    // Carregar dados CSV
+
+    const obterAprovacoesOutrosConcursosVisiveis = (texto?: string): string => {
+        if (!texto) return '';
+
+        return String(texto)
+            .split(',')
+            .map(c => c.trim())
+            .filter(c => c !== '' && !c.startsWith('*'))
+            .join(', ');
+    };
+
+    const isAprovadoOutrosConcursosValido = (texto?: string): boolean => {
+        return obterAprovacoesOutrosConcursosVisiveis(texto) !== '';
+    };
     useEffect(() => {
         const paths = [
             '/data/dados.csv',
@@ -449,12 +463,12 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                                         {item['OBSERVACAO'] || '-'}
                                                     </td>
                                                     <td className={`px-1 py-0.5 whitespace-nowrap text-[10px] border border-black text-center ${(() => {
-                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
+                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
                                                         return aguardando ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
                                                     })()}`}>
                                                         {(() => {
-                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
-                                                            return aguardando ? item['APROVADO_OUTRO_CONCURSO'] : '-';
+                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
+                                                            return aguardando ? obterAprovacoesOutrosConcursosVisiveis(item['APROVADO_OUTRO_CONCURSO']) : '-';
                                                         })()}
                                                     </td>
                                                 </>
@@ -492,12 +506,12 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                                         {item['OBSERVACAO'] || '-'}
                                                     </td>
                                                     <td className={`px-1 py-0.5 whitespace-nowrap text-[10px] border border-black text-center ${(() => {
-                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
+                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
                                                         return aguardando ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
                                                     })()}`}>
                                                         {(() => {
-                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && item['APROVADO_OUTRO_CONCURSO'] && item['APROVADO_OUTRO_CONCURSO'].trim() !== '');
-                                                            return aguardando ? item['APROVADO_OUTRO_CONCURSO'] : '-';
+                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
+                                                            return aguardando ? obterAprovacoesOutrosConcursosVisiveis(item['APROVADO_OUTRO_CONCURSO']) : '-';
                                                         })()}
                                                     </td>
                                                 </>
