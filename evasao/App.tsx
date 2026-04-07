@@ -403,6 +403,15 @@ const App: React.FC = () => {
     return { pontosUnidadeEvasao: pontosUnidadeEvasaoSeparados, pontosUnidadeInatividade: pontosUnidadeInatividadeSeparados, detalhesUnidade: detalhes, detalhesUnidadeInatividade: detalhesInatividade };
   };
 
+  const obterAprovacoesOutrosConcursosValidas = (aprovadoOutroConcurso: any): string[] => {
+    if (!aprovadoOutroConcurso) return [];
+
+    return String(aprovadoOutroConcurso)
+      .split(',')
+      .map(c => c.trim())
+      .filter(c => c !== '' && !c.startsWith('*'));
+  };
+
   // Agrupa dados de aprovados em outros concursos por concurso/órgão
   const agregarPorAprovacaoOutroConcurso = (registros: any[]): {
     dadosAprovado: { concurso: string; count: number }[];
@@ -414,9 +423,10 @@ const App: React.FC = () => {
     for (const registro of registros) {
       const situacao = registro['SITUACAO'];
       const aprovadoOutroConcurso = registro['APROVADO_OUTRO_CONCURSO'];
-      
-      // Apenas auditores em exercício com dados de aprovação em outro concurso
-      if (situacao !== 'EM EXERCÍCIO' || !aprovadoOutroConcurso || String(aprovadoOutroConcurso).trim() === '') {
+      const concursos = obterAprovacoesOutrosConcursosValidas(aprovadoOutroConcurso);
+
+      // Apenas auditores em exercício com dados de aprovação em outro concurso válidos
+      if (situacao !== 'EM EXERCÍCIO' || concursos.length === 0) {
         continue;
       }
 
@@ -424,12 +434,6 @@ const App: React.FC = () => {
       const nome = registro['NOME'] ?? '';
       const area = registro['AREA'] ?? null;
       const unidade = registro['UNIDADE'] ?? registro['Unidade'] ?? null;
-
-      // Separar múltiplos concursos por vírgula
-      const concursos = String(aprovadoOutroConcurso)
-        .split(',')
-        .map(c => c.trim())
-        .filter(c => c !== '');
 
       // Para cada concurso, criar uma entrada
       for (const concurso of concursos) {
@@ -476,9 +480,10 @@ const App: React.FC = () => {
     for (const registro of registros) {
       const situacao = registro['SITUACAO'];
       const aprovadoOutroConcurso = registro['APROVADO_OUTRO_CONCURSO'];
+      const concursos = obterAprovacoesOutrosConcursosValidas(aprovadoOutroConcurso);
       
-      // Apenas auditores em exercício com aprovação em outro concurso
-      if (situacao === 'EM EXERCÍCIO' && aprovadoOutroConcurso && String(aprovadoOutroConcurso).trim() !== '') {
+      // Apenas auditores em exercício com aprovação em outro concurso válidos
+      if (situacao === 'EM EXERCÍCIO' && concursos.length > 0) {
         const nome = registro['NOME'] ?? '';
         auditoresUnicos.add(nome);
       }
