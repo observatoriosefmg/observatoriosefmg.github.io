@@ -1,0 +1,52 @@
+name: Atualizar histórico de alterações do dados.csv
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'evasao/data/dados.csv'
+      - 'evasao/package.json'
+      - 'evasao/scripts/**'
+      - '.github/workflows/**'
+
+jobs:
+  gerar-alteracoes:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: evasao
+
+      - name: Gerar arquivo de alterações
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: npm run generate-changes
+        working-directory: evasao
+
+      - name: Commit e push do arquivo gerado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add evasao/public/alteracoes.json evasao/public/alteracoes-registros.json
+          if ! git diff --cached --quiet; then
+            git commit -m "[skip ci] Atualiza histórico de alterações do dados.csv"
+            git push
+          else
+            echo "Nenhuma alteração nos arquivos de histórico"
+          fi
+        shell: bash

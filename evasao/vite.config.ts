@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => {
         rollupOptions: {
           input: {
             main: path.resolve(__dirname, 'index.html'),
-            table: path.resolve(__dirname, 'table.html')
+            table: path.resolve(__dirname, 'table.html'),
+            history: path.resolve(__dirname, 'history.html')
           }
         }
       },

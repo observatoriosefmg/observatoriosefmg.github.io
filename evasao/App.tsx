@@ -10,10 +10,38 @@ import { DadosDestinoEvasao } from './types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faUsers, faPersonShelter, faHourglassEnd } from '@fortawesome/free-solid-svg-icons';
 
+type RecentChange = {
+  key: string;
+  commitDate: string;
+  nome: string;
+  fromSituacao: string;
+  toSituacao: string;
+  orgaoDestino?: string | null;
+};
+
+const normalizeKey = (value: string | null | undefined) => String(value ?? '').trim().toUpperCase();
+
+const buildCurrentRecordMap = (records: any[]) => {
+  const map = new Map<string, any>();
+  for (const record of records) {
+    const key = normalizeKey(record['INSCRICAO'] ?? record['MASP'] ?? record['HGV-0'] ?? record['NOME']);
+    if (!key) continue;
+    map.set(key, record);
+  }
+  return map;
+};
+
+const getCurrentOrgaoDestino = (record: any): string | null => {
+  const destino = String(record?.['ORGAO_DESTINO'] ?? '').trim();
+  return destino || null;
+};
+
 const App: React.FC = () => {
   const [diasDesdeUltimaEvasao, setDiasDesdeUltimaEvasao] = useState<number | null>(null);
 
   const [dadosBrutos, setDadosBrutos] = useState<any[]>([]);
+  const [recentChanges, setRecentChanges] = useState<RecentChange[]>([]);
+  const [recentChangesError, setRecentChangesError] = useState<string | null>(null);
 
   const [dataUltimaEvasao, setDataUltimaEvasao] = useState<Date | null>(null);
   const [areaSelecionada, setAreaSelecionada] = useState<string>('TODAS');
@@ -37,6 +65,79 @@ const App: React.FC = () => {
     const diferencaEmMs = dataFim.getTime() - dataInicio.getTime();
     return Math.floor(diferencaEmMs / (1000 * 3600 * 24));
   };
+
+  const formatCommitDate = (dateString: string | undefined | null): string => {
+    if (!dateString) return '—';
+
+    const isoMatch = dateString.match(
+      /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?(?:Z|([+-]\d{2}):?(\d{2}))?$/,
+    );
+
+    if (isoMatch) {
+      const [, year, month, day, hour, minute] = isoMatch;
+      return `${day}/${month}/${year} ${hour}:${minute}`;
+    }
+
+    const date = analisarDataBrasil(dateString);
+    if (date) {
+      return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+
+    return dateString;
+  };
+
+  const formatRecentChangeDescription = (change: RecentChange): React.ReactNode => {
+    const situacao = (change.toSituacao ?? '').trim().toUpperCase();
+    const pessoa = <strong>{change.nome}</strong>;
+    let description: React.ReactNode;
+
+    if (situacao === 'EXONERADO') {
+      description = <>Exoneração de {pessoa}.</>;
+    } else if (situacao === 'DESISTENTE') {
+      description = <>{pessoa} desistiu de tomar posse.</>;
+    } else if (situacao === 'APOSENTADO') {
+      description = <>Aposentadoria de {pessoa}.</>;
+    } else if (situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA') {
+      description = <>Afastamento de {pessoa}.</>;
+    } else {
+      description = <>{pessoa} teve alteração de situação para {change.toSituacao}.</>;
+    }
+
+    if (change.orgaoDestino) {
+      description = <>{description} Órgão de destino: <strong>{change.orgaoDestino}</strong>.</>;
+    }
+
+    return description;
+  };
+
+  useEffect(() => {
+    if (dadosBrutos.length === 0 || recentChanges.length === 0) return;
+
+    const currentMap = buildCurrentRecordMap(dadosBrutos);
+    let changed = false;
+
+    const updatedChanges = recentChanges.map(change => {
+      const current = currentMap.get(change.key);
+      const currentDestino = current ? getCurrentOrgaoDestino(current) : null;
+      const destino = currentDestino || change.orgaoDestino || null;
+
+      if (destino !== change.orgaoDestino) {
+        changed = true;
+        return { ...change, orgaoDestino: destino };
+      }
+      return change;
+    });
+
+    if (changed) {
+      setRecentChanges(updatedChanges);
+    }
+  }, [dadosBrutos, recentChanges]);
 
   // diasDesdeUltimaEvasao será calculado apenas após carregamento dos dados
   useEffect(() => {
@@ -190,6 +291,73 @@ const App: React.FC = () => {
 
     tryLoad();
 
+    return () => { montado = false; };
+  }, []);
+
+  useEffect(() => {
+    let montado = true;
+    const baseUrl = import.meta.env.BASE_URL ?? './';
+    const caminhosHistorico = [
+      `${baseUrl}alteracoes-registros.json`,
+      'alteracoes-registros.json',
+      '/alteracoes-registros.json',
+      '/evasao/alteracoes-registros.json',
+      '/evasao/dist/alteracoes-registros.json',
+    ];
+
+    const criarUrlSemCache = (baseUrl: string) => baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'v=' + Date.now();
+
+    const carregarHistorico = async () => {
+      for (const caminho of caminhosHistorico) {
+        try {
+          const resposta = await fetch(criarUrlSemCache(caminho), { cache: 'no-store', headers: { 'cache-control': 'no-cache' } as any });
+          if (!resposta.ok) continue;
+          const payload = await resposta.json();
+          const historyItems = Array.isArray(payload.history)
+            ? payload.history
+            : Array.isArray(payload)
+              ? payload
+              : [];
+
+          const currentMap = buildCurrentRecordMap(dadosBrutos);
+          const changes: RecentChange[] = [];
+          for (const item of historyItems) {
+            if (!item || !Array.isArray(item.changes) || !item.commit?.date) continue;
+            for (const change of item.changes) {
+              const key = normalizeKey(change.inscricao ?? change.masp ?? change.nome ?? '');
+              if (!key) continue;
+              const current = currentMap.get(key);
+              const currentDestino = current ? getCurrentOrgaoDestino(current) : null;
+              changes.push({
+                key,
+                commitDate: item.commit.date,
+                nome: change.nome ?? '',
+                fromSituacao: change.fromSituacao ?? '',
+                toSituacao: change.toSituacao ?? '',
+                orgaoDestino: currentDestino || change.orgaoDestino || null,
+              });
+            }
+          }
+
+          const ordenadas = changes.sort((a, b) => b.commitDate.localeCompare(a.commitDate)).slice(0, 3);
+          if (montado) {
+            setRecentChanges(ordenadas);
+            setRecentChangesError(null);
+          }
+          return;
+        } catch (erro) {
+          // tentar próximo caminho
+          // eslint-disable-next-line no-console
+          console.debug('Falha ao carregar histórico', caminho, erro);
+        }
+      }
+
+      if (montado) {
+        setRecentChangesError('Não foi possível carregar as alterações recentes.');
+      }
+    };
+
+    carregarHistorico();
     return () => { montado = false; };
   }, []);
 
@@ -769,6 +937,32 @@ const App: React.FC = () => {
             </div>
           </div>
 
+          <section className="bg-gray-900 rounded-xl p-4 border border-gray-800 mb-8">
+            <div className="mb-3">
+              <h2 className="text-2xl font-bold text-amber-400">Últimas alterações</h2>
+            </div>
+            {recentChangesError ? (
+              <div className="text-sm text-red-200">{recentChangesError}</div>
+            ) : recentChanges.length === 0 ? (
+              <div className="text-sm text-gray-400">Carregando as alterações mais recentes...</div>
+            ) : (
+              <>
+                <ul className="space-y-1 text-sm text-gray-200">
+                  {recentChanges.map((change, index) => (
+                    <li key={`${change.commitDate}-${change.nome}-${index}`} className="flex flex-wrap items-baseline gap-2">
+                      <span className="text-xs text-gray-400 uppercase tracking-wider">{formatCommitDate(change.commitDate)}</span>
+                      <span className="text-amber-400">•</span>
+                      <span>{formatRecentChangeDescription(change)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3 text-sm">
+                  <a href="/evasao/dist/history.html" className="text-amber-400 hover:text-amber-300">Ver histórico completo</a>
+                </div>
+              </>
+            )}
+          </section>
+
           <section className="bg-gray-900 rounded-xl p-6 shadow-2xl border border-gray-800">
             <h2 className="text-2xl font-bold text-red-300 mb-4">Destinos da Evasão</h2>
             <p className="text-gray-400 mb-6">
@@ -797,8 +991,8 @@ const App: React.FC = () => {
           )}
         </main>
 
-        {/* Link para tabela detalhada */}
-        <div className="mt-8 mb-6 text-center">
+        {/* Links para páginas auxiliares */}
+        <div className="mt-8 mb-6 flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
           <a
             href="/evasao/dist/table.html"
             className="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-red-600 border border-transparent rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
