@@ -1,0 +1,757 @@
+{
+  "sourceFile": "data/dados.csv",
+  "generatedAt": "2026-04-11T15:44:54.485Z",
+  "commitCount": 125,
+  "commits": [
+    {
+      "hash": "75be4410df95f79e9196db7df92d569d327c1d01",
+      "date": "2025-10-31T14:51:14Z",
+      "author": "observatoriosefmg",
+      "message": "Atualizando órgãos destino"
+    },
+    {
+      "hash": "3211f524b178aa7e3132f91028aee0dceaea93d7",
+      "date": "2025-10-31T16:08:20Z",
+      "author": "observatoriosefmg",
+      "message": "Ajustes órgãos"
+    },
+    {
+      "hash": "141e465bd7cbee6170c0ce38a4de60efbc485974",
+      "date": "2025-10-31T16:17:08Z",
+      "author": "observatoriosefmg",
+      "message": "Ajustes órgãos"
+    },
+    {
+      "hash": "600b82fc5082b1ed83f001a60514ca25c9b25d0d",
+      "date": "2025-10-31T16:28:58Z",
+      "author": "observatoriosefmg",
+      "message": "datas senado"
+    },
+    {
+      "hash": "9a87ed2d37ff7e5a4ee9064e5354f348c1ccdc18",
+      "date": "2025-10-31T16:33:01Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
+    },
+    {
+      "hash": "7fc38affefce01db9d8aea24e03261147ad8c56c",
+      "date": "2025-10-31T16:36:31Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "3f290c324f3cd5047488943764d277815dab7774",
+      "date": "2025-10-31T16:40:25Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "c34f5e9b5505b4611561d584e559bace5c51d5a8",
+      "date": "2025-10-31T16:46:08Z",
+      "author": "observatoriosefmg",
+      "message": "DADOS"
+    },
+    {
+      "hash": "d127f16c9c85c21847c559facceda3751f5c0633",
+      "date": "2025-10-31T16:48:56Z",
+      "author": "observatoriosefmg",
+      "message": "DADOS"
+    },
+    {
+      "hash": "f930a149cb9a7d73921184d9790da3b2decb5c7a",
+      "date": "2025-10-31T16:55:44Z",
+      "author": "observatoriosefmg",
+      "message": "DADOS"
+    },
+    {
+      "hash": "067e6d58ea02120f6cf275d51dcd1c7dca9f7fe8",
+      "date": "2025-10-31T16:58:09Z",
+      "author": "observatoriosefmg",
+      "message": "DADOS"
+    },
+    {
+      "hash": "1632bb5e1b1a917aabad6819f3d04768bfce4a6c",
+      "date": "2025-10-31T17:35:42Z",
+      "author": "observatoriosefmg",
+      "message": "DADOS"
+    },
+    {
+      "hash": "ef9755b8b8c3342c9faf341ca5e685e6c8e14bf9",
+      "date": "2025-10-31T18:14:13Z",
+      "author": "observatoriosefmg",
+      "message": "DADOS"
+    },
+    {
+      "hash": "7642a4014ce3f5113c4e72b8e1082d1888456c93",
+      "date": "2025-10-31T18:16:19Z",
+      "author": "observatoriosefmg",
+      "message": "DADOS"
+    },
+    {
+      "hash": "225eba58440d244d2323b6565a25e75931b236f9",
+      "date": "2025-10-31T19:21:58Z",
+      "author": "observatoriosefmg",
+      "message": "desistentes"
+    },
+    {
+      "hash": "9e82fff57c7c59302c1e522281c69cc0a35d2806",
+      "date": "2025-11-03T12:43:31Z",
+      "author": "observatoriosefmg",
+      "message": "nova versão"
+    },
+    {
+      "hash": "d239c01622546f7ee61922e0872060e7be8d39d7",
+      "date": "2025-11-03T13:08:45Z",
+      "author": "observatoriosefmg",
+      "message": "atualização de dados"
+    },
+    {
+      "hash": "90068b03725431ab8184edc25d086f4ad4f4b063",
+      "date": "2025-11-03T18:36:01-03:00",
+      "author": "observatoriosefmg",
+      "message": "Update dados.csv"
+    },
+    {
+      "hash": "84486c46e1518f6244516dd6d858dc86cfed2645",
+      "date": "2025-11-03T20:46:55-03:00",
+      "author": "observatoriosefmg",
+      "message": "Update dados.csv"
+    },
+    {
+      "hash": "303cc24a0ac229d7fe0fcb58e1a411dcfee9d735",
+      "date": "2025-11-04T00:38:46Z",
+      "author": "observatoriosefmg",
+      "message": "atualização nos dados"
+    },
+    {
+      "hash": "58a1246cf53160f15a7b251baaa185323e365a71",
+      "date": "2025-11-04T01:07:32Z",
+      "author": "observatoriosefmg",
+      "message": "teste alteração dados"
+    },
+    {
+      "hash": "623f335fde990c059f32250ff998cfe8c6a0411e",
+      "date": "2025-11-04T01:08:47Z",
+      "author": "observatoriosefmg",
+      "message": "alteração dados"
+    },
+    {
+      "hash": "36e8cc0f1abccfcee0fa1d945ff684fcb3c3c521",
+      "date": "2025-11-04T02:14:25Z",
+      "author": "observatoriosefmg",
+      "message": "atualização de dados"
+    },
+    {
+      "hash": "62d1f683962e644bcb3268dd27f980a51c9bfd44",
+      "date": "2025-11-04T12:14:23Z",
+      "author": "observatoriosefmg",
+      "message": "ATUALIZAÇAO DE DADOS"
+    },
+    {
+      "hash": "c279bf789f3fe54b5f824cf8f0b9ec3c875cd662",
+      "date": "2025-11-04T12:35:36Z",
+      "author": "observatoriosefmg",
+      "message": "atualização no tooltip"
+    },
+    {
+      "hash": "a8293948d64de1d8dda60475a2e44ccdc9ddfced",
+      "date": "2025-11-04T12:39:55Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
+    },
+    {
+      "hash": "99045909343c6931c13b359373c18452f9928262",
+      "date": "2025-11-05T10:41:39Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
+    },
+    {
+      "hash": "98bbabdf7d83686db9072ed60b13c82091c0f85c",
+      "date": "2025-11-05T11:00:09Z",
+      "author": "observatoriosefmg",
+      "message": "atualização de dados"
+    },
+    {
+      "hash": "35d654514c9bbf4ab93d52b8ed8cd00eb8d87509",
+      "date": "2025-11-05T11:09:01Z",
+      "author": "observatoriosefmg",
+      "message": "Trocar a denominação \"NOMEADO E EXONERADO\" para \"EXONERADO\""
+    },
+    {
+      "hash": "b8adb3554b583818e56e8302cfe5e6a4692d2b8d",
+      "date": "2025-11-05T17:58:22Z",
+      "author": "observatoriosefmg",
+      "message": "atualizar dados"
+    },
+    {
+      "hash": "0f028b6008ca1f32c279e4f5281c123cc2050160",
+      "date": "2025-11-05T23:53:06Z",
+      "author": "observatoriosefmg",
+      "message": "aposentados"
+    },
+    {
+      "hash": "dbd4f546c980bdc4ea2ae7ccde6bafe4db3902d2",
+      "date": "2025-11-06T13:00:20Z",
+      "author": "observatoriosefmg",
+      "message": "reordenando dados"
+    },
+    {
+      "hash": "1e2b2b575ee9cefc5fe6e25bae8109074930ce46",
+      "date": "2025-11-06T13:51:38Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
+    },
+    {
+      "hash": "0def0b9c55aefbb5f3e4ab58bbcaccc5f730c3bc",
+      "date": "2025-11-06T13:52:22Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
+    },
+    {
+      "hash": "afdc880a715b84f22d998b9553c7eb996b8e415d",
+      "date": "2025-11-12T10:17:51Z",
+      "author": "observatoriosefmg",
+      "message": "atualização de dados"
+    },
+    {
+      "hash": "cbce1bce4376f835a4675fd6b797bf25f0009c09",
+      "date": "2025-11-14T09:48:31Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
+    },
+    {
+      "hash": "1b7d4c6acbf5ccd39cb2ccb9211d9056fa00b4bc",
+      "date": "2025-11-14T15:38:55-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "95e7efc038c8c18f2c17c8c27b775673f64c64a5",
+      "date": "2025-11-15T05:45:43-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "091622ca283b761c4590a39ae46c5b2749e80664",
+      "date": "2025-11-15T05:46:50-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "2f9b5b01738f76fefb416e514cdbde403737d570",
+      "date": "2025-11-15T05:51:35-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "fdc1a3fcf0f1899fa3486e59a6ddba43d46bfb66",
+      "date": "2025-11-15T11:32:39-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "128122d85e827a27d2f67030133d02802b7d2b08",
+      "date": "2025-11-19T18:06:56-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização Dados"
+    },
+    {
+      "hash": "5d8dfdb9947fde2a77594b8d61d7b75709a15485",
+      "date": "2025-11-19T23:02:01Z",
+      "author": "observatoriosefmg",
+      "message": "atualização de dados"
+    },
+    {
+      "hash": "914b96085d6e3f91a40d1e6acd441144c61d611f",
+      "date": "2025-11-19T23:03:04Z",
+      "author": "observatoriosefmg",
+      "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
+    },
+    {
+      "hash": "874571cf2722bb9aef7d4e5c934befbb39f4ea74",
+      "date": "2025-11-19T23:11:01Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
+    },
+    {
+      "hash": "8076338126325c1c15bc7c5c480c8340aa31c022",
+      "date": "2025-11-19T23:12:41Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
+    },
+    {
+      "hash": "848a4fae406709504e8deffed8a792c76ef25729",
+      "date": "2025-11-20T08:26:58-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "2d3af97e23e51c30f4803224da1dc03e1ea58616",
+      "date": "2025-11-20T08:30:19-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "b81a02f8e58d7d64b1356e63319d46b056d992a1",
+      "date": "2025-11-20T08:40:07-03:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "f1ceb83019a8aa6954871b47e52c04361a1a5586",
+      "date": "2025-11-21T16:58:57-08:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "8ce872440d9ad55638ae3bc38384e87bb538465f",
+      "date": "2025-11-21T17:01:26-08:00",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados"
+    },
+    {
+      "hash": "3ef63660fa0f8f84c4cc3f34297137049a936850",
+      "date": "2025-11-29T02:28:41Z",
+      "author": "observatoriosefmg",
+      "message": "Atualização de dados, 101 evasões."
+    },
+    {
+      "hash": "1bdae002b27001a04c2460fa5f2f157cf6c6b610",
+      "date": "2025-12-09T21:30:01Z",
+      "author": "observatoriosefmg",
+      "message": "ATUALIZAÇAO DADOS"
+    },
+    {
+      "hash": "455f57d15814af69794425e83b12610b8c16089e",
+      "date": "2026-01-08T01:06:42Z",
+      "author": "observatoriosefmg",
+      "message": "atualização de dados"
+    },
+    {
+      "hash": "f7bb686df69582194f0e35c9028872a291289f9d",
+      "date": "2026-01-09T02:28:12Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "2f01353a1485cbed82ce2104cbeb9999c41d7b44",
+      "date": "2026-01-09T11:23:00Z",
+      "author": "observatoriosefmg",
+      "message": "ALEXANDER RODRIGUES LADEIRA"
+    },
+    {
+      "hash": "fe266dd953c1cba8784d9241ebbf6f5c1de56a55",
+      "date": "2026-01-09T11:25:54Z",
+      "author": "observatoriosefmg",
+      "message": "ALEXANDER RODRIGUES LADEIRA"
+    },
+    {
+      "hash": "ef281e83e7cd09045d1892b02262defaed4130a6",
+      "date": "2026-01-10T10:16:20Z",
+      "author": "observatoriosefmg",
+      "message": "unidade"
+    },
+    {
+      "hash": "4cc7d31bd22a2eb3bf61d0e22b51394961da8909",
+      "date": "2026-01-13T22:21:26Z",
+      "author": "observatoriosefmg",
+      "message": "DADOS"
+    },
+    {
+      "hash": "2da259e639340064835078ab085909bd98a46074",
+      "date": "2026-01-14T09:59:59Z",
+      "author": "observatoriosefmg",
+      "message": "Dados - Exonerações publicadas"
+    },
+    {
+      "hash": "d1aa60f6f0fcb6f3c41afe312290559568def539",
+      "date": "2026-01-14T10:00:51Z",
+      "author": "observatoriosefmg",
+      "message": "dados - Correção na data de exoneração"
+    },
+    {
+      "hash": "85e153d79040ea964d28c9daa28e951523cb26d6",
+      "date": "2026-01-14T09:34:37-03:00",
+      "author": "observatoriosefmg",
+      "message": "RACHID"
+    },
+    {
+      "hash": "2c3eb9627e421334c6efea3c98a2dbf24094411c",
+      "date": "2026-01-14T09:38:55-03:00",
+      "author": "observatoriosefmg",
+      "message": "Rachid"
+    },
+    {
+      "hash": "f2eec05a4562211bd65993d8b93e7260e252c750",
+      "date": "2026-01-15T11:21:24Z",
+      "author": "observatoriosefmg",
+      "message": "grafico por unidade"
+    },
+    {
+      "hash": "33be2a179187cddad8f630433efb3a5e0f05a65f",
+      "date": "2026-01-15T11:21:35Z",
+      "author": "observatoriosefmg",
+      "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
+    },
+    {
+      "hash": "2879319518d889c5793d00649ee67f7e53b28e80",
+      "date": "2026-01-16T10:40:39Z",
+      "author": "observatoriosefmg",
+      "message": "evasao/data/dados.csv"
+    },
+    {
+      "hash": "93e043dd8647febb18a3fcf38d02687bc57c5863",
+      "date": "2026-01-16T10:28:38-03:00",
+      "author": "observatoriosefmg",
+      "message": "SEFA PR"
+    },
+    {
+      "hash": "f9ab348127390dc849ccc0d4e27e0e816f7f6695",
+      "date": "2026-02-05T11:28:39Z",
+      "author": "observatoriosefmg",
+      "message": "JOSE GERALDO CRUZ"
+    },
+    {
+      "hash": "c826ed4322c52730adec9bafa89e634bd408f01f",
+      "date": "2026-02-05T11:32:49Z",
+      "author": "observatoriosefmg",
+      "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
+    },
+    {
+      "hash": "7d71d1b190dbe8c8f23fd17fe839d65aeb253c5d",
+      "date": "2026-02-10T16:14:31-03:00",
+      "author": "observatoriosefmg",
+      "message": "Dados"
+    },
+    {
+      "hash": "e44c46b51cc9616600a1a14115110a1975f25f5d",
+      "date": "2026-02-11T00:05:31Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "97e2f5f83e9d2b3cbfb5dbd722e35859bd93f3c1",
+      "date": "2026-02-11T00:21:32Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "65ee3486a46a02d2068209cbf9619d4b41a690a2",
+      "date": "2026-02-11T12:08:41Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "c44473c2bc173fc0c4c55b139164c55ba69445e7",
+      "date": "2026-02-12T11:10:28Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "298ae6d4704aec6fd5f49828f160ce5d0bf5bf1b",
+      "date": "2026-02-12T11:17:44Z",
+      "author": "observatoriosefmg",
+      "message": "LUDMILA CARVALHO NEVES"
+    },
+    {
+      "hash": "d032eeb5f7b1a1e90189858b8e89027d754c3d3e",
+      "date": "2026-02-12T11:20:09Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "f37e3479b71d94838c923a5241a561b14a1f2df9",
+      "date": "2026-02-12T11:20:31Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "38da725be8e5ab807a1feda7a2a1702da502558f",
+      "date": "2026-02-12T11:27:25Z",
+      "author": "observatoriosefmg",
+      "message": "FELIPE AUGUSTO PEREIRA ROTTERDAN DE CARVALHO"
+    },
+    {
+      "hash": "1f5c26237b3f4ae0f04543fcf610e8fb64e0c687",
+      "date": "2026-02-12T10:54:56-03:00",
+      "author": "observatoriosefmg",
+      "message": "Dados"
+    },
+    {
+      "hash": "2ef061a9ebfac493d436bb9d3931793b04d1bc65",
+      "date": "2026-02-26T11:15:21Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "13dd4824850cc6e26ef41fe4a70ae1348b60141f",
+      "date": "2026-02-26T11:16:40Z",
+      "author": "observatoriosefmg",
+      "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
+    },
+    {
+      "hash": "db15a989f7038d4de239d6053587f8bd4fc18303",
+      "date": "2026-02-26T11:23:05Z",
+      "author": "observatoriosefmg",
+      "message": "JONATAS DE OLIVEIRA"
+    },
+    {
+      "hash": "e91925fb7952cfa9efd6fdad3297c37da17465f3",
+      "date": "2026-02-26T11:23:05Z",
+      "author": "observatoriosefmg",
+      "message": "evasao/data/dados.csv"
+    },
+    {
+      "hash": "640ba66f4d283c27b600819994943aaf47968800",
+      "date": "2026-02-26T11:25:40Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "cd06ec5153e4ae24171eef6992d3bfe652cbbbe2",
+      "date": "2026-03-06T12:14:44Z",
+      "author": "observatoriosefmg",
+      "message": "atualização de dados"
+    },
+    {
+      "hash": "cded8d876c8edaff138b0f32a7937d88ccdad8a7",
+      "date": "2026-03-06T12:25:11Z",
+      "author": "observatoriosefmg",
+      "message": "exonerações"
+    },
+    {
+      "hash": "624e3be08fcd7e9c439e01b6fe429276f30a137a",
+      "date": "2026-03-06T12:25:28Z",
+      "author": "observatoriosefmg",
+      "message": "sinc"
+    },
+    {
+      "hash": "0a6abe18b461792eea3623cdc3eddd5f3bc0118b",
+      "date": "2026-03-07T11:42:15Z",
+      "author": "observatoriosefmg",
+      "message": "Nomeações 07/03/2026"
+    },
+    {
+      "hash": "715813d680146165074b19b37730de2fac869529",
+      "date": "2026-03-09T14:25:09-03:00",
+      "author": "observatoriosefmg",
+      "message": "Nomeação Otávio"
+    },
+    {
+      "hash": "f476cf725344649526fc735983ccdb222a127b50",
+      "date": "2026-03-09T14:26:33-03:00",
+      "author": "observatoriosefmg",
+      "message": "Otávio correção data nomeação"
+    },
+    {
+      "hash": "082e154ea43deefa26aec853c243d7dcff1b98c2",
+      "date": "2026-03-09T22:01:11Z",
+      "author": "observatoriosefmg",
+      "message": "evasao/data/dados.csv"
+    },
+    {
+      "hash": "4e0b1cbb56597aa12580dc6b2cc04db0ed65a2fa",
+      "date": "2026-03-09T22:22:15Z",
+      "author": "observatoriosefmg",
+      "message": "atualização lotações"
+    },
+    {
+      "hash": "722444754521374891caa684eeaad28526802d77",
+      "date": "2026-03-10T03:09:06Z",
+      "author": "observatoriosefmg",
+      "message": "evasao/data/dados.csv"
+    },
+    {
+      "hash": "1bb1ab6c4e7b49f10cf82eb29e43a003d6bb84f4",
+      "date": "2026-03-10T03:09:45Z",
+      "author": "observatoriosefmg",
+      "message": "evasao/data/dados.csv"
+    },
+    {
+      "hash": "6c58f92be70ab2a02d9c65bcc695af88fcec3893",
+      "date": "2026-03-11T00:13:52Z",
+      "author": "observatoriosefmg",
+      "message": "evasao/data/dados.csv"
+    },
+    {
+      "hash": "60a54b0a671f671bb3d525742af35e69fdf9837a",
+      "date": "2026-03-11T11:40:15Z",
+      "author": "observatoriosefmg",
+      "message": "Data exoneração Eduardo"
+    },
+    {
+      "hash": "f7f5026b32d9f6f9a82e06a90c028d051fcfc3f8",
+      "date": "2026-03-11T23:18:39Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "dc71a95f5773595dae23836e6f874f4b70bdb762",
+      "date": "2026-03-13T10:01:57Z",
+      "author": "observatoriosefmg",
+      "message": "Nomeação Lilian - Exoneração Bressane"
+    },
+    {
+      "hash": "b2f72b1dbc6ac4cc60b1165e4350750baa67ae2a",
+      "date": "2026-03-20T15:14:32Z",
+      "author": "observatoriosefmg",
+      "message": "fabio"
+    },
+    {
+      "hash": "f0398411b44ed051540036004a4f0f772d019b9e",
+      "date": "2026-03-24T15:32:31Z",
+      "author": "observatoriosefmg",
+      "message": " terafael"
+    },
+    {
+      "hash": "84d752bcb17520434881f4d1c5250ee7c1e3bf5f",
+      "date": "2026-04-01T12:33:05Z",
+      "author": "observatoriosefmg",
+      "message": "afastamentos"
+    },
+    {
+      "hash": "df90eaac207b3e9f95a4b0a7c4ea211e8dd6455a",
+      "date": "2026-04-02T18:32:41Z",
+      "author": "observatoriosefmg",
+      "message": "aguardando nomeacao"
+    },
+    {
+      "hash": "d5a2ee0ca5fced737983c04b37196366a8817ef1",
+      "date": "2026-04-02T23:56:13Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "a7d96042f9f43c4e51ae1b1a3383ab5e34363894",
+      "date": "2026-04-03T00:29:02Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "8395efa61cbae5c6970b2977db5315c236940f7f",
+      "date": "2026-04-03T00:31:01Z",
+      "author": "observatoriosefmg",
+      "message": "atualizacao cargos"
+    },
+    {
+      "hash": "bba8995894797b02662e535bc0df993a29cedc30",
+      "date": "2026-04-03T04:47:08Z",
+      "author": "observatoriosefmg",
+      "message": "cadastro de reserva"
+    },
+    {
+      "hash": "b24e96b3cfe66fe8463cb023935153a656991560",
+      "date": "2026-04-03T12:51:28Z",
+      "author": "observatoriosefmg",
+      "message": "CR TRIBUTAÇAO"
+    },
+    {
+      "hash": "9797e4d21533e7d36935182faa67add9c495df84",
+      "date": "2026-04-03T12:57:46Z",
+      "author": "observatoriosefmg",
+      "message": "EDGARD"
+    },
+    {
+      "hash": "11b13e769cfca38844e997dcc4c269c661c0b54f",
+      "date": "2026-04-03T17:36:43Z",
+      "author": "observatoriosefmg",
+      "message": "APROVADOS OUTROS CONCURSOS"
+    },
+    {
+      "hash": "6a77a89d953aa10b1ab6c762638da6d6f8d14f08",
+      "date": "2026-04-03T22:50:22Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "9410d9de1466f544021da12acc5842573837f38c",
+      "date": "2026-04-03T22:51:36Z",
+      "author": "observatoriosefmg",
+      "message": "lotação"
+    },
+    {
+      "hash": "dc438f861a96bbc5c5a245cae771d52497fe242c",
+      "date": "2026-04-03T22:52:43Z",
+      "author": "observatoriosefmg",
+      "message": "lotação"
+    },
+    {
+      "hash": "7720fdd8b87df9763b0d435fa9376bed0472a637",
+      "date": "2026-04-06T10:48:55Z",
+      "author": "observatoriosefmg",
+      "message": "atualização de dados"
+    },
+    {
+      "hash": "2b7a206662baa0ebfdb1f888a051b93a399360a5",
+      "date": "2026-04-06T11:11:41Z",
+      "author": "observatoriosefmg",
+      "message": "Aprovações do CR"
+    },
+    {
+      "hash": "19860966fa67909ef363e37f416b79dd20561d39",
+      "date": "2026-04-06T12:34:46Z",
+      "author": "observatoriosefmg",
+      "message": "aprovação retirada a pedido"
+    },
+    {
+      "hash": "ccf0485e08f093baa5bfd098225ee3bba0894849",
+      "date": "2026-04-06T13:22:49Z",
+      "author": "observatoriosefmg",
+      "message": "remoção Diego a pedido"
+    },
+    {
+      "hash": "d5a02b68110fb1d2b910d0c19eb722e55ee45c30",
+      "date": "2026-04-07T10:36:27Z",
+      "author": "observatoriosefmg",
+      "message": "marcador ignorar aprovações"
+    },
+    {
+      "hash": "6f7be10bd2c15d46761af3569d2ed6389e00af65",
+      "date": "2026-04-08T18:10:00Z",
+      "author": "observatoriosefmg",
+      "message": "Matheus Reis"
+    },
+    {
+      "hash": "0fbbdf8b157d3a9398e72a782b72262ea6852b68",
+      "date": "2026-04-08T18:19:45Z",
+      "author": "observatoriosefmg",
+      "message": "matheus reis"
+    },
+    {
+      "hash": "8f14f4ecf4ef388dbedb4df98d1beedfcb9c2e3d",
+      "date": "2026-04-09T16:22:30Z",
+      "author": "observatoriosefmg",
+      "message": "raymundo"
+    },
+    {
+      "hash": "4f61a04fa402b27bfedc0d9577963515a508f4cb",
+      "date": "2026-04-10T09:47:30Z",
+      "author": "observatoriosefmg",
+      "message": "AULO CLESIO FERNANDES"
+    },
+    {
+      "hash": "92c41853a931b6fa164d225b8bfcea488afefd11",
+      "date": "2026-04-10T16:29:53Z",
+      "author": "observatoriosefmg",
+      "message": "cidade"
+    },
+    {
+      "hash": "ff6bb451ad35b6c7ec8ac097f859b0e67847ce4d",
+      "date": "2026-04-10T17:39:36Z",
+      "author": "observatoriosefmg",
+      "message": "dados"
+    },
+    {
+      "hash": "c94e0dd44f99106bccf45e23b7f9eb2e8ec0537d",
+      "date": "2026-04-11T11:52:34Z",
+      "author": "observatoriosefmg",
+      "message": "GUILHERME COUTO SOARES"
+    },
+    {
+      "hash": "06d217b59c8dc2ddb03984c0286840fece3d635e",
+      "date": "2026-04-11T11:56:07Z",
+      "author": "observatoriosefmg",
+      "message": "GUILHERME COUTO SOARES"
+    }
+  ]
+}

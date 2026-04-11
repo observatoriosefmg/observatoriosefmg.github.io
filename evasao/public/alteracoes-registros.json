@@ -1,0 +1,866 @@
+{
+  "sourceFile": "data/dados.csv",
+  "generatedAt": "2026-04-11T15:44:54.485Z",
+  "commitCount": 125,
+  "totalChangeCount": 29,
+  "history": [
+    {
+      "commit": {
+        "hash": "afdc880a715b84f22d998b9553c7eb996b8e415d",
+        "date": "2025-11-12T10:17:51Z",
+        "author": "observatoriosefmg",
+        "message": "atualização de dados"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "266012520",
+          "inscricao": "266012520",
+          "nome": "FELIPE DE MENEZES LIMA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS BH",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266012520",
+            "NOME": "FELIPE DE MENEZES LIMA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266012520",
+            "NOME": "FELIPE DE MENEZES LIMA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS BH"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "128122d85e827a27d2f67030133d02802b7d2b08",
+        "date": "2025-11-19T18:06:56-03:00",
+        "author": "observatoriosefmg",
+        "message": "Atualização Dados"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "266021552",
+          "inscricao": "266021552",
+          "nome": "HORACIO ROQUE HENRIQUES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ PE",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266021552",
+            "NOME": "HORACIO ROQUE HENRIQUES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266021552",
+            "NOME": "HORACIO ROQUE HENRIQUES",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ PE"
+          }
+        },
+        {
+          "masp": "266007657",
+          "inscricao": "266007657",
+          "nome": "OTAVIO BRUNO SILVEIRA SALES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ PE",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266007657",
+            "NOME": "OTAVIO BRUNO SILVEIRA SALES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266007657",
+            "NOME": "OTAVIO BRUNO SILVEIRA SALES",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ PE"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "914b96085d6e3f91a40d1e6acd441144c61d611f",
+        "date": "2025-11-19T23:03:04Z",
+        "author": "observatoriosefmg",
+        "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "266021552",
+          "inscricao": "266021552",
+          "nome": "HORACIO ROQUE HENRIQUES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ PE",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266021552",
+            "NOME": "HORACIO ROQUE HENRIQUES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266021552",
+            "NOME": "HORACIO ROQUE HENRIQUES",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ PE"
+          }
+        },
+        {
+          "masp": "266007657",
+          "inscricao": "266007657",
+          "nome": "OTAVIO BRUNO SILVEIRA SALES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ PE",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266007657",
+            "NOME": "OTAVIO BRUNO SILVEIRA SALES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266007657",
+            "NOME": "OTAVIO BRUNO SILVEIRA SALES",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ PE"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "f1ceb83019a8aa6954871b47e52c04361a1a5586",
+        "date": "2025-11-21T16:58:57-08:00",
+        "author": "observatoriosefmg",
+        "message": "Atualização de dados"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "266013391",
+          "inscricao": "266013391",
+          "nome": "ALEXANDER RODRIGUES LADEIRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS BH",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266013391",
+            "NOME": "ALEXANDER RODRIGUES LADEIRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266013391",
+            "NOME": "ALEXANDER RODRIGUES LADEIRA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS BH"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "3ef63660fa0f8f84c4cc3f34297137049a936850",
+        "date": "2025-11-29T02:28:41Z",
+        "author": "observatoriosefmg",
+        "message": "Atualização de dados, 101 evasões."
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "266013380",
+          "inscricao": "266013380",
+          "nome": "HERNAN LINDOSO TRIBUG",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ AM",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266013380",
+            "NOME": "HERNAN LINDOSO TRIBUG",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266013380",
+            "NOME": "HERNAN LINDOSO TRIBUG",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ AM"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "1bdae002b27001a04c2460fa5f2f157cf6c6b610",
+        "date": "2025-12-09T21:30:01Z",
+        "author": "observatoriosefmg",
+        "message": "ATUALIZAÇAO DADOS"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "266008556",
+          "inscricao": "266008556",
+          "nome": "EDUARDO VERGNE DIAS",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "CÂMARA DOS DEPUTADOS",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266008556",
+            "NOME": "EDUARDO VERGNE DIAS",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266008556",
+            "NOME": "EDUARDO VERGNE DIAS",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "CÂMARA DOS DEPUTADOS"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "85e153d79040ea964d28c9daa28e951523cb26d6",
+        "date": "2026-01-14T09:34:37-03:00",
+        "author": "observatoriosefmg",
+        "message": "RACHID"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7557093",
+          "inscricao": "266004129",
+          "nome": "RACHID ELIAS ARAB",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS Cuiabá",
+          "before": {
+            "MASP": "7557093",
+            "INSCRICAO": "266004129",
+            "NOME": "RACHID ELIAS ARAB",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7557093",
+            "INSCRICAO": "266004129",
+            "NOME": "RACHID ELIAS ARAB",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS Cuiabá"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "33be2a179187cddad8f630433efb3a5e0f05a65f",
+        "date": "2026-01-15T11:21:35Z",
+        "author": "observatoriosefmg",
+        "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7557093",
+          "inscricao": "266004129",
+          "nome": "RACHID ELIAS ARAB",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS CUIABÁ",
+          "before": {
+            "MASP": "7557093",
+            "INSCRICAO": "266004129",
+            "NOME": "RACHID ELIAS ARAB",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7557093",
+            "INSCRICAO": "266004129",
+            "NOME": "RACHID ELIAS ARAB",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS CUIABÁ"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "93e043dd8647febb18a3fcf38d02687bc57c5863",
+        "date": "2026-01-16T10:28:38-03:00",
+        "author": "observatoriosefmg",
+        "message": "SEFA PR"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "7556947",
+          "inscricao": "266001207",
+          "nome": "RODOLFO MINORU ABE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFA PR",
+          "before": {
+            "MASP": "7556947",
+            "INSCRICAO": "266001207",
+            "NOME": "RODOLFO MINORU ABE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556947",
+            "INSCRICAO": "266001207",
+            "NOME": "RODOLFO MINORU ABE",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFA PR"
+          }
+        },
+        {
+          "masp": "7555261",
+          "inscricao": "266000831",
+          "nome": "LEVY GUYSS NASCIMENTO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFA PR",
+          "before": {
+            "MASP": "7555261",
+            "INSCRICAO": "266000831",
+            "NOME": "LEVY GUYSS NASCIMENTO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555261",
+            "INSCRICAO": "266000831",
+            "NOME": "LEVY GUYSS NASCIMENTO",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFA PR"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "c826ed4322c52730adec9bafa89e634bd408f01f",
+        "date": "2026-02-05T11:32:49Z",
+        "author": "observatoriosefmg",
+        "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "7556947",
+          "inscricao": "266001207",
+          "nome": "RODOLFO MINORU ABE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFA PR",
+          "before": {
+            "MASP": "7556947",
+            "INSCRICAO": "266001207",
+            "NOME": "RODOLFO MINORU ABE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556947",
+            "INSCRICAO": "266001207",
+            "NOME": "RODOLFO MINORU ABE",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFA PR"
+          }
+        },
+        {
+          "masp": "7555261",
+          "inscricao": "266000831",
+          "nome": "LEVY GUYSS NASCIMENTO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFA PR",
+          "before": {
+            "MASP": "7555261",
+            "INSCRICAO": "266000831",
+            "NOME": "LEVY GUYSS NASCIMENTO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555261",
+            "INSCRICAO": "266000831",
+            "NOME": "LEVY GUYSS NASCIMENTO",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFA PR"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "7d71d1b190dbe8c8f23fd17fe839d65aeb253c5d",
+        "date": "2026-02-10T16:14:31-03:00",
+        "author": "observatoriosefmg",
+        "message": "Dados"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556624",
+          "inscricao": "266004165",
+          "nome": "GABRIEL BRESSANE SILVA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS CUIABÁ",
+          "before": {
+            "MASP": "7556624",
+            "INSCRICAO": "266004165",
+            "NOME": "GABRIEL BRESSANE SILVA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556624",
+            "INSCRICAO": "266004165",
+            "NOME": "GABRIEL BRESSANE SILVA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS CUIABÁ"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "2ef061a9ebfac493d436bb9d3931793b04d1bc65",
+        "date": "2026-02-26T11:15:21Z",
+        "author": "observatoriosefmg",
+        "message": "dados"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "7556624",
+          "inscricao": "266004165",
+          "nome": "GABRIEL BRESSANE SILVA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS CUIABÁ",
+          "before": {
+            "MASP": "7556624",
+            "INSCRICAO": "266004165",
+            "NOME": "GABRIEL BRESSANE SILVA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556624",
+            "INSCRICAO": "266004165",
+            "NOME": "GABRIEL BRESSANE SILVA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS CUIABÁ"
+          }
+        },
+        {
+          "masp": "5472212",
+          "inscricao": "",
+          "nome": "JONATAS DE OLIVEIRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "APOSENTADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "5472212",
+            "INSCRICAO": "",
+            "NOME": "JONATAS DE OLIVEIRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "5472212",
+            "INSCRICAO": "",
+            "NOME": "JONATAS DE OLIVEIRA",
+            "SITUACAO": "APOSENTADO",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "f7f5026b32d9f6f9a82e06a90c028d051fcfc3f8",
+        "date": "2026-03-11T23:18:39Z",
+        "author": "observatoriosefmg",
+        "message": "dados"
+      },
+      "changeCount": 4,
+      "changes": [
+        {
+          "masp": "3100492",
+          "inscricao": "",
+          "nome": "NEWTON FLAVIO SILVA DE OLIVEIRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3100492",
+            "INSCRICAO": "",
+            "NOME": "NEWTON FLAVIO SILVA DE OLIVEIRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3100492",
+            "INSCRICAO": "",
+            "NOME": "NEWTON FLAVIO SILVA DE OLIVEIRA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "3105871",
+          "inscricao": "",
+          "nome": "PEDRO FERNANDES DE LACERDA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3105871",
+            "INSCRICAO": "",
+            "NOME": "PEDRO FERNANDES DE LACERDA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3105871",
+            "INSCRICAO": "",
+            "NOME": "PEDRO FERNANDES DE LACERDA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "3874559",
+          "inscricao": "",
+          "nome": "JOAO FROTA GOMES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3874559",
+            "INSCRICAO": "",
+            "NOME": "JOAO FROTA GOMES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3874559",
+            "INSCRICAO": "",
+            "NOME": "JOAO FROTA GOMES",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "6688576",
+          "inscricao": "",
+          "nome": "CLAUDIO DE FREITAS RODRIGUES CAVALCANTE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "6688576",
+            "INSCRICAO": "",
+            "NOME": "CLAUDIO DE FREITAS RODRIGUES CAVALCANTE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "6688576",
+            "INSCRICAO": "",
+            "NOME": "CLAUDIO DE FREITAS RODRIGUES CAVALCANTE",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "dc71a95f5773595dae23836e6f874f4b70bdb762",
+        "date": "2026-03-13T10:01:57Z",
+        "author": "observatoriosefmg",
+        "message": "Nomeação Lilian - Exoneração Bressane"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556624",
+          "inscricao": "266004165",
+          "nome": "GABRIEL BRESSANE SILVA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS CUIABÁ",
+          "before": {
+            "MASP": "7556624",
+            "INSCRICAO": "266004165",
+            "NOME": "GABRIEL BRESSANE SILVA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556624",
+            "INSCRICAO": "266004165",
+            "NOME": "GABRIEL BRESSANE SILVA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS CUIABÁ"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "f0398411b44ed051540036004a4f0f772d019b9e",
+        "date": "2026-03-24T15:32:31Z",
+        "author": "observatoriosefmg",
+        "message": " terafael"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556087",
+          "inscricao": "266002169",
+          "nome": "RAFAEL ANGELO VIEIRA PESSOA LIMA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SE",
+          "before": {
+            "MASP": "7556087",
+            "INSCRICAO": "266002169",
+            "NOME": "RAFAEL ANGELO VIEIRA PESSOA LIMA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556087",
+            "INSCRICAO": "266002169",
+            "NOME": "RAFAEL ANGELO VIEIRA PESSOA LIMA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SE"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "84d752bcb17520434881f4d1c5250ee7c1e3bf5f",
+        "date": "2026-04-01T12:33:05Z",
+        "author": "observatoriosefmg",
+        "message": "afastamentos"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "2857399",
+          "inscricao": "",
+          "nome": "ANGELO GIOVANNI DE OLIVEIRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "2857399",
+            "INSCRICAO": "",
+            "NOME": "ANGELO GIOVANNI DE OLIVEIRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "2857399",
+            "INSCRICAO": "",
+            "NOME": "ANGELO GIOVANNI DE OLIVEIRA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "5466651",
+          "inscricao": "",
+          "nome": "ROBSON LUIZ RESENDE CORREA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "5466651",
+            "INSCRICAO": "",
+            "NOME": "ROBSON LUIZ RESENDE CORREA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "5466651",
+            "INSCRICAO": "",
+            "NOME": "ROBSON LUIZ RESENDE CORREA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "9797e4d21533e7d36935182faa67add9c495df84",
+        "date": "2026-04-03T12:57:46Z",
+        "author": "observatoriosefmg",
+        "message": "EDGARD"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556996",
+          "inscricao": "266002735",
+          "nome": "EDGARD DA CONCEICAO SANT ANNA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SE",
+          "before": {
+            "MASP": "7556996",
+            "INSCRICAO": "266002735",
+            "NOME": "EDGARD DA CONCEICAO SANT ANNA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556996",
+            "INSCRICAO": "266002735",
+            "NOME": "EDGARD DA CONCEICAO SANT ANNA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SE"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "6f7be10bd2c15d46761af3569d2ed6389e00af65",
+        "date": "2026-04-08T18:10:00Z",
+        "author": "observatoriosefmg",
+        "message": "Matheus Reis"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556822",
+          "inscricao": "266007080",
+          "nome": "MATHEUS REIS",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "7556822",
+            "INSCRICAO": "266007080",
+            "NOME": "MATHEUS REIS",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556822",
+            "INSCRICAO": "266007080",
+            "NOME": "MATHEUS REIS",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "4f61a04fa402b27bfedc0d9577963515a508f4cb",
+        "date": "2026-04-10T09:47:30Z",
+        "author": "observatoriosefmg",
+        "message": "AULO CLESIO FERNANDES"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "2856862",
+          "inscricao": "",
+          "nome": "PAULO CLESIO FERNANDES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "APOSENTADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "2856862",
+            "INSCRICAO": "",
+            "NOME": "PAULO CLESIO FERNANDES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "2856862",
+            "INSCRICAO": "",
+            "NOME": "PAULO CLESIO FERNANDES",
+            "SITUACAO": "APOSENTADO",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "c94e0dd44f99106bccf45e23b7f9eb2e8ec0537d",
+        "date": "2026-04-11T11:52:34Z",
+        "author": "observatoriosefmg",
+        "message": "GUILHERME COUTO SOARES"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "6691588",
+          "inscricao": "",
+          "nome": "GUILHERME COUTO SOARES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "6691588",
+            "INSCRICAO": "",
+            "NOME": "GUILHERME COUTO SOARES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "6691588",
+            "INSCRICAO": "",
+            "NOME": "GUILHERME COUTO SOARES",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    }
+  ]
+}
