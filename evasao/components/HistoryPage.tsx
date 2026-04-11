@@ -51,19 +51,27 @@ const formatDate = (dateString: string | undefined | null): string => {
   );
 
   if (isoMatch) {
-    const [, year, month, day, hour, minute] = isoMatch;
-    return `${day}/${month}/${year} ${hour}:${minute}`;
-  }
-
-  const date = analisarDataBrasil(dateString);
-  if (date) {
-    return date.toLocaleString('pt-BR', {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    });
+    }).format(date);
+  }
+
+  const date = analisarDataBrasil(dateString);
+  if (date) {
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
   }
 
   return dateString;
@@ -126,10 +134,20 @@ const parseCsv = (texto: string): CurrentRecord[] => {
 
 const normalizeKey = (value: string | null | undefined) => String(value ?? '').trim().toUpperCase();
 
+const pickFirstNonEmpty = (...values: Array<string | null | undefined>) => {
+  for (const value of values) {
+    if (value != null) {
+      const trimmed = String(value).trim();
+      if (trimmed !== '') return trimmed;
+    }
+  }
+  return '';
+};
+
 const buildCurrentRecordMap = (currentRecords: CurrentRecord[]) => {
   const map = new Map<string, CurrentRecord>();
   for (const registro of currentRecords) {
-    const key = normalizeKey(registro['INSCRICAO'] ?? registro['MASP'] ?? registro['HGV-0'] ?? registro['NOME']);
+    const key = normalizeKey(pickFirstNonEmpty(registro['INSCRICAO'], registro['MASP'], registro['HGV-0'], registro['NOME']));
     if (!key) continue;
     map.set(key, registro);
   }
@@ -161,29 +179,36 @@ const formatDescription = (change: Change, currentOrgaoDestino?: string): React.
   return description;
 };
 
-const isRetirement = (row: HistoryRow) => {
-  const situacao = (row.toSituacao ?? '').trim().toUpperCase();
+const isRetirement = (row: HistoryRow | Change) => {
+  const situacao = ((row as HistoryRow).toSituacao ?? (row as Change).toSituacao ?? '').trim().toUpperCase();
   return situacao === 'APOSENTADO' || situacao === 'AFASTAMENTO PRELIMINAR À APOSENTADORIA';
 };
 
 const extractLatestChanges = (history: HistoryItem[], currentMap: Map<string, CurrentRecord>): HistoryRow[] => {
+  console.log('[HistoryPage] extractLatestChanges: iniciando', history.length, 'history items');
   const latestMap = new Map<string, { change: Change; commit: CommitInfo }>();
   const sorted = [...history].sort((a, b) => b.commit.date.localeCompare(a.commit.date));
 
   for (const item of sorted) {
     for (const change of item.changes) {
-      const key = normalizeKey(change.inscricao ?? change.masp ?? change.nome ?? '');
-      if (!key) continue;
+      const key = normalizeKey(pickFirstNonEmpty(change.inscricao, change.masp, change.nome));
+      if (!key) {
+        console.log('[HistoryPage] extractLatestChanges: change sem key', change);
+        continue;
+      }
       if (!latestMap.has(key)) {
         latestMap.set(key, { change, commit: item.commit });
       }
     }
   }
 
-  return Array.from(latestMap.values())
+  const latestRows: HistoryRow[] = Array.from(latestMap.values())
     .map(({ change, commit }) => {
-      const key = normalizeKey(change.inscricao ?? change.masp ?? change.nome ?? '');
+      const key = normalizeKey(pickFirstNonEmpty(change.inscricao, change.masp, change.nome));
       const current = currentMap.get(key);
+      if (!current) {
+        console.log('[HistoryPage] extractLatestChanges: currentMap não encontrou registro para', key, change.nome, change.toSituacao);
+      }
       const currentOrgaoDestino = current?.['ORGAO_DESTINO'] ?? undefined;
       const currentDataExoneracao = current?.['DATA_EXONERACAO'] ?? current?.['DATA_INATIVIDADE'] ?? undefined;
       return {
@@ -192,8 +217,47 @@ const extractLatestChanges = (history: HistoryItem[], currentMap: Map<string, Cu
         currentOrgaoDestino,
         currentDataExoneracao,
       };
-    })
-    .sort((a, b) => b.commitDate.localeCompare(a.commitDate));
+    });
+
+  console.log('[HistoryPage] extractLatestChanges: latestRows count', latestRows.length);
+
+  const latestRowByKey = new Map<string, HistoryRow>();
+  for (const row of latestRows) {
+    const key = normalizeKey(pickFirstNonEmpty(row.inscricao, row.masp, row.nome));
+    latestRowByKey.set(key, row);
+  }
+
+  const retirementRows: HistoryRow[] = [];
+  const addedRetirementKeys = new Set<string>();
+  for (const item of sorted) {
+    for (const change of item.changes) {
+      if (!isRetirement(change)) continue;
+      const key = normalizeKey(pickFirstNonEmpty(change.inscricao, change.masp, change.nome));
+      if (!key || addedRetirementKeys.has(key)) continue;
+      const existing = latestRowByKey.get(key);
+      if (existing && isRetirement(existing)) {
+        console.log('[HistoryPage] extractLatestChanges: já existe aposentadoria para', key, change.nome);
+        continue;
+      }
+
+      if (!currentMap.has(key)) {
+        console.log('[HistoryPage] extractLatestChanges: retirement key sem currentMap', key, change.nome, change.toSituacao);
+      }
+      const current = currentMap.get(key);
+      const currentOrgaoDestino = current?.['ORGAO_DESTINO'] ?? undefined;
+      const currentDataExoneracao = current?.['DATA_EXONERACAO'] ?? current?.['DATA_INATIVIDADE'] ?? undefined;
+      retirementRows.push({
+        ...change,
+        commitDate: item.commit.date,
+        currentOrgaoDestino,
+        currentDataExoneracao,
+      });
+      addedRetirementKeys.add(key);
+    }
+  }
+
+  console.log('[HistoryPage] extractLatestChanges: retirementRows count', retirementRows.length);
+  return [...latestRows, ...retirementRows].sort((a, b) => b.commitDate.localeCompare(a.commitDate));
 };
 
 const HistoryPage: React.FC = () => {
@@ -219,24 +283,31 @@ const HistoryPage: React.FC = () => {
     const criarUrlSemCache = (baseUrl: string) => baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'v=' + Date.now();
 
     const fetchCurrentData = async () => {
+      console.log('[HistoryPage] fetchCurrentData: iniciando');
       for (const caminho of caminhos) {
         try {
+          console.log('[HistoryPage] fetchCurrentData: tentando', caminho);
           const response = await fetch(criarUrlSemCache(caminho), { cache: 'no-store', headers: { 'cache-control': 'no-cache' } as any });
+          console.log('[HistoryPage] fetchCurrentData: resposta', caminho, response.status);
           if (!response.ok) continue;
           let texto = await response.text();
           texto = texto.replace(/^\uFEFF/, '');
           const registros = parseCsv(texto);
+          console.log('[HistoryPage] fetchCurrentData: registros extraídos', caminho, registros.length);
           if (registros.length === 0) continue;
           return registros;
-        } catch {
+        } catch (erro) {
+          console.log('[HistoryPage] fetchCurrentData: falha', caminho, erro);
           continue;
         }
       }
+      console.log('[HistoryPage] fetchCurrentData: nenhum arquivo atual encontrado');
       return [] as CurrentRecord[];
     };
 
     const loadHistory = async () => {
       try {
+        console.log('[HistoryPage] loadHistory: iniciando');
         const baseUrl = import.meta.env.BASE_URL ?? './';
         const caminhosHistorico = [
           `${baseUrl}alteracoes-registros.json`,
@@ -245,6 +316,7 @@ const HistoryPage: React.FC = () => {
           '/evasao/alteracoes-registros.json',
           '/evasao/dist/alteracoes-registros.json',
         ];
+        console.log('[HistoryPage] loadHistory: baseUrl=', baseUrl, 'caminhosHistorico=', caminhosHistorico);
 
         const [currentRecords, historyResponse] = await Promise.all([
           fetchCurrentData(),
@@ -252,12 +324,15 @@ const HistoryPage: React.FC = () => {
             let response: Response | null = null;
             for (const caminho of caminhosHistorico) {
               try {
+                console.log('[HistoryPage] loadHistory: tentando histórico', caminho);
                 response = await fetch(criarUrlSemCache(caminho), { cache: 'no-store', headers: { 'cache-control': 'no-cache' } as any });
+                console.log('[HistoryPage] loadHistory: resposta histórico', caminho, response?.status);
                 if (response.ok) {
                   setHistorySource(caminho);
                   return response;
                 }
-              } catch {
+              } catch (erro) {
+                console.log('[HistoryPage] loadHistory: falha histórico', caminho, erro);
                 // tentar próximo caminho
               }
             }
@@ -275,8 +350,13 @@ const HistoryPage: React.FC = () => {
           : Array.isArray(payload)
             ? payload
             : [];
+        console.log('[HistoryPage] loadHistory: historyData items', historyData.length);
+        if (historyData.length > 0) {
+          console.log('[HistoryPage] loadHistory: first item', historyData[0]);
+        }
 
         const currentMap = buildCurrentRecordMap(currentRecords);
+        console.log('[HistoryPage] loadHistory: currentMap size', currentMap.size);
         setHistoryRows(extractLatestChanges(historyData, currentMap));
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Erro desconhecido ao carregar o histórico.');
@@ -293,7 +373,7 @@ const HistoryPage: React.FC = () => {
   const summaryText = useMemo(() => {
     if (loading) return 'Carregando histórico de alterações...';
     if (error) return 'Não foi possível carregar o histórico.';
-    return `Mostrando ${historyRows.length} últimas alterações, uma por auditor${retirementCount > 0 ? ` (${retirementCount} aposentadorias/afastamentos incluídos)` : ''}.`;
+    return `Hisórico de alterações do Observatório das Evasões`;
   }, [historyRows.length, retirementCount, loading, error]);
 
   return (
@@ -301,15 +381,12 @@ const HistoryPage: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <header className="mb-10 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-red-400">Histórico de Alterações</h1>
-          <p className="mt-2 text-gray-400">Todas as alterações relevantes registradas no arquivo de dados.</p>
         </header>
 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
           <div>
             <p className="text-gray-300">{summaryText}</p>
-            {historySource && !loading && !error && (
-              <p className="text-xs text-gray-500">Base de histórico carregada de: {historySource}</p>
-            )}
+            {historySource && !loading && !error}
           </div>
           <div className="flex flex-wrap gap-3 justify-center sm:justify-end">
             <a

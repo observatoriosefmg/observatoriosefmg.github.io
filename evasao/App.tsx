@@ -21,10 +21,20 @@ type RecentChange = {
 
 const normalizeKey = (value: string | null | undefined) => String(value ?? '').trim().toUpperCase();
 
+const pickFirstNonEmpty = (...values: Array<string | null | undefined>) => {
+  for (const value of values) {
+    if (value != null) {
+      const trimmed = String(value).trim();
+      if (trimmed !== '') return trimmed;
+    }
+  }
+  return '';
+};
+
 const buildCurrentRecordMap = (records: any[]) => {
   const map = new Map<string, any>();
   for (const record of records) {
-    const key = normalizeKey(record['INSCRICAO'] ?? record['MASP'] ?? record['HGV-0'] ?? record['NOME']);
+    const key = normalizeKey(pickFirstNonEmpty(record['INSCRICAO'], record['MASP'], record['HGV-0'], record['NOME']));
     if (!key) continue;
     map.set(key, record);
   }
@@ -74,19 +84,27 @@ const App: React.FC = () => {
     );
 
     if (isoMatch) {
-      const [, year, month, day, hour, minute] = isoMatch;
-      return `${day}/${month}/${year} ${hour}:${minute}`;
-    }
-
-    const date = analisarDataBrasil(dateString);
-    if (date) {
-      return date.toLocaleString('pt-BR', {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-      });
+      }).format(date);
+    }
+
+    const date = analisarDataBrasil(dateString);
+    if (date) {
+      return new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(date);
     }
 
     return dateString;
@@ -324,7 +342,7 @@ const App: React.FC = () => {
           for (const item of historyItems) {
             if (!item || !Array.isArray(item.changes) || !item.commit?.date) continue;
             for (const change of item.changes) {
-              const key = normalizeKey(change.inscricao ?? change.masp ?? change.nome ?? '');
+              const key = normalizeKey(pickFirstNonEmpty(change.inscricao, change.masp, change.nome));
               if (!key) continue;
               const current = currentMap.get(key);
               const currentDestino = current ? getCurrentOrgaoDestino(current) : null;
@@ -339,7 +357,7 @@ const App: React.FC = () => {
             }
           }
 
-          const ordenadas = changes.sort((a, b) => b.commitDate.localeCompare(a.commitDate)).slice(0, 3);
+          const ordenadas = changes.sort((a, b) => b.commitDate.localeCompare(a.commitDate)).slice(0, 5);
           if (montado) {
             setRecentChanges(ordenadas);
             setRecentChangesError(null);
@@ -939,7 +957,7 @@ const App: React.FC = () => {
 
           <section className="bg-gray-900 rounded-xl p-4 border border-gray-800 mb-8">
             <div className="mb-3">
-              <h2 className="text-2xl font-bold text-amber-400">Últimas alterações</h2>
+              <h2 className="text-2xl font-bold text-amber-400">Últimas alterações do Observatório</h2>
             </div>
             {recentChangesError ? (
               <div className="text-sm text-red-200">{recentChangesError}</div>
