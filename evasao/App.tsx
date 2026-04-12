@@ -957,7 +957,7 @@ const App: React.FC = () => {
 
           <section className="bg-gray-900 rounded-xl p-4 border border-gray-800 mb-8">
             <div className="mb-3">
-              <h2 className="text-2xl font-bold text-amber-400">Últimas alterações do Observatório</h2>
+              <h2 className="text-2xl font-bold text-amber-400">Últimas evasões cadastradas no Observatório</h2>
             </div>
             {recentChangesError ? (
               <div className="text-sm text-red-200">{recentChangesError}</div>
