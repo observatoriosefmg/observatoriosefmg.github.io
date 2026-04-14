@@ -975,7 +975,7 @@ const App: React.FC = () => {
                   ))}
                 </ul>
                 <div className="mt-3 text-sm">
-                  <a href="/evasao/dist/history.html" className="text-amber-400 hover:text-amber-300">Ver histórico completo</a>
+                  <a href="/evasao/dist/historico_alteracoes.html" className="text-amber-400 hover:text-amber-300">Ver histórico completo</a>
                 </div>
               </>
             )}
@@ -1012,7 +1012,7 @@ const App: React.FC = () => {
         {/* Links para páginas auxiliares */}
         <div className="mt-8 mb-6 flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
           <a
-            href="/evasao/dist/table.html"
+            href="/evasao/dist/dados_detalhados.html"
             className="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-red-600 border border-transparent rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
           >
             Ver Dados Detalhados →
