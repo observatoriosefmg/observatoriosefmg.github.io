@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-04-11T15:44:54.485Z",
-  "commitCount": 125,
-  "totalChangeCount": 29,
+  "generatedAt": "2026-04-14T02:34:03.845Z",
+  "commitCount": 128,
+  "totalChangeCount": 35,
   "history": [
     {
       "commit": {
@@ -451,6 +451,149 @@
             "NOME": "GABRIEL BRESSANE SILVA",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "ISS CUIABÁ"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "65ee3486a46a02d2068209cbf9619d4b41a690a2",
+        "date": "2026-02-11T12:08:41Z",
+        "author": "observatoriosefmg",
+        "message": "dados"
+      },
+      "changeCount": 6,
+      "changes": [
+        {
+          "masp": "266014059",
+          "inscricao": "266014059",
+          "nome": "FERNANDA MARCHIORI DAMASCENO",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "ISS SP",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266014059",
+            "NOME": "FERNANDA MARCHIORI DAMASCENO",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266014059",
+            "NOME": "FERNANDA MARCHIORI DAMASCENO",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "ISS SP"
+          }
+        },
+        {
+          "masp": "266014964",
+          "inscricao": "266014964",
+          "nome": "TULIO DE BRITO QUINAN",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "SEFAZ/ES",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266014964",
+            "NOME": "TULIO DE BRITO QUINAN",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266014964",
+            "NOME": "TULIO DE BRITO QUINAN",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "SEFAZ/ES"
+          }
+        },
+        {
+          "masp": "266007292",
+          "inscricao": "266007292",
+          "nome": "LEANDRO ROGERIO FIM",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266007292",
+            "NOME": "LEANDRO ROGERIO FIM",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266007292",
+            "NOME": "LEANDRO ROGERIO FIM",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "266008107",
+          "inscricao": "266008107",
+          "nome": "LUDMILA CARVALHO NEVES",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266008107",
+            "NOME": "LUDMILA CARVALHO NEVES",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266008107",
+            "NOME": "LUDMILA CARVALHO NEVES",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "266009372",
+          "inscricao": "266009372",
+          "nome": "RUBENS BARDELLI JUNIOR",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "SEFAZ/RS",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266009372",
+            "NOME": "RUBENS BARDELLI JUNIOR",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266009372",
+            "NOME": "RUBENS BARDELLI JUNIOR",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "SEFAZ/RS"
+          }
+        },
+        {
+          "masp": "266010999",
+          "inscricao": "266010999",
+          "nome": "ANTONIO LUIS SOMBRA DE MEDEIROS",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "STN",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266010999",
+            "NOME": "ANTONIO LUIS SOMBRA DE MEDEIROS",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266010999",
+            "NOME": "ANTONIO LUIS SOMBRA DE MEDEIROS",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "STN"
           }
         }
       ]
