@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-04-14T02:53:42.494Z",
-  "commitCount": 131,
-  "totalChangeCount": 35,
+  "generatedAt": "2026-04-14T10:45:05.938Z",
+  "commitCount": 132,
+  "totalChangeCount": 40,
   "history": [
     {
       "commit": {
@@ -1001,6 +1001,127 @@
             "NOME": "GUILHERME COUTO SOARES",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
             "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "c51036c013ea34b0b8aaa8ab35c12e46a5d3993c",
+        "date": "2026-04-14T10:44:50Z",
+        "author": "observatoriosefmg",
+        "message": "desistencias"
+      },
+      "changeCount": 5,
+      "changes": [
+        {
+          "masp": "266004708",
+          "inscricao": "266004708",
+          "nome": "JULIANA SILVA PEREIRA",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "ISS FORTALEZA",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266004708",
+            "NOME": "JULIANA SILVA PEREIRA",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266004708",
+            "NOME": "JULIANA SILVA PEREIRA",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "ISS FORTALEZA"
+          }
+        },
+        {
+          "masp": "266010407",
+          "inscricao": "266010407",
+          "nome": "RODRIGO KENKITI NAGATA",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "SEFAZ ES",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266010407",
+            "NOME": "RODRIGO KENKITI NAGATA",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266010407",
+            "NOME": "RODRIGO KENKITI NAGATA",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "SEFAZ ES"
+          }
+        },
+        {
+          "masp": "266017550",
+          "inscricao": "266017550",
+          "nome": "GREISON DIAS",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266017550",
+            "NOME": "GREISON DIAS",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266017550",
+            "NOME": "GREISON DIAS",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "266002478",
+          "inscricao": "266002478",
+          "nome": "MARCOS VINICIUS PRESCENDO TONIN",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "TCE GO",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266002478",
+            "NOME": "MARCOS VINICIUS PRESCENDO TONIN",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266002478",
+            "NOME": "MARCOS VINICIUS PRESCENDO TONIN",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "TCE GO"
+          }
+        },
+        {
+          "masp": "266003625",
+          "inscricao": "266003625",
+          "nome": "DANILO LUIZ EBIHARA BARBOSA",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "TCE SP",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266003625",
+            "NOME": "DANILO LUIZ EBIHARA BARBOSA",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266003625",
+            "NOME": "DANILO LUIZ EBIHARA BARBOSA",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "TCE SP"
           }
         }
       ]
