@@ -92,7 +92,9 @@ const normalizeValue = (value) => {
 const normalizeKey = (value) => normalizeValue(value).toUpperCase();
 
 const keyForRecord = (record) => {
-  const key = normalizeValue(record['MASP'] ?? record['HGV-0'] ?? record['INSCRICAO'] ?? record['NOME']);
+  const key = normalizeValue(record['MASP'] ?? record['HGV-0']) ||
+              normalizeValue(record['INSCRICAO']) ||
+              normalizeValue(record['NOME']);
   return key ? normalizeKey(key) : null;
 };
 

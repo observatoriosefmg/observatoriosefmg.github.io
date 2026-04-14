@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
+// Defina como true para reativar o popup de novidade
+const ANNOUNCEMENT_ENABLED = false;
+
 const AnnouncementModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    if (!ANNOUNCEMENT_ENABLED) return;
     // Apenas mostrar o modal na primeira vez que a página é carregada
     // Usar localStorage para rastrear se o usuário já viu o modal
     const alreadyShown = localStorage.getItem('announcementModalShown');
