@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-04-17T18:52:46.645Z",
-  "commitCount": 135,
+  "generatedAt": "2026-04-22T22:21:44.940Z",
+  "commitCount": 136,
   "commits": [
     {
       "hash": "75be4410df95f79e9196db7df92d569d327c1d01",
@@ -812,6 +812,12 @@
       "date": "2026-04-17T18:52:31Z",
       "author": "observatoriosefmg",
       "message": "ALINY"
+    },
+    {
+      "hash": "c25f0a355b1e78a41f2775a71352fd8bb66a9023",
+      "date": "2026-04-22T22:21:35Z",
+      "author": "observatoriosefmg",
+      "message": "SEFAZ MT"
     }
   ]
 }
