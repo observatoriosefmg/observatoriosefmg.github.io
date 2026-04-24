@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-04-22T22:21:44.933Z",
-  "commitCount": 136,
-  "totalChangeCount": 40,
+  "generatedAt": "2026-04-24T10:31:25.882Z",
+  "commitCount": 137,
+  "totalChangeCount": 41,
   "history": [
     {
       "commit": {
@@ -1122,6 +1122,39 @@
             "NOME": "DANILO LUIZ EBIHARA BARBOSA",
             "SITUACAO": "DESISTENTE",
             "ORGAO_DESTINO": "TCE SP"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "10767a0bccc4e806c8b0f39ae43d44dcddcc39aa",
+        "date": "2026-04-24T10:31:13Z",
+        "author": "observatoriosefmg",
+        "message": "GILBERTO MAGALHAES LEITE"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "2976603",
+          "inscricao": "",
+          "nome": "GILBERTO MAGALHAES LEITE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "APOSENTADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "2976603",
+            "INSCRICAO": "",
+            "NOME": "GILBERTO MAGALHAES LEITE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "2976603",
+            "INSCRICAO": "",
+            "NOME": "GILBERTO MAGALHAES LEITE",
+            "SITUACAO": "APOSENTADO",
+            "ORGAO_DESTINO": ""
           }
         }
       ]
