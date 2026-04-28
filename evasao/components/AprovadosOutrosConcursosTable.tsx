@@ -7,11 +7,22 @@ interface AuditorAguardandoDetail {
   name: string;
   area?: string | null;
   unidade?: string | null;
+  tipoAprovacao: 'Aprovado nas vagas' | 'Cadastro de Reservas';
+  aprovacoes: {
+    tipoAprovacao: 'Aprovado nas vagas' | 'Cadastro de Reservas';
+    cargo: string;
+    modalidade: string;
+    posicao: number | null;
+    numeroVagas: number | null;
+    ultimaVagaNomeada: number | null;
+    observacao?: string | null;
+  }[];
 }
 
 interface AprovadoData {
   concurso: string;
   count: number;
+  statusConcurso: string;
 }
 
 interface AprovadosOutrosConcursosTableProps {
@@ -26,12 +37,11 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
     setOpen(prev => ({ ...prev, [concurso]: !prev[concurso] }));
   };
 
-  // Tooltip portal component
-  const TooltipPortal: React.FC<{ pos: { left: number; top: number } | null; text: string; visible: boolean }> = ({ pos, text, visible }) => {
+  const TooltipPortal: React.FC<{ pos: { left: number; top: number } | null; content: React.ReactNode; visible: boolean }> = ({ pos, content, visible }) => {
     if (!visible || !pos) return null;
 
     const viewportWidth = window.innerWidth;
-    const tooltipWidth = 200;
+    const tooltipWidth = 280;
     const tooltipHeight = 40;
 
     let left = pos.left;
@@ -55,17 +65,15 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
       <div
         role="tooltip"
         style={{ left, top, transform }}
-        className="fixed z-[9999] pointer-events-none bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg border border-gray-700 max-w-[200px] break-words"
+        className="fixed z-[9999] pointer-events-none bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg border border-gray-700 max-w-[280px] break-words"
       >
-        <div className="relative">
-          {text}
-        </div>
+        <div className="relative">{content}</div>
       </div>,
-      document.body
+      document.body,
     );
   };
 
-  const AuditorRow: React.FC<{ aud: AuditorAguardandoDetail; concurso: string; rowIndex: number; itemIndex: number }> = ({ aud, concurso, rowIndex, itemIndex }) => {
+  const AuditorRow: React.FC<{ aud: AuditorAguardandoDetail }> = ({ aud }) => {
     const btnRef = useRef<HTMLButtonElement | null>(null);
     const [visible, setVisible] = useState(false);
     const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -73,6 +81,42 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
     const areaUnit = aud.area
       ? (aud.unidade && String(aud.unidade).trim() ? `${aud.area} - ${aud.unidade}` : aud.area)
       : '—';
+
+    const formatPosicao = (valor: number | null) => (valor != null ? `${valor}º` : '—');
+
+    const tooltipAriaLabel = aud.aprovacoes
+      .map((item) => {
+        const base = `${item.cargo || '—'} (${item.modalidade || '—'})`;
+        const posicao = `${formatPosicao(item.posicao)} de ${item.numeroVagas ?? '—'} vagas`;
+        const nomeado = item.ultimaVagaNomeada != null ? `(Nomeado até o ${formatPosicao(item.ultimaVagaNomeada)} lugar)` : '';
+        const observacao = item.observacao ? `Observação: ${item.observacao}` : '';
+        return [base, posicao, nomeado, observacao].filter(Boolean).join(' ');
+      })
+      .join(' | ');
+
+    const tooltipDetalhes = (
+      <div className="space-y-2">
+        {aud.aprovacoes.map((item, i) => (
+          <div key={`${aud.name}-${i}`} className={i > 0 ? 'pt-2 border-t border-gray-700/80' : ''}>
+            <div>{`${item.cargo || '—'} (${item.modalidade || '—'})`}</div>
+            <div>
+              <span className="text-amber-400 font-semibold">{formatPosicao(item.posicao)}</span>
+              {` de ${item.numeroVagas ?? '—'} vagas`}
+            </div>
+            {item.ultimaVagaNomeada != null && (
+              <div>
+                {'(Nomeado até o '}
+                <span className="text-amber-400 font-semibold">{formatPosicao(item.ultimaVagaNomeada)}</span>
+                {' lugar)'}
+              </div>
+            )}
+            {item.observacao && (
+              <div className="text-gray-300">{item.observacao}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
 
     const show = () => {
       const el = btnRef.current;
@@ -82,6 +126,7 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
       }
       setVisible(true);
     };
+
     const hide = () => setVisible(false);
 
     return (
@@ -90,7 +135,24 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
           <div className="font-medium text-gray-200">{aud.name}</div>
           <div className="text-xs text-gray-400">{areaUnit}</div>
         </div>
-        <span className="text-sm text-gray-400"></span>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-semibold px-2 py-1 rounded ${aud.tipoAprovacao === 'Aprovado nas vagas' ? 'bg-emerald-900/50 text-emerald-300 border border-emerald-700/40' : 'bg-amber-900/50 text-amber-300 border border-amber-700/40'}`}>
+            {aud.tipoAprovacao}
+          </span>
+          <button
+            ref={btnRef}
+            type="button"
+            onMouseEnter={show}
+            onMouseLeave={hide}
+            onFocus={show}
+            onBlur={hide}
+            className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400"
+            aria-label={tooltipAriaLabel}
+          >
+            <FontAwesomeIcon icon={faQuestion} className="w-2 h-2 bold-icon" aria-hidden="true" color="#1A2436" />
+          </button>
+          <TooltipPortal pos={pos} content={tooltipDetalhes} visible={visible} />
+        </div>
       </li>
     );
   };
@@ -118,7 +180,10 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
                       <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 text-amber-400 transform ${isOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                      <span className="break-words whitespace-normal block">{concurso}</span>
+                      <span className="break-words whitespace-normal block">
+                        <span className="block">{concurso}</span>
+                        <span className="block text-xs text-amber-300/90 mt-1">{item.statusConcurso}</span>
+                      </span>
                     </button>
                   </td>
                   <td className="px-6 py-4 text-right font-bold text-amber-400">{item.count}</td>
@@ -129,7 +194,7 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
                     <td colSpan={2} className="px-6 py-3">
                       <ul className="space-y-2">
                         {rows.map((aud, i) => (
-                          <AuditorRow key={`${index}-${i}`} aud={aud} concurso={concurso} rowIndex={index} itemIndex={i} />
+                          <AuditorRow key={`${index}-${i}`} aud={aud} />
                         ))}
                       </ul>
                     </td>
