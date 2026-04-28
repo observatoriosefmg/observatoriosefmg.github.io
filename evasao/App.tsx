@@ -19,6 +19,34 @@ type RecentChange = {
   orgaoDestino?: string | null;
 };
 
+type TipoAprovacao = 'Aprovado nas vagas' | 'Cadastro de Reservas';
+
+type AprovacaoOutroConcursoRaw = Record<string, string | null>;
+
+type OutroConcursoRaw = Record<string, string | null>;
+
+type AprovacaoOutroConcursoNormalizada = {
+  nome: string;
+  concurso: string;
+  cargo: string;
+  modalidade: string;
+  posicao: string;
+  ignorar: boolean;
+  observacao: string;
+};
+
+type OutroConcursoNormalizado = {
+  concurso: string;
+  cargo: string;
+  modalidade: string;
+  numeroVagas: number | null;
+  dataHomologacao: string;
+  ultimaVagaNomeada: number | null;
+  dataVencimento: string;
+  prorrogavel: boolean;
+  observacao: string;
+};
+
 const normalizeKey = (value: string | null | undefined) => String(value ?? '').trim().toUpperCase();
 
 const pickFirstNonEmpty = (...values: Array<string | null | undefined>) => {
@@ -46,10 +74,124 @@ const getCurrentOrgaoDestino = (record: any): string | null => {
   return destino || null;
 };
 
+const normalizarNomeChave = (valor: string | null | undefined) => String(valor ?? '').trim().replace(/\s+/g, ' ').toUpperCase();
+
+const normalizarTexto = (valor: string | null | undefined) => String(valor ?? '').trim();
+
+const analisarCsvSeparadoPorPontoVirgula = (texto: string) => {
+  const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== '');
+  if (linhas.length === 0) return [];
+
+  const analisarLinha = (linha: string) => {
+    const partes: string[] = [];
+    let atual = '';
+    let entreAspas = false;
+    for (let i = 0; i < linha.length; i++) {
+      const caractere = linha[i];
+      if (caractere === '"') {
+        if (entreAspas && linha[i + 1] === '"') {
+          atual += '"';
+          i++;
+        } else {
+          entreAspas = !entreAspas;
+        }
+        continue;
+      }
+      if (caractere === ';' && !entreAspas) {
+        partes.push(atual);
+        atual = '';
+        continue;
+      }
+      atual += caractere;
+    }
+    partes.push(atual);
+    return partes;
+  };
+
+  const cabecalhos = analisarLinha(linhas[0]).map(coluna => coluna.trim());
+  const registros: Record<string, string | null>[] = [];
+
+  for (let i = 1; i < linhas.length; i++) {
+    const partes = analisarLinha(linhas[i]);
+    while (partes.length < cabecalhos.length) partes.push('');
+    const item: Record<string, string | null> = {};
+    for (let j = 0; j < cabecalhos.length; j++) {
+      item[cabecalhos[j]] = partes[j] ? partes[j].trim() : null;
+    }
+    registros.push(item);
+  }
+
+  return registros;
+};
+
+const parseBoolean = (valor: string | null | undefined) => {
+  const normalizado = String(valor ?? '').trim().toLowerCase();
+  return ['true', '1', 'sim', 'yes'].includes(normalizado);
+};
+
+const parseNumber = (valor: string | null | undefined): number | null => {
+  const texto = normalizarTexto(valor);
+  if (!texto) return null;
+  const somenteDigitos = texto.replace(/[^\d,.-]/g, '').replace(',', '.');
+  const numero = Number(somenteDigitos);
+  return Number.isFinite(numero) ? numero : null;
+};
+
+const normalizarLinhaAprovacao = (linha: AprovacaoOutroConcursoRaw): AprovacaoOutroConcursoNormalizada | null => {
+  const nome = normalizarTexto(pickFirstNonEmpty(linha['NOME'], linha['Nome'], linha['NOME_APROVADO'], linha['Nome aprovado']));
+  let concursoOriginal = normalizarTexto(pickFirstNonEmpty(linha['CONCURSO'], linha['Concurso']));
+  if (!nome || !concursoOriginal) return null;
+
+  let ignorar = parseBoolean(pickFirstNonEmpty(linha['IGNORAR'], linha['Ignorar']));
+  if (concursoOriginal.startsWith('*')) {
+    ignorar = true;
+    concursoOriginal = concursoOriginal.slice(1).trim();
+  }
+
+  const concurso = concursoOriginal.replace(/\s*\(CR\)\s*$/i, '').trim();
+  if (!concurso) return null;
+
+  return {
+    nome,
+    concurso,
+    cargo: normalizarTexto(pickFirstNonEmpty(linha['CARGO'], linha['Cargo'])),
+    modalidade: normalizarTexto(pickFirstNonEmpty(linha['MODALIDADE'], linha['Modalidade'])) || 'Ampla concorrencia',
+    posicao: normalizarTexto(pickFirstNonEmpty(linha['POSICAO'], linha['POSIÇÃO'], linha['POSICAO_CANDIDATO'], linha['POSIÇÃO CANDIDATO'])),
+    ignorar,
+    observacao: normalizarTexto(pickFirstNonEmpty(linha['OBSERVAÇÃO'], linha['OBSERVACAO'], linha['OBSERVAÇÃO APROVAÇÃO'], linha['OBSERVACAO APROVACAO'])),
+  };
+};
+
+const normalizarLinhaOutroConcurso = (linha: OutroConcursoRaw): OutroConcursoNormalizado | null => {
+  const concurso = normalizarTexto(pickFirstNonEmpty(linha['CONCURSO'], linha['Concurso']));
+  const cargo = normalizarTexto(pickFirstNonEmpty(linha['CARGO'], linha['Cargo']));
+  const modalidade = normalizarTexto(pickFirstNonEmpty(linha['MODALIDADE'], linha['Modalidade']));
+
+  if (!concurso || !cargo || !modalidade) return null;
+
+  return {
+    concurso,
+    cargo,
+    modalidade,
+    numeroVagas: parseNumber(pickFirstNonEmpty(linha['NUMERO_VAGAS'], linha['NÚMERO_VAGAS'])),
+    dataHomologacao: normalizarTexto(pickFirstNonEmpty(linha['DATA_HOMOLOGACAO'], linha['DATA HOMOLOGACAO'], linha['DATA_HOMOLOGAÇÃO'], linha['DATA HOMOLOGAÇÃO'])),
+    ultimaVagaNomeada: parseNumber(pickFirstNonEmpty(linha['ULTIMA_VAGA_NOMEADA'], linha['ÚLTIMA_VAGA_NOMEADA'])),
+    dataVencimento: normalizarTexto(pickFirstNonEmpty(linha['DATA_VENCIMENTO'], linha['DATA VENCIMENTO'])),
+    prorrogavel: parseBoolean(pickFirstNonEmpty(linha['PRORROGAVEL'], linha['PRORROGÁVEL'])),
+    observacao: normalizarTexto(pickFirstNonEmpty(linha['OBSERVACAO'], linha['OBSERVAÇÃO'])),
+  };
+};
+
+const construirChaveTripla = (concurso: string, cargo: string, modalidade: string) => {
+  return [normalizeKey(concurso), normalizeKey(cargo), normalizeKey(modalidade)].join('||');
+};
+
 const App: React.FC = () => {
   const [diasDesdeUltimaEvasao, setDiasDesdeUltimaEvasao] = useState<number | null>(null);
 
   const [dadosBrutos, setDadosBrutos] = useState<any[]>([]);
+  const [dadosAprovacoesOutrosConcursos, setDadosAprovacoesOutrosConcursos] = useState<AprovacaoOutroConcursoRaw[]>([]);
+  const [dadosOutrosConcursos, setDadosOutrosConcursos] = useState<OutroConcursoRaw[]>([]);
   const [recentChanges, setRecentChanges] = useState<RecentChange[]>([]);
   const [recentChangesError, setRecentChangesError] = useState<string | null>(null);
 
@@ -305,6 +447,106 @@ const App: React.FC = () => {
       // eslint-disable-next-line no-console
       console.warn('Não foi possível carregar dados.csv; usando dados internos.');
       setEstaCarregando(false);
+    }
+
+    tryLoad();
+
+    return () => { montado = false; };
+  }, []);
+
+  useEffect(() => {
+    let montado = true;
+
+    const caminhos = [
+      '/data/aprovacoes_outros_concursos.csv',
+      '/evasao/data/aprovacoes_outros_concursos.csv',
+      'data/aprovacoes_outros_concursos.csv',
+      './data/aprovacoes_outros_concursos.csv',
+      '/evasao/dist/data/aprovacoes_outros_concursos.csv',
+      '/evasao/dist/assets/aprovacoes_outros_concursos.csv',
+      '/evasao/aprovacoes_outros_concursos.csv',
+      '/aprovacoes_outros_concursos.csv',
+      'dist/data/aprovacoes_outros_concursos.csv',
+      'assets/aprovacoes_outros_concursos.csv',
+    ];
+
+    const criarUrlSemCache = (baseUrl: string) => baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'v=' + Date.now();
+
+    async function tryLoad() {
+      for (const caminho of caminhos) {
+        try {
+          const resposta = await fetch(criarUrlSemCache(caminho), { cache: 'no-store', headers: { 'cache-control': 'no-cache' } as any });
+          if (!resposta.ok) continue;
+          let textoConteudo = await resposta.text();
+          textoConteudo = textoConteudo.replace(/^\uFEFF/, '');
+          const dadosParsed = analisarCsvSeparadoPorPontoVirgula(textoConteudo) as AprovacaoOutroConcursoRaw[];
+          if (!Array.isArray(dadosParsed) || dadosParsed.length === 0) continue;
+
+          if (montado) {
+            setDadosAprovacoesOutrosConcursos(dadosParsed);
+          }
+          return;
+        } catch (erro) {
+          // eslint-disable-next-line no-console
+          console.debug('Falha ao carregar aprovacoes_outros_concursos.csv', caminho, erro);
+        }
+      }
+
+      if (montado) {
+        // eslint-disable-next-line no-console
+        console.warn('Nao foi possivel carregar aprovacoes_outros_concursos.csv; secao ficara vazia.');
+        setDadosAprovacoesOutrosConcursos([]);
+      }
+    }
+
+    tryLoad();
+
+    return () => { montado = false; };
+  }, []);
+
+  useEffect(() => {
+    let montado = true;
+
+    const caminhos = [
+      '/data/outros_concursos.csv',
+      '/evasao/data/outros_concursos.csv',
+      'data/outros_concursos.csv',
+      './data/outros_concursos.csv',
+      '/evasao/dist/data/outros_concursos.csv',
+      '/evasao/dist/assets/outros_concursos.csv',
+      '/evasao/outros_concursos.csv',
+      '/outros_concursos.csv',
+      'dist/data/outros_concursos.csv',
+      'assets/outros_concursos.csv',
+    ];
+
+    const criarUrlSemCache = (baseUrl: string) => baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'v=' + Date.now();
+
+    async function tryLoad() {
+      for (const caminho of caminhos) {
+        try {
+          const resposta = await fetch(criarUrlSemCache(caminho), { cache: 'no-store', headers: { 'cache-control': 'no-cache' } as any });
+          if (!resposta.ok) continue;
+          let textoConteudo = await resposta.text();
+          textoConteudo = textoConteudo.replace(/^\uFEFF/, '');
+          const dadosParsed = analisarCsvSeparadoPorPontoVirgula(textoConteudo) as OutroConcursoRaw[];
+          if (!Array.isArray(dadosParsed) || dadosParsed.length === 0) continue;
+
+          if (montado) {
+            setDadosOutrosConcursos(dadosParsed);
+          }
+          return;
+        } catch (erro) {
+          // eslint-disable-next-line no-console
+          console.debug('Falha ao carregar outros_concursos.csv', caminho, erro);
+        }
+      }
+
+      if (montado) {
+        // eslint-disable-next-line no-console
+        console.warn('Nao foi possivel carregar outros_concursos.csv; secao ficara com menos detalhes.');
+        setDadosOutrosConcursos([]);
+      }
     }
 
     tryLoad();
@@ -589,90 +831,208 @@ const App: React.FC = () => {
     return { pontosUnidadeEvasao: pontosUnidadeEvasaoSeparados, pontosUnidadeInatividade: pontosUnidadeInatividadeSeparados, detalhesUnidade: detalhes, detalhesUnidadeInatividade: detalhesInatividade };
   };
 
-  const obterAprovacoesOutrosConcursosValidas = (aprovadoOutroConcurso: any): string[] => {
-    if (!aprovadoOutroConcurso) return [];
+  const mapaAuditoresEmExercicio = new Map<string, { nome: string; area?: string | null; unidade?: string | null }>();
+  for (const registro of dadosBrutos) {
+    if (registro['SITUACAO'] !== 'EM EXERCÍCIO') continue;
+    const nome = normalizarTexto(registro['NOME']);
+    if (!nome) continue;
+    const chaveNome = normalizarNomeChave(nome);
+    if (!mapaAuditoresEmExercicio.has(chaveNome)) {
+      mapaAuditoresEmExercicio.set(chaveNome, {
+        nome,
+        area: registro['AREA'] ?? null,
+        unidade: registro['UNIDADE'] ?? registro['Unidade'] ?? null,
+      });
+    }
+  }
 
-    return String(aprovadoOutroConcurso)
-      .split(',')
-      .map(c => c.trim())
-      .filter(c => c !== '' && !c.startsWith('*'));
+  const ordemTipoAprovacao = (tipo: TipoAprovacao) => (tipo === 'Aprovado nas vagas' ? 0 : 1);
+
+  const concursoEstaVencido = (dataVencimento: string): boolean => {
+    const data = analisarDataBrasil(dataVencimento);
+    if (!data) return false;
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    data.setHours(0, 0, 0, 0);
+    return data.getTime() < hoje.getTime();
+  };
+
+  const formatarDataValidade = (dataVencimento: string) => {
+    const data = analisarDataBrasil(dataVencimento);
+    if (!data) return 'Data indisponível';
+    return data.toLocaleDateString('pt-BR');
   };
 
   // Agrupa dados de aprovados em outros concursos por concurso/órgão
-  const agregarPorAprovacaoOutroConcurso = (registros: any[]): {
-    dadosAprovado: { concurso: string; count: number }[];
-    detalhesAprovado: Record<string, { name: string; area?: string | null; unidade?: string | null }[]>;
+  const agregarPorAprovacaoOutroConcurso = (
+    registros: AprovacaoOutroConcursoRaw[],
+    concursos: OutroConcursoRaw[],
+    areaFiltro: string | null,
+  ): {
+    dadosAprovado: { concurso: string; count: number; statusConcurso: string }[];
+    detalhesAprovado: Record<string, { name: string; area?: string | null; unidade?: string | null; tipoAprovacao: TipoAprovacao; aprovacoes: { tipoAprovacao: TipoAprovacao; cargo: string; modalidade: string; posicao: number | null; numeroVagas: number | null; ultimaVagaNomeada: number | null; observacao?: string | null }[] }[]>;
   } => {
-    const mapaConcursos = new Map<string, number>();
-    const detalhes: Record<string, { name: string; area?: string | null; unidade?: string | null }[]> = {};
+    const mapaConcursosInfo = new Map<string, OutroConcursoNormalizado>();
+    for (const concursoRaw of concursos) {
+      const concursoNormalizado = normalizarLinhaOutroConcurso(concursoRaw);
+      if (!concursoNormalizado) continue;
+      mapaConcursosInfo.set(
+        construirChaveTripla(concursoNormalizado.concurso, concursoNormalizado.cargo, concursoNormalizado.modalidade),
+        concursoNormalizado,
+      );
+    }
+
+    const detalhesPorConcurso = new Map<string, Map<string, { name: string; area?: string | null; unidade?: string | null; aprovacoes: { tipoAprovacao: TipoAprovacao; cargo: string; modalidade: string; posicao: number | null; numeroVagas: number | null; ultimaVagaNomeada: number | null; observacao?: string | null }[] }>>();
+    const detalhes: Record<string, { name: string; area?: string | null; unidade?: string | null; tipoAprovacao: TipoAprovacao; aprovacoes: { tipoAprovacao: TipoAprovacao; cargo: string; modalidade: string; posicao: number | null; numeroVagas: number | null; ultimaVagaNomeada: number | null; observacao?: string | null }[] }[]> = {};
+    const statusConcursoMap = new Map<string, { homologado: boolean; dataVencimento: string; prorrogavel: boolean }>();
 
     for (const registro of registros) {
-      const situacao = registro['SITUACAO'];
-      const aprovadoOutroConcurso = registro['APROVADO_OUTRO_CONCURSO'];
-      const concursos = obterAprovacoesOutrosConcursosValidas(aprovadoOutroConcurso);
+      const aprovado = normalizarLinhaAprovacao(registro);
+      if (!aprovado || aprovado.ignorar) continue;
 
-      // Apenas auditores em exercício com dados de aprovação em outro concurso válidos
-      if (situacao !== 'EM EXERCÍCIO' || concursos.length === 0) {
-        continue;
-      }
+      const concursoRelacionado = mapaConcursosInfo.get(
+        construirChaveTripla(aprovado.concurso, aprovado.cargo, aprovado.modalidade),
+      );
+      if (!concursoRelacionado) continue;
+      if (concursoEstaVencido(concursoRelacionado.dataVencimento)) continue;
 
-      // Nome do auditor
-      const nome = registro['NOME'] ?? '';
-      const area = registro['AREA'] ?? null;
-      const unidade = registro['UNIDADE'] ?? registro['Unidade'] ?? null;
+      const auditorEmExercicio = mapaAuditoresEmExercicio.get(normalizarNomeChave(aprovado.nome));
+      if (!auditorEmExercicio) continue;
 
-      // Para cada concurso, criar uma entrada
-      for (const concurso of concursos) {
-        const anterior = mapaConcursos.get(concurso) ?? 0;
-        mapaConcursos.set(concurso, anterior + 1);
+      if (areaFiltro && auditorEmExercicio.area !== areaFiltro) continue;
 
-        if (!detalhes[concurso]) detalhes[concurso] = [];
-        detalhes[concurso].push({ name: nome, area, unidade });
-      }
-    }
+      const posicaoNumero = parseNumber(aprovado.posicao);
+      const numeroVagas = concursoRelacionado.numeroVagas;
+      const tipoAprovacao: TipoAprovacao = (
+        posicaoNumero != null &&
+        numeroVagas != null &&
+        numeroVagas > 0 &&
+        posicaoNumero <= numeroVagas
+      )
+        ? 'Aprovado nas vagas'
+        : 'Cadastro de Reservas';
 
-    // Converter mapa para array e ordenar por:
-    // 1. Primeiro: órgãos que NÃO terminam com "(CR)"
-    // 2. Depois: órgãos que terminam com "(CR)"
-    // 3. Dentro de cada grupo: ordenar por contagem decrescente
-    const dadosAprovado = Array.from(mapaConcursos.entries())
-      .map(([concurso, count]) => ({ concurso, count }))
-      .sort((a, b) => {
-        const aTerminaCR = a.concurso.trim().endsWith('(CR)');
-        const bTerminaCR = b.concurso.trim().endsWith('(CR)');
-        
-        // Se uma termina com (CR) e a outra não, as que não terminam vem primeiro
-        if (aTerminaCR !== bTerminaCR) {
-          return aTerminaCR ? 1 : -1;
-        }
-        
-        // Se ambas têm o mesmo padrão de terminação, ordena por contagem (maior para menor)
-        return b.count - a.count;
+      const statusAtual = statusConcursoMap.get(aprovado.concurso) ?? { homologado: false, dataVencimento: '', prorrogavel: false };
+      const homologado = statusAtual.homologado || !!concursoRelacionado.dataHomologacao;
+      const dataVencimento = (() => {
+        if (!concursoRelacionado.dataVencimento) return statusAtual.dataVencimento;
+        if (!statusAtual.dataVencimento) return concursoRelacionado.dataVencimento;
+        const dataNova = analisarDataBrasil(concursoRelacionado.dataVencimento);
+        const dataAtual = analisarDataBrasil(statusAtual.dataVencimento);
+        if (dataNova && dataAtual) return dataNova.getTime() > dataAtual.getTime() ? concursoRelacionado.dataVencimento : statusAtual.dataVencimento;
+        return statusAtual.dataVencimento || concursoRelacionado.dataVencimento;
+      })();
+
+      statusConcursoMap.set(aprovado.concurso, {
+        homologado,
+        dataVencimento,
+        prorrogavel: statusAtual.prorrogavel || concursoRelacionado.prorrogavel,
       });
 
-    // Ordenar detalhes de cada concurso por nome
-    for (const concurso of Object.keys(detalhes)) {
-      detalhes[concurso].sort((a, b) => a.name.localeCompare(b.name));
+      let porPessoa = detalhesPorConcurso.get(aprovado.concurso);
+      if (!porPessoa) {
+        porPessoa = new Map();
+        detalhesPorConcurso.set(aprovado.concurso, porPessoa);
+      }
+
+      const chavePessoa = normalizarNomeChave(auditorEmExercicio.nome);
+      let agregadoPessoa = porPessoa.get(chavePessoa);
+      if (!agregadoPessoa) {
+        agregadoPessoa = {
+          name: auditorEmExercicio.nome,
+          area: auditorEmExercicio.area ?? null,
+          unidade: auditorEmExercicio.unidade ?? null,
+          aprovacoes: [],
+        };
+        porPessoa.set(chavePessoa, agregadoPessoa);
+      }
+
+      agregadoPessoa.aprovacoes.push({
+        tipoAprovacao,
+        cargo: concursoRelacionado.cargo,
+        modalidade: concursoRelacionado.modalidade,
+        posicao: posicaoNumero,
+        numeroVagas,
+        ultimaVagaNomeada: concursoRelacionado.ultimaVagaNomeada,
+        observacao: aprovado.observacao || concursoRelacionado.observacao || null,
+      });
     }
+
+    for (const [concurso, porPessoa] of detalhesPorConcurso.entries()) {
+      const pessoasConsolidadas = Array.from(porPessoa.values()).map(pessoa => {
+        const tipoConsolidado: TipoAprovacao = pessoa.aprovacoes.some(item => item.tipoAprovacao === 'Aprovado nas vagas')
+          ? 'Aprovado nas vagas'
+          : 'Cadastro de Reservas';
+
+        pessoa.aprovacoes.sort((a, b) => {
+          const porTipo = ordemTipoAprovacao(a.tipoAprovacao) - ordemTipoAprovacao(b.tipoAprovacao);
+          if (porTipo !== 0) return porTipo;
+          const porCargo = a.cargo.localeCompare(b.cargo);
+          if (porCargo !== 0) return porCargo;
+          return a.modalidade.localeCompare(b.modalidade);
+        });
+
+        return {
+          name: pessoa.name,
+          area: pessoa.area,
+          unidade: pessoa.unidade,
+          tipoAprovacao: tipoConsolidado,
+          aprovacoes: pessoa.aprovacoes,
+        };
+      });
+
+      pessoasConsolidadas.sort((a, b) => {
+        const porTipo = ordemTipoAprovacao(a.tipoAprovacao) - ordemTipoAprovacao(b.tipoAprovacao);
+        if (porTipo !== 0) return porTipo;
+        return a.name.localeCompare(b.name);
+      });
+
+      detalhes[concurso] = pessoasConsolidadas;
+    }
+
+    const dadosAprovado = Array.from(detalhesPorConcurso.entries())
+      .map(([concurso, porPessoa]) => {
+        const count = porPessoa.size;
+        const status = statusConcursoMap.get(concurso);
+        let statusConcurso = 'Aguardando Homologação';
+        if (status?.homologado) {
+          statusConcurso = `Valido até ${formatarDataValidade(status.dataVencimento)}${status.prorrogavel ? ' (Prorrogável)' : ''}`;
+        }
+        return { concurso, count, statusConcurso };
+      })
+      .sort((a, b) => (b.count - a.count) || a.concurso.localeCompare(b.concurso));
 
     return { dadosAprovado, detalhesAprovado: detalhes };
   };
 
   // Conta auditores em exercício que estão aguardando nomeação em outros concursos
   // Cada auditor é contado apenas uma vez, mesmo que esteja aguardando em múltiplos concursos
-  const contarAuditoresEmExercicioAguardandoNomeacao = (registros: any[]): number => {
+  const contarAuditoresEmExercicioAguardandoNomeacao = (registros: AprovacaoOutroConcursoRaw[], concursos: OutroConcursoRaw[]): number => {
+    const mapaConcursosInfo = new Map<string, OutroConcursoNormalizado>();
+    for (const concursoRaw of concursos) {
+      const concursoNormalizado = normalizarLinhaOutroConcurso(concursoRaw);
+      if (!concursoNormalizado) continue;
+      mapaConcursosInfo.set(
+        construirChaveTripla(concursoNormalizado.concurso, concursoNormalizado.cargo, concursoNormalizado.modalidade),
+        concursoNormalizado,
+      );
+    }
+
     const auditoresUnicos = new Set<string>();
     
     for (const registro of registros) {
-      const situacao = registro['SITUACAO'];
-      const aprovadoOutroConcurso = registro['APROVADO_OUTRO_CONCURSO'];
-      const concursos = obterAprovacoesOutrosConcursosValidas(aprovadoOutroConcurso);
-      
-      // Apenas auditores em exercício com aprovação em outro concurso válidos
-      if (situacao === 'EM EXERCÍCIO' && concursos.length > 0) {
-        const nome = registro['NOME'] ?? '';
-        auditoresUnicos.add(nome);
-      }
+      const aprovado = normalizarLinhaAprovacao(registro);
+      if (!aprovado || aprovado.ignorar) continue;
+
+      const concursoRelacionado = mapaConcursosInfo.get(
+        construirChaveTripla(aprovado.concurso, aprovado.cargo, aprovado.modalidade),
+      );
+      if (!concursoRelacionado) continue;
+      if (concursoEstaVencido(concursoRelacionado.dataVencimento)) continue;
+
+      const chaveNome = normalizarNomeChave(aprovado.nome);
+      if (!mapaAuditoresEmExercicio.has(chaveNome)) continue;
+      auditoresUnicos.add(chaveNome);
     }
     
     return auditoresUnicos.size;
@@ -691,12 +1051,12 @@ const App: React.FC = () => {
   const { pontosMensais: pontosMensais, detalhesMensais: detalhesMensais } = agregarPorMes(registrosEvasao, 'DATA_EXONERACAO');
   const { pontosMensais: pontosMensaisInatividade, detalhesMensais: detalhesMensaisInatividade } = agregarPorMes(registrosInatividade, 'DATA_INATIVIDADE');
   const { pontosUnidadeEvasao: pontosUnidadeEvasaoDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividades, detalhesUnidade: detalhesUnidadeEvasao, detalhesUnidadeInatividade } = agregarPorUnidade(registrosEvasaoComUnidade, registrosInatividade);
-  const { dadosAprovado: dadosAprovadoOutrosConcursos, detalhesAprovado: detalhesAprovadoOutrosConcursos } = agregarPorAprovacaoOutroConcurso(dadosBrutos);
+  const { dadosAprovado: dadosAprovadoOutrosConcursos, detalhesAprovado: detalhesAprovadoOutrosConcursos } = agregarPorAprovacaoOutroConcurso(dadosAprovacoesOutrosConcursos, dadosOutrosConcursos, null);
 
   // Totais e métricas básicas
   const contagemEvasoes = registrosEvasao.length;
   const contagemInativos = registrosInatividade.length;
-  const contagemAuditoresEmExercicioAguardandoNomeacao = contarAuditoresEmExercicioAguardandoNomeacao(dadosBrutos);
+  const contagemAuditoresEmExercicioAguardandoNomeacao = contarAuditoresEmExercicioAguardandoNomeacao(dadosAprovacoesOutrosConcursos, dadosOutrosConcursos);
   // Contagem otimizada de aposentados e afastamentos
   const { contagemAposentado, contagemAfastamentoPreliminar } = dadosBrutos.reduce((acumulador, registro) => {
     const situacao = registro['SITUACAO'];
@@ -804,7 +1164,9 @@ const App: React.FC = () => {
   const { pontosMensais: pontosMensaisFiltrados, detalhesMensais: detalhesMensaisFiltrados } = agregarPorMes(registrosEvasaoFiltrados, 'DATA_EXONERACAO');
   const { pontosMensais: pontosMensaisInatividadeFiltrados, detalhesMensais: detalhesMensaisInatividadeFiltrados } = agregarPorMes(registrosInatividadeFiltrados, 'DATA_INATIVIDADE');
   const { pontosUnidadeEvasao: pontosUnidadeEvasaoFiltradosDetalhados, pontosUnidadeInatividade: pontosUnidadeInatividadeFiltradosDetalhados, detalhesUnidade: detalhesUnidadeEvasaoFiltrados, detalhesUnidadeInatividade: detalhesUnidadeInatividadeFiltrados } = agregarPorUnidade(registrosEvasaoComUnidadeFiltrados, registrosInatividadeFiltrados);
-  const { dadosAprovado: dadosAprovadoOutrosCursosFiltrados, detalhesAprovado: detalhesAprovadoOutrosCursosFiltrados } = areaSelecionada === 'TODAS' ? { dadosAprovado: dadosAprovadoOutrosConcursos, detalhesAprovado: detalhesAprovadoOutrosConcursos } : agregarPorAprovacaoOutroConcurso(filtrarPorArea(dadosBrutos, areaSelecionada));
+  const { dadosAprovado: dadosAprovadoOutrosCursosFiltrados, detalhesAprovado: detalhesAprovadoOutrosCursosFiltrados } = areaSelecionada === 'TODAS'
+    ? { dadosAprovado: dadosAprovadoOutrosConcursos, detalhesAprovado: detalhesAprovadoOutrosConcursos }
+    : agregarPorAprovacaoOutroConcurso(dadosAprovacoesOutrosConcursos, dadosOutrosConcursos, areaSelecionada);
   
   // Calcular recorde: maior intervalo (em dias) sem publicação entre datas de publicação
   const datasExoneracao: Date[] = dadosBrutos
