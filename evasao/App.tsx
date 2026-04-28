@@ -19,7 +19,7 @@ type RecentChange = {
   orgaoDestino?: string | null;
 };
 
-type TipoAprovacao = 'Aprovado nas vagas' | 'Cadastro de Reservas';
+type TipoAprovacao = 'Nomeado' | 'Aprovado nas vagas' | 'Cadastro de Reservas' | 'Fim de Fila';
 
 type AprovacaoOutroConcursoRaw = Record<string, string | null>;
 
@@ -32,6 +32,8 @@ type AprovacaoOutroConcursoNormalizada = {
   modalidade: string;
   posicao: string;
   ignorar: boolean;
+  renunciou: boolean;
+  fimDeFila: boolean;
   observacao: string;
 };
 
@@ -158,6 +160,8 @@ const normalizarLinhaAprovacao = (linha: AprovacaoOutroConcursoRaw): AprovacaoOu
     modalidade: normalizarTexto(pickFirstNonEmpty(linha['MODALIDADE'], linha['Modalidade'])) || 'Ampla concorrencia',
     posicao: normalizarTexto(pickFirstNonEmpty(linha['POSICAO'], linha['POSIÇÃO'], linha['POSICAO_CANDIDATO'], linha['POSIÇÃO CANDIDATO'])),
     ignorar,
+    renunciou: parseBoolean(pickFirstNonEmpty(linha['RENUNCIOU'], linha['RENUNCIOU?'], linha['RENUNCIOU_OUTRO_CONCURSO'])),
+    fimDeFila: parseBoolean(pickFirstNonEmpty(linha['FIM_DE_FILA'], linha['FIM DE FILA'])),
     observacao: normalizarTexto(pickFirstNonEmpty(linha['OBSERVAÇÃO'], linha['OBSERVACAO'], linha['OBSERVAÇÃO APROVAÇÃO'], linha['OBSERVACAO APROVACAO'])),
   };
 };
@@ -846,7 +850,12 @@ const App: React.FC = () => {
     }
   }
 
-  const ordemTipoAprovacao = (tipo: TipoAprovacao) => (tipo === 'Aprovado nas vagas' ? 0 : 1);
+  const ordemTipoAprovacao = (tipo: TipoAprovacao) => {
+    if (tipo === 'Nomeado') return 0;
+    if (tipo === 'Aprovado nas vagas') return 1;
+    if (tipo === 'Cadastro de Reservas') return 2;
+    return 3;
+  };
 
   const concursoEstaVencido = (dataVencimento: string): boolean => {
     const data = analisarDataBrasil(dataVencimento);
@@ -888,29 +897,41 @@ const App: React.FC = () => {
 
     for (const registro of registros) {
       const aprovado = normalizarLinhaAprovacao(registro);
-      if (!aprovado || aprovado.ignorar) continue;
+      if (!aprovado || aprovado.ignorar || aprovado.renunciou) continue;
 
       const concursoRelacionado = mapaConcursosInfo.get(
         construirChaveTripla(aprovado.concurso, aprovado.cargo, aprovado.modalidade),
       );
       if (!concursoRelacionado) continue;
-      if (concursoEstaVencido(concursoRelacionado.dataVencimento)) continue;
+      const concursoVencido = concursoEstaVencido(concursoRelacionado.dataVencimento);
+
+      const posicaoNumero = parseNumber(aprovado.posicao);
+      const numeroVagas = concursoRelacionado.numeroVagas;
+      const ultimaVagaNomeada = concursoRelacionado.ultimaVagaNomeada;
+      const tipoAprovacao: TipoAprovacao = aprovado.fimDeFila
+        ? 'Fim de Fila'
+        : (
+          posicaoNumero != null &&
+          ultimaVagaNomeada != null &&
+          ultimaVagaNomeada > 0 &&
+          posicaoNumero <= ultimaVagaNomeada
+        )
+          ? 'Nomeado'
+          : (
+            posicaoNumero != null &&
+            numeroVagas != null &&
+            numeroVagas > 0 &&
+            posicaoNumero <= numeroVagas
+          )
+            ? 'Aprovado nas vagas'
+            : 'Cadastro de Reservas';
+
+      if (concursoVencido && tipoAprovacao !== 'Nomeado') continue;
 
       const auditorEmExercicio = mapaAuditoresEmExercicio.get(normalizarNomeChave(aprovado.nome));
       if (!auditorEmExercicio) continue;
 
       if (areaFiltro && auditorEmExercicio.area !== areaFiltro) continue;
-
-      const posicaoNumero = parseNumber(aprovado.posicao);
-      const numeroVagas = concursoRelacionado.numeroVagas;
-      const tipoAprovacao: TipoAprovacao = (
-        posicaoNumero != null &&
-        numeroVagas != null &&
-        numeroVagas > 0 &&
-        posicaoNumero <= numeroVagas
-      )
-        ? 'Aprovado nas vagas'
-        : 'Cadastro de Reservas';
 
       const statusAtual = statusConcursoMap.get(aprovado.concurso) ?? { homologado: false, dataVencimento: '', prorrogavel: false };
       const homologado = statusAtual.homologado || !!concursoRelacionado.dataHomologacao;
@@ -953,16 +974,18 @@ const App: React.FC = () => {
         modalidade: concursoRelacionado.modalidade,
         posicao: posicaoNumero,
         numeroVagas,
-        ultimaVagaNomeada: concursoRelacionado.ultimaVagaNomeada,
+        ultimaVagaNomeada,
         observacao: aprovado.observacao || concursoRelacionado.observacao || null,
       });
     }
 
     for (const [concurso, porPessoa] of detalhesPorConcurso.entries()) {
       const pessoasConsolidadas = Array.from(porPessoa.values()).map(pessoa => {
-        const tipoConsolidado: TipoAprovacao = pessoa.aprovacoes.some(item => item.tipoAprovacao === 'Aprovado nas vagas')
-          ? 'Aprovado nas vagas'
-          : 'Cadastro de Reservas';
+        const tipoConsolidado: TipoAprovacao = pessoa.aprovacoes.reduce<TipoAprovacao>((melhor, item) => {
+          return ordemTipoAprovacao(item.tipoAprovacao) < ordemTipoAprovacao(melhor)
+            ? item.tipoAprovacao
+            : melhor;
+        }, 'Fim de Fila');
 
         pessoa.aprovacoes.sort((a, b) => {
           const porTipo = ordemTipoAprovacao(a.tipoAprovacao) - ordemTipoAprovacao(b.tipoAprovacao);
@@ -1022,13 +1045,35 @@ const App: React.FC = () => {
     
     for (const registro of registros) {
       const aprovado = normalizarLinhaAprovacao(registro);
-      if (!aprovado || aprovado.ignorar) continue;
+      if (!aprovado || aprovado.ignorar || aprovado.renunciou) continue;
 
       const concursoRelacionado = mapaConcursosInfo.get(
         construirChaveTripla(aprovado.concurso, aprovado.cargo, aprovado.modalidade),
       );
       if (!concursoRelacionado) continue;
-      if (concursoEstaVencido(concursoRelacionado.dataVencimento)) continue;
+
+      const posicaoNumero = parseNumber(aprovado.posicao);
+      const numeroVagas = concursoRelacionado.numeroVagas;
+      const ultimaVagaNomeada = concursoRelacionado.ultimaVagaNomeada;
+      const tipoAprovacao: TipoAprovacao = aprovado.fimDeFila
+        ? 'Fim de Fila'
+        : (
+          posicaoNumero != null &&
+          ultimaVagaNomeada != null &&
+          ultimaVagaNomeada > 0 &&
+          posicaoNumero <= ultimaVagaNomeada
+        )
+          ? 'Nomeado'
+          : (
+            posicaoNumero != null &&
+            numeroVagas != null &&
+            numeroVagas > 0 &&
+            posicaoNumero <= numeroVagas
+          )
+            ? 'Aprovado nas vagas'
+            : 'Cadastro de Reservas';
+
+      if (concursoEstaVencido(concursoRelacionado.dataVencimento) && tipoAprovacao !== 'Nomeado') continue;
 
       const chaveNome = normalizarNomeChave(aprovado.nome);
       if (!mapaAuditoresEmExercicio.has(chaveNome)) continue;
