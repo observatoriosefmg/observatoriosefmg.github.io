@@ -7,9 +7,9 @@ interface AuditorAguardandoDetail {
   name: string;
   area?: string | null;
   unidade?: string | null;
-  tipoAprovacao: 'Aprovado nas vagas' | 'Cadastro de Reservas';
+  tipoAprovacao: 'Nomeado' | 'Aprovado nas vagas' | 'Cadastro de Reservas' | 'Fim de Fila';
   aprovacoes: {
-    tipoAprovacao: 'Aprovado nas vagas' | 'Cadastro de Reservas';
+    tipoAprovacao: 'Nomeado' | 'Aprovado nas vagas' | 'Cadastro de Reservas' | 'Fim de Fila';
     cargo: string;
     modalidade: string;
     posicao: number | null;
@@ -32,6 +32,29 @@ interface AprovadosOutrosConcursosTableProps {
 
 const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps> = ({ data, details = {} }) => {
   const [open, setOpen] = useState<Record<string, boolean>>({});
+
+  const analisarDataBrasil = (valor: string): Date | null => {
+    const match = valor.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!match) return null;
+    const dia = Number(match[1]);
+    const mes = Number(match[2]) - 1;
+    const ano = Number(match[3]);
+    const data = new Date(ano, mes, dia);
+    if (Number.isNaN(data.getTime())) return null;
+    data.setHours(0, 0, 0, 0);
+    return data;
+  };
+
+  const concursoEstaVencidoPeloStatus = (statusConcurso: string): boolean => {
+    const match = statusConcurso.match(/Valido ate (\d{2}\/\d{2}\/\d{4})|Válido até (\d{2}\/\d{2}\/\d{4})/i);
+    const dataTexto = match?.[1] ?? match?.[2] ?? null;
+    if (!dataTexto) return false;
+    const vencimento = analisarDataBrasil(dataTexto);
+    if (!vencimento) return false;
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    return vencimento.getTime() < hoje.getTime();
+  };
 
   const toggle = (concurso: string) => {
     setOpen(prev => ({ ...prev, [concurso]: !prev[concurso] }));
@@ -74,6 +97,14 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
   };
 
   const AuditorRow: React.FC<{ aud: AuditorAguardandoDetail }> = ({ aud }) => {
+        const badgeClass = aud.tipoAprovacao === 'Nomeado'
+          ? 'bg-sky-900/50 text-sky-300 border border-sky-700/40'
+          : aud.tipoAprovacao === 'Aprovado nas vagas'
+            ? 'bg-emerald-900/50 text-emerald-300 border border-emerald-700/40'
+            : aud.tipoAprovacao === 'Cadastro de Reservas'
+              ? 'bg-amber-900/50 text-amber-300 border border-amber-700/40'
+              : 'bg-rose-900/50 text-rose-300 border border-rose-700/40';
+
     const btnRef = useRef<HTMLButtonElement | null>(null);
     const [visible, setVisible] = useState(false);
     const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -136,7 +167,7 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
           <div className="text-xs text-gray-400">{areaUnit}</div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`text-xs font-semibold px-2 py-1 rounded ${aud.tipoAprovacao === 'Aprovado nas vagas' ? 'bg-emerald-900/50 text-emerald-300 border border-emerald-700/40' : 'bg-amber-900/50 text-amber-300 border border-amber-700/40'}`}>
+          <span className={`text-xs font-semibold px-2 py-1 rounded ${badgeClass}`}>
             {aud.tipoAprovacao}
           </span>
           <button
@@ -157,6 +188,24 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
     );
   };
 
+  const concursosExibidos = data
+    .map((item) => {
+      const rowsOriginais = details[item.concurso] ?? [];
+      const concursoVencido = concursoEstaVencidoPeloStatus(item.statusConcurso);
+      const rows = concursoVencido
+        ? rowsOriginais.filter((aud) => aud.tipoAprovacao === 'Nomeado')
+        : rowsOriginais;
+
+      if (concursoVencido && rows.length === 0) return null;
+
+      return {
+        item,
+        rows,
+        count: concursoVencido ? rows.length : item.count,
+      };
+    })
+    .filter((entry): entry is { item: AprovadoData; rows: AuditorAguardandoDetail[]; count: number } => entry !== null);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left table-auto">
@@ -167,9 +216,8 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-700">
-          {data.map((item, index) => {
+          {concursosExibidos.map(({ item, rows, count }, index) => {
             const concurso = item.concurso;
-            const rows = details[concurso] ?? [];
             const isOpen = !!open[concurso];
 
             return (
@@ -186,7 +234,7 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
                       </span>
                     </button>
                   </td>
-                  <td className="px-6 py-4 text-right font-bold text-amber-400">{item.count}</td>
+                  <td className="px-6 py-4 text-right font-bold text-amber-400">{count}</td>
                 </tr>
 
                 {isOpen && rows.length > 0 && (
