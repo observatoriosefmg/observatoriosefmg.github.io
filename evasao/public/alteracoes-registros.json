@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-04-29T12:08:51.948Z",
-  "commitCount": 141,
-  "totalChangeCount": 41,
+  "generatedAt": "2026-04-30T15:00:01.444Z",
+  "commitCount": 142,
+  "totalChangeCount": 42,
   "history": [
     {
       "commit": {
@@ -1153,6 +1153,39 @@
             "MASP": "2976603",
             "INSCRICAO": "",
             "NOME": "GILBERTO MAGALHAES LEITE",
+            "SITUACAO": "APOSENTADO",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "b24e9c41a2ff626ec1ab2cbc1914392339c1f9fb",
+        "date": "2026-04-30T14:59:52Z",
+        "author": "observatoriosefmg",
+        "message": "aposentadoria"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "6683205",
+          "inscricao": "",
+          "nome": "ORLANDIM JOSE ORLANDI",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "APOSENTADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "6683205",
+            "INSCRICAO": "",
+            "NOME": "ORLANDIM JOSE ORLANDI",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "6683205",
+            "INSCRICAO": "",
+            "NOME": "ORLANDIM JOSE ORLANDI",
             "SITUACAO": "APOSENTADO",
             "ORGAO_DESTINO": ""
           }
