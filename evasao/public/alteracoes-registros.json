@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-05-05T08:08:19.908Z",
-  "commitCount": 143,
-  "totalChangeCount": 42,
+  "generatedAt": "2026-05-08T02:27:13.068Z",
+  "commitCount": 144,
+  "totalChangeCount": 43,
   "history": [
     {
       "commit": {
@@ -1188,6 +1188,39 @@
             "NOME": "ORLANDIM JOSE ORLANDI",
             "SITUACAO": "APOSENTADO",
             "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "30ed674f9b46df39f92b8fb4fc00cff3927e52d5",
+        "date": "2026-05-08T02:26:54Z",
+        "author": "observatoriosefmg",
+        "message": "bruno L"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "266003252",
+          "inscricao": "266003252",
+          "nome": "BRUNO LOPES DE ABREU",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "SEFA PR",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266003252",
+            "NOME": "BRUNO LOPES DE ABREU",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266003252",
+            "NOME": "BRUNO LOPES DE ABREU",
+            "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": "SEFA PR"
           }
         }
       ]
