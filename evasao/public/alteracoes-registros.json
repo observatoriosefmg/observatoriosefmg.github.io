@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-05-08T02:27:13.068Z",
-  "commitCount": 144,
-  "totalChangeCount": 43,
+  "generatedAt": "2026-05-25T16:02:15.728Z",
+  "commitCount": 145,
+  "totalChangeCount": 45,
   "history": [
     {
       "commit": {
@@ -1221,6 +1221,61 @@
             "NOME": "BRUNO LOPES DE ABREU",
             "SITUACAO": "DESISTENTE",
             "ORGAO_DESTINO": "SEFA PR"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "b7f7afc0d3bcee448258eef9c902cbcca2fb2add",
+        "date": "2026-05-25T16:02:03Z",
+        "author": "observatoriosefmg",
+        "message": "aposentados"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "2417764",
+          "inscricao": "",
+          "nome": "LUCIA MARIA BIZZOTTO RANDAZZO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "2417764",
+            "INSCRICAO": "",
+            "NOME": "LUCIA MARIA BIZZOTTO RANDAZZO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "2417764",
+            "INSCRICAO": "",
+            "NOME": "LUCIA MARIA BIZZOTTO RANDAZZO",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "2709467",
+          "inscricao": "",
+          "nome": "MARCO AURELIO GARCIA DE OLIVEIRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "2709467",
+            "INSCRICAO": "",
+            "NOME": "MARCO AURELIO GARCIA DE OLIVEIRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "2709467",
+            "INSCRICAO": "",
+            "NOME": "MARCO AURELIO GARCIA DE OLIVEIRA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
           }
         }
       ]

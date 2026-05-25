@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-05-08T02:27:13.201Z",
-  "commitCount": 144,
+  "generatedAt": "2026-05-25T16:02:16.003Z",
+  "commitCount": 145,
   "commits": [
     {
       "hash": "75be4410df95f79e9196db7df92d569d327c1d01",
@@ -866,6 +866,12 @@
       "date": "2026-05-08T02:26:54Z",
       "author": "observatoriosefmg",
       "message": "bruno L"
+    },
+    {
+      "hash": "b7f7afc0d3bcee448258eef9c902cbcca2fb2add",
+      "date": "2026-05-25T16:02:03Z",
+      "author": "observatoriosefmg",
+      "message": "aposentados"
     }
   ]
 }
