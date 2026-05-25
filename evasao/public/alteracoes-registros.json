@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-05-25T16:02:15.728Z",
-  "commitCount": 145,
-  "totalChangeCount": 45,
+  "generatedAt": "2026-05-25T16:49:54.257Z",
+  "commitCount": 146,
+  "totalChangeCount": 47,
   "history": [
     {
       "commit": {
@@ -1275,6 +1275,61 @@
             "INSCRICAO": "",
             "NOME": "MARCO AURELIO GARCIA DE OLIVEIRA",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "04101d2026823de532308dc0b43ba2a42f3bf19e",
+        "date": "2026-05-25T16:49:42Z",
+        "author": "observatoriosefmg",
+        "message": "desistentes"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "7558471",
+          "inscricao": "266007191",
+          "nome": "YURI TELES DAMACENA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS ARACAJU",
+          "before": {
+            "MASP": "7558471",
+            "INSCRICAO": "266007191",
+            "NOME": "YURI TELES DAMACENA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7558471",
+            "INSCRICAO": "266007191",
+            "NOME": "YURI TELES DAMACENA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS ARACAJU"
+          }
+        },
+        {
+          "masp": "266007588",
+          "inscricao": "266007588",
+          "nome": "LARISSA QUEIROZ LIMA VERDE",
+          "fromSituacao": "NOMEADO",
+          "toSituacao": "DESISTENTE",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266007588",
+            "NOME": "LARISSA QUEIROZ LIMA VERDE",
+            "SITUACAO": "NOMEADO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266007588",
+            "NOME": "LARISSA QUEIROZ LIMA VERDE",
+            "SITUACAO": "DESISTENTE",
             "ORGAO_DESTINO": ""
           }
         }
