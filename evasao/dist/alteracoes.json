@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-05-25T16:02:16.003Z",
-  "commitCount": 145,
+  "generatedAt": "2026-05-25T16:49:54.281Z",
+  "commitCount": 146,
   "commits": [
     {
       "hash": "75be4410df95f79e9196db7df92d569d327c1d01",
@@ -872,6 +872,12 @@
       "date": "2026-05-25T16:02:03Z",
       "author": "observatoriosefmg",
       "message": "aposentados"
+    },
+    {
+      "hash": "04101d2026823de532308dc0b43ba2a42f3bf19e",
+      "date": "2026-05-25T16:49:42Z",
+      "author": "observatoriosefmg",
+      "message": "desistentes"
     }
   ]
 }
