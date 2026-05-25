@@ -55,7 +55,7 @@ def sort_key(row: list[str], col_map: dict[str, int]) -> tuple:
             situacao_rank = index
             break
 
-    return (area_rank, situacao_rank, parse_position(pos), nome)
+    return (area_rank, parse_position(pos), situacao_rank, nome)
 
 
 def load_rows(path: Path) -> tuple[list[str], list[list[str]], bool]:
