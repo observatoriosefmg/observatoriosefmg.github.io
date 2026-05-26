@@ -3,23 +3,41 @@ import React, { useState, useMemo } from 'react';
 interface DetailedTableProps {
   data: any[];
   estaCarregando?: boolean;
+  dadosAprovacoesOutrosConcursos?: any[];
+  dadosOutrosConcursos?: any[];
 }
 
-const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = false }) => {
+const DetailedTable: React.FC<DetailedTableProps> = ({ 
+  data, 
+  estaCarregando = false,
+  dadosAprovacoesOutrosConcursos = [],
+  dadosOutrosConcursos = []
+}) => {
   const [areaSelecionada, setAreaSelecionada] = useState<string>('TODAS');
 
-  const obterAprovacoesOutrosConcursosVisiveis = (texto?: string): string => {
-    if (!texto) return '';
+  // Função para normalizar nomes para comparação
+  const normalizarNomeChave = (valor: string | null | undefined) => 
+    String(valor ?? '').trim().replace(/\s+/g, ' ').toUpperCase();
 
-    return String(texto)
-      .split(',')
-      .map(c => c.trim())
-      .filter(c => c !== '' && !c.startsWith('*'))
-      .join(', ');
-  };
-
-  const isAprovadoOutrosConcursosValido = (texto?: string): boolean => {
-    return obterAprovacoesOutrosConcursosVisiveis(texto) !== '';
+  // Verificar se um auditor está aguardando nomeação em outro concurso
+  const estaAguardandoNomeacao = (nome?: string): boolean => {
+    if (!nome || dadosAprovacoesOutrosConcursos.length === 0) return false;
+    
+    const nomeNormalizado = normalizarNomeChave(nome);
+    
+    for (const aprovacao of dadosAprovacoesOutrosConcursos) {
+      const nomeAprovacao = normalizarNomeChave(aprovacao['NOME'] || aprovacao['Nome'] || '');
+      if (nomeAprovacao === nomeNormalizado) {
+        // Verificar se não está ignorado ou renunciado
+        const ignorar = String(aprovacao['IGNORAR'] || aprovacao['Ignorar'] || '').toLowerCase() === 'true';
+        const renunciou = String(aprovacao['RENUNCIOU'] || aprovacao['RENUNCIOU?'] || '').toLowerCase() === 'true';
+        
+        if (!ignorar && !renunciou) {
+          return true;
+        }
+      }
+    }
+    return false;
   };
 
   // Debug: log dos dados recebidos
@@ -238,7 +256,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap">
                             {(() => {
-                              const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
+                              const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && estaAguardandoNomeacao(item['NOME']));
                               return aguardando ? (
                                 <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">
                                   Sim
@@ -295,7 +313,7 @@ const DetailedTable: React.FC<DetailedTableProps> = ({ data, estaCarregando = fa
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap">
                             {(() => {
-                              const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
+                              const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && estaAguardandoNomeacao(item['NOME']));
                               return aguardando ? (
                                 <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">
                                   Sim

@@ -8,21 +8,36 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
     const [estaCarregando, setEstaCarregando] = useState(true);
     const [searchName, setSearchName] = useState<string>('');
     const [filterPCD, setFilterPCD] = useState<boolean>(false);
-    const [selectedStatus, setSelectedStatus] = useState<string>('');    // Carregar dados CSV
+    const [selectedStatus, setSelectedStatus] = useState<string>('');
+    const [dadosAprovacoesOutrosConcursos, setDadosAprovacoesOutrosConcursos] = useState<any[]>([]);
+    const [dadosOutrosConcursos, setDadosOutrosConcursos] = useState<any[]>([]);
 
-    const obterAprovacoesOutrosConcursosVisiveis = (texto?: string): string => {
-        if (!texto) return '';
+    // Função para normalizar nomes para comparação
+    const normalizarNomeChave = (valor: string | null | undefined) => 
+        String(valor ?? '').trim().replace(/\s+/g, ' ').toUpperCase();
 
-        return String(texto)
-            .split(',')
-            .map(c => c.trim())
-            .filter(c => c !== '' && !c.startsWith('*'))
-            .join(', ');
+    // Verificar se um auditor está aguardando nomeação em outro concurso
+    const estaAguardandoNomeacao = (nome?: string): boolean => {
+        if (!nome || dadosAprovacoesOutrosConcursos.length === 0) return false;
+        
+        const nomeNormalizado = normalizarNomeChave(nome);
+        
+        for (const aprovacao of dadosAprovacoesOutrosConcursos) {
+            const nomeAprovacao = normalizarNomeChave(aprovacao['NOME'] || aprovacao['Nome'] || '');
+            if (nomeAprovacao === nomeNormalizado) {
+                // Verificar se não está ignorado ou renunciado
+                const ignorar = String(aprovacao['IGNORAR'] || aprovacao['Ignorar'] || '').toLowerCase() === 'true';
+                const renunciou = String(aprovacao['RENUNCIOU'] || aprovacao['RENUNCIOU?'] || '').toLowerCase() === 'true';
+                
+                if (!ignorar && !renunciou) {
+                    return true;
+                }
+            }
+        }
+        return false;
     };
 
-    const isAprovadoOutrosConcursosValido = (texto?: string): boolean => {
-        return obterAprovacoesOutrosConcursosVisiveis(texto) !== '';
-    };
+    // Carregar dados CSV principais (dados.csv)
     useEffect(() => {
         const paths = [
             '/data/dados.csv',
@@ -114,6 +129,141 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
 
             console.warn('Não foi possível carregar dados.csv');
             setEstaCarregando(false);
+        }
+
+        loadData();
+    }, []);
+
+    // Função auxiliar para parsear CSV com separador ponto-e-vírgula
+    const parseCsvSemicolon = (text: string) => {
+        const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+        if (lines.length === 0) return [];
+
+        const parseLine = (line: string) => {
+            const parts: string[] = [];
+            let cur = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        cur += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                    continue;
+                }
+                if (ch === ';' && !inQuotes) {
+                    parts.push(cur);
+                    cur = '';
+                    continue;
+                }
+                cur += ch;
+            }
+            parts.push(cur);
+            return parts;
+        };
+
+        const headerLine = lines[0];
+        const headers = parseLine(headerLine).map(h => h.trim());
+        const rows: any[] = [];
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            const parts = parseLine(line);
+            while (parts.length < headers.length) parts.push('');
+            const obj: Record<string, string> = {};
+            for (let j = 0; j < headers.length; j++) {
+                obj[headers[j]] = parts[j] ? parts[j].trim() : '';
+            }
+            rows.push(obj);
+        }
+        return rows;
+    };
+
+    // Carregar dados de aprovações em outros concursos
+    useEffect(() => {
+        const paths = [
+            '/data/aprovacoes_outros_concursos.csv',
+            '/evasao/data/aprovacoes_outros_concursos.csv',
+            'data/aprovacoes_outros_concursos.csv',
+            './data/aprovacoes_outros_concursos.csv',
+            '/evasao/dist/data/aprovacoes_outros_concursos.csv',
+            '/evasao/dist/assets/aprovacoes_outros_concursos.csv',
+            '/evasao/aprovacoes_outros_concursos.csv',
+            '/aprovacoes_outros_concursos.csv',
+            'dist/data/aprovacoes_outros_concursos.csv',
+            'assets/aprovacoes_outros_concursos.csv',
+        ];
+
+        async function loadData() {
+            for (const p of paths) {
+                try {
+                    const url = p + (p.includes('?') ? '&' : '?') + `_ts=${Date.now()}`;
+                    const res = await fetch(url, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0',
+                        },
+                    });
+                    if (!res.ok) continue;
+                    let text = await res.text();
+                    text = text.replace(/^\uFEFF/, '');
+                    const raw = parseCsvSemicolon(text);
+                    if (!Array.isArray(raw) || raw.length === 0) continue;
+                    setDadosAprovacoesOutrosConcursos(raw);
+                    return;
+                } catch (err) {
+                    console.debug('Falha ao carregar aprovacoes_outros_concursos.csv', p, err);
+                }
+            }
+            console.warn('Não foi possível carregar aprovacoes_outros_concursos.csv');
+        }
+
+        loadData();
+    }, []);
+
+    // Carregar dados de outros concursos
+    useEffect(() => {
+        const paths = [
+            '/data/outros_concursos.csv',
+            '/evasao/data/outros_concursos.csv',
+            'data/outros_concursos.csv',
+            './data/outros_concursos.csv',
+            '/evasao/dist/data/outros_concursos.csv',
+            '/evasao/dist/assets/outros_concursos.csv',
+            '/evasao/outros_concursos.csv',
+            '/outros_concursos.csv',
+            'dist/data/outros_concursos.csv',
+            'assets/outros_concursos.csv',
+        ];
+
+        async function loadData() {
+            for (const p of paths) {
+                try {
+                    const url = p + (p.includes('?') ? '&' : '?') + `_ts=${Date.now()}`;
+                    const res = await fetch(url, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0',
+                        },
+                    });
+                    if (!res.ok) continue;
+                    let text = await res.text();
+                    text = text.replace(/^\uFEFF/, '');
+                    const raw = parseCsvSemicolon(text);
+                    if (!Array.isArray(raw) || raw.length === 0) continue;
+                    setDadosOutrosConcursos(raw);
+                    return;
+                } catch (err) {
+                    console.debug('Falha ao carregar outros_concursos.csv', p, err);
+                }
+            }
+            console.warn('Não foi possível carregar outros_concursos.csv');
         }
 
         loadData();
@@ -463,12 +613,12 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                                         {item['OBSERVACAO'] || '-'}
                                                     </td>
                                                     <td className={`px-1 py-0.5 whitespace-nowrap text-[10px] border border-black text-center ${(() => {
-                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
+                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && estaAguardandoNomeacao(item['NOME']));
                                                         return aguardando ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
                                                     })()}`}>
                                                         {(() => {
-                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
-                                                            return aguardando ? obterAprovacoesOutrosConcursosVisiveis(item['APROVADO_OUTRO_CONCURSO']) : '-';
+                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && estaAguardandoNomeacao(item['NOME']));
+                                                            return aguardando ? 'Sim' : '-';
                                                         })()}
                                                     </td>
                                                 </>
@@ -506,12 +656,12 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                                         {item['OBSERVACAO'] || '-'}
                                                     </td>
                                                     <td className={`px-1 py-0.5 whitespace-nowrap text-[10px] border border-black text-center ${(() => {
-                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
+                                                        const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && estaAguardandoNomeacao(item['NOME']));
                                                         return aguardando ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
                                                     })()}`}>
                                                         {(() => {
-                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && isAprovadoOutrosConcursosValido(item['APROVADO_OUTRO_CONCURSO']));
-                                                            return aguardando ? obterAprovacoesOutrosConcursosVisiveis(item['APROVADO_OUTRO_CONCURSO']) : '-';
+                                                            const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && estaAguardandoNomeacao(item['NOME']));
+                                                            return aguardando ? 'Sim' : '-';
                                                         })()}
                                                     </td>
                                                 </>
