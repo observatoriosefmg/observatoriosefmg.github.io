@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-05-26T13:10:25.497Z",
-  "commitCount": 147,
-  "totalChangeCount": 47,
+  "generatedAt": "2026-06-02T12:12:01.042Z",
+  "commitCount": 148,
+  "totalChangeCount": 49,
   "history": [
     {
       "commit": {
@@ -1330,6 +1330,61 @@
             "INSCRICAO": "266007588",
             "NOME": "LARISSA QUEIROZ LIMA VERDE",
             "SITUACAO": "DESISTENTE",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "2ad97047aa919924e869451c58ddfb13cbee9aa7",
+        "date": "2026-06-02T12:11:48Z",
+        "author": "observatoriosefmg",
+        "message": "dados"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "3814266",
+          "inscricao": "",
+          "nome": "FRANCISCO VIEIRA MAFFRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3814266",
+            "INSCRICAO": "",
+            "NOME": "FRANCISCO VIEIRA MAFFRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3814266",
+            "INSCRICAO": "",
+            "NOME": "FRANCISCO VIEIRA MAFFRA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "3869096",
+          "inscricao": "",
+          "nome": "WLADIMIR CESAR DE ANDRADE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3869096",
+            "INSCRICAO": "",
+            "NOME": "WLADIMIR CESAR DE ANDRADE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3869096",
+            "INSCRICAO": "",
+            "NOME": "WLADIMIR CESAR DE ANDRADE",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
             "ORGAO_DESTINO": ""
           }
         }
