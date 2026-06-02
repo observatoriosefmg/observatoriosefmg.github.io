@@ -91,11 +91,11 @@ VINICIUS DE CARLOS HAYDU;SEFA PA;Auditor Fiscal de Receitas Estaduais;Ampla Conc
 RAFAEL CABRAL DE LACERDA;SEFA PA;Auditor Fiscal de Receitas Estaduais;Ampla Concorrência;54;FALSE;;FALSE;FALSE
 GABRIEL SILVA DE ASSIS;SEFA PA;Auditor Fiscal de Receitas Estaduais;Ampla Concorrência;64;FALSE;;FALSE;FALSE
 CATHERINA PAULA CABRAL DA COSTA AMARAL;SEFA PA;Fiscal de Receitas Estaduais;Ampla Concorrência;51;FALSE;;FALSE;FALSE
-VINICIUS AMADEU SANTANA;SEFA PR;Auditor Fiscal;Ampla Concorrência;104;FALSE;;FALSE;FALSE
+VINICIUS AMADEU SANTANA;SEFA PR;Auditor Fiscal;Ampla Concorrência;104;FALSE;;TRUE;FALSE
 AGOSTINHO LOPES JUNIOR;SEFA PR;Auditor Fiscal;Ampla Concorrência;394;FALSE;;FALSE;FALSE
 BRUNO LOPES DE ABREU;SEFA PR;Auditor Fiscal;Ampla Concorrência;52;FALSE;;FALSE;FALSE
 ALEXANDRE RAYMUNDO DE JESUS;SEFA PR;Auditor Fiscal;Ampla Concorrência;375;FALSE;;FALSE;FALSE
-LUIS AFFONSO RODRIGUES DRESCH;SEFA PR;Auditor Fiscal;Ampla Concorrência;149;FALSE;;FALSE;FALSE
+LUIS AFFONSO RODRIGUES DRESCH;SEFA PR;Auditor Fiscal;Ampla Concorrência;149;FALSE;;TRUE;FALSE
 JOAO MARCOS LOPES ALMEIDA;SEFA PR;Auditor Fiscal;Ampla Concorrência;48;FALSE;;FALSE;FALSE
 ANNA SILVIA RAMOS DE OLIVEIRA GIMENEZ;SEFAZ AM;Auditor Fiscal de Tributos Estaduais;Ampla Concorrência;158;FALSE;;FALSE;FALSE
 THAYNARA OLIVEIRA DOS SANTOS;SEFAZ AM;Auditor Fiscal de Tributos Estaduais;Ampla Concorrência;213;FALSE;;FALSE;FALSE
@@ -210,7 +210,7 @@ ELTON LAGROTERIA DOS SANTOS;SEFAZ SP;Auditor Fiscal da Receita Estadual - TI e C
 FABIANO TAKEMI ISHII;SEFAZ SP;Auditor Fiscal da Receita Estadual - TI e Comunicação;Ampla Concorrência;25;FALSE;;FALSE;FALSE
 VINICIUS LOMBARDI;SEFAZ SP;Auditor Fiscal da Receita Estadual - Gestão Tributária;Ampla Concorrência;254;FALSE;;FALSE;FALSE
 ANA JESSICA DE OLIVEIRA BATISTA;TCE MG;Analista de Controle Externo - Ciência da Computação;Ampla Concorrência;10;FALSE;;FALSE;FALSE
-PEDRO ALEXANDRE DE ARAUJO AGUIAR;TCE MG;Analista de Controle Externo - Ciência da Computação;Ampla Concorrência;1;FALSE;;FALSE;FALSE
+PEDRO ALEXANDRE DE ARAUJO AGUIAR;TCE MG;Analista de Controle Externo - Ciência da Computação;Ampla Concorrência;1;FALSE;;TRUE;FALSE
 ANDRE FEIJO QUINTELA FILHO;TCE PE;Auditor de Controle Externo - Contas Públicas;Ampla Concorrência;47;FALSE;;FALSE;FALSE
 ANDRE FEIJO QUINTELA FILHO;TCE PE;Auditor de Controle Externo - Contas Públicas;Negro;8;FALSE;;FALSE;FALSE
 ANDRE FEIJO QUINTELA FILHO;TCE PE;Analista de Controle Externo - Contas Públicas;Ampla Concorrência;191;FALSE;;FALSE;FALSE
