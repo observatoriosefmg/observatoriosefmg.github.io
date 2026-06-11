@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-06-02T12:16:17.166Z",
-  "commitCount": 149,
+  "generatedAt": "2026-06-11T11:10:53.149Z",
+  "commitCount": 150,
   "commits": [
     {
       "hash": "75be4410df95f79e9196db7df92d569d327c1d01",
@@ -896,6 +896,12 @@
       "date": "2026-06-02T12:16:09Z",
       "author": "observatoriosefmg",
       "message": "dados"
+    },
+    {
+      "hash": "3ad923cce91d8ebe677f446a4bb099c3b79a14ed",
+      "date": "2026-06-11T11:10:39Z",
+      "author": "observatoriosefmg",
+      "message": "atualização dados"
     }
   ]
 }

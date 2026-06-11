@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-06-02T12:16:17.165Z",
-  "commitCount": 149,
-  "totalChangeCount": 49,
+  "generatedAt": "2026-06-11T11:10:52.986Z",
+  "commitCount": 150,
+  "totalChangeCount": 50,
   "history": [
     {
       "commit": {
@@ -1385,6 +1385,39 @@
             "INSCRICAO": "",
             "NOME": "WLADIMIR CESAR DE ANDRADE",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "3ad923cce91d8ebe677f446a4bb099c3b79a14ed",
+        "date": "2026-06-11T11:10:39Z",
+        "author": "observatoriosefmg",
+        "message": "atualização dados"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "2964138",
+          "inscricao": "",
+          "nome": "DANILO VILELA PRADO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "APOSENTADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "2964138",
+            "INSCRICAO": "",
+            "NOME": "DANILO VILELA PRADO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "2964138",
+            "INSCRICAO": "",
+            "NOME": "DANILO VILELA PRADO",
+            "SITUACAO": "APOSENTADO",
             "ORGAO_DESTINO": ""
           }
         }
