@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-06-11T11:39:25.322Z",
-  "commitCount": 153,
-  "totalChangeCount": 50,
+  "generatedAt": "2026-06-15T11:34:24.630Z",
+  "commitCount": 154,
+  "totalChangeCount": 51,
   "history": [
     {
       "commit": {
@@ -1418,6 +1418,39 @@
             "INSCRICAO": "",
             "NOME": "DANILO VILELA PRADO",
             "SITUACAO": "APOSENTADO",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "6702f2e026ea8648d9b390976e6f94d7089dfeaa",
+        "date": "2026-06-15T11:34:10Z",
+        "author": "observatoriosefmg",
+        "message": "AFASTAMENTOS"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "2972107",
+          "inscricao": "",
+          "nome": "GERALDO INACIO BRAGA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "2972107",
+            "INSCRICAO": "",
+            "NOME": "GERALDO INACIO BRAGA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "2972107",
+            "INSCRICAO": "",
+            "NOME": "GERALDO INACIO BRAGA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
             "ORGAO_DESTINO": ""
           }
         }

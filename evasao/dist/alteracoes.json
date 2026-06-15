@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-06-11T11:39:25.323Z",
-  "commitCount": 153,
+  "generatedAt": "2026-06-15T11:34:24.791Z",
+  "commitCount": 154,
   "commits": [
     {
       "hash": "75be4410df95f79e9196db7df92d569d327c1d01",
@@ -920,6 +920,12 @@
       "date": "2026-06-11T11:23:26Z",
       "author": "observatoriosefmg",
       "message": "dados"
+    },
+    {
+      "hash": "6702f2e026ea8648d9b390976e6f94d7089dfeaa",
+      "date": "2026-06-15T11:34:10Z",
+      "author": "observatoriosefmg",
+      "message": "AFASTAMENTOS"
     }
   ]
 }
