@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-06-17T16:22:13.330Z",
-  "commitCount": 155,
-  "totalChangeCount": 51,
+  "generatedAt": "2026-06-18T12:07:22.747Z",
+  "commitCount": 156,
+  "totalChangeCount": 52,
   "history": [
     {
       "commit": {
@@ -1451,6 +1451,39 @@
             "INSCRICAO": "",
             "NOME": "GERALDO INACIO BRAGA",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "b38ee7c421a722fd6aca6186e71ebc791a52cc6b",
+        "date": "2026-06-18T12:07:07Z",
+        "author": "observatoriosefmg",
+        "message": "aposentadoria"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "3827052",
+          "inscricao": "",
+          "nome": "LEOPOLDO LUIZ BALESTRINI",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "APOSENTADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3827052",
+            "INSCRICAO": "",
+            "NOME": "LEOPOLDO LUIZ BALESTRINI",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3827052",
+            "INSCRICAO": "",
+            "NOME": "LEOPOLDO LUIZ BALESTRINI",
+            "SITUACAO": "APOSENTADO",
             "ORGAO_DESTINO": ""
           }
         }
