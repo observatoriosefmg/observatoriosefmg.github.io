@@ -1293,6 +1293,7 @@ const App: React.FC = () => {
                   <div className="flex flex-wrap gap-3 justify-center">
                     <div className="text-xs text-gray-400">Aposentados: <span className="font-medium text-amber-400">{contagemAposentado}</span></div>
                     <div className="text-xs text-gray-400">Afastamento preliminar: <span className="font-medium text-amber-400">{contagemAfastamentoPreliminar}</span></div>
+                    <div className="text-xs text-gray-400">Cada Auditor é contado uma única vez, ainda que ele tenha se afastado primeiro e depois se aposentado.</div>
                   </div>
                 </div>
               }
