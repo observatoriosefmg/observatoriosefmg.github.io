@@ -31,8 +31,8 @@ SEFAZ PE;Auditor Fiscal do Tesouro Estadual;Ampla Concorrência;19;11/10/2022;10
 SEFAZ PI;Agente de Tributos da Fazenda Estadual - Geral;Ampla Concorrência;19;10/03/2026;33;24/06/2026;10/03/2028;TRUE;
 SEFAZ PI;Auditor Fiscal da Fazenda Estadual - Geral;Ampla Concorrência;11;10/03/2026;12;24/06/2026;10/03/2028;TRUE;
 SEFAZ PI;Auditor Fiscal da Fazenda Estadual - Tecnologia da Informação;Ampla Concorrência;2;10/03/2026;2;24/06/2026;10/03/2028;TRUE;
-SEFAZ RJ;Auditor Fiscal da Receita Estadual;Ampla Concorrência;29;01/04/2026;;;01/04/2028;TRUE;
-SEFAZ RJ;Auditor Fiscal da Receita Estadual;Negro;9;01/04/2026;;;01/04/2028;TRUE;
+SEFAZ RJ;Auditor Fiscal da Receita Estadual;Ampla Concorrência;29;01/04/2026;29;07/07/2026;01/04/2028;TRUE;
+SEFAZ RJ;Auditor Fiscal da Receita Estadual;Negro;9;01/04/2026;16;07/07/2026;01/04/2028;TRUE;
 SEFAZ RN;Auditor Fiscal de Receitas Estaduais;Ampla Concorrência;35;27/05/2026;37;29/06/2026;27/05/2028;TRUE;
 SEFAZ RN;Auditor Fiscal de Receitas Estaduais;Negro;10;27/05/2026;11;29/06/2026;27/05/2028;TRUE;
 SEFAZ RS;Auditor Fiscal da Receita Estadual - Gestão Tributária;Ampla Concorrência;37;19/03/2019;415;10/04/2025;10/04/2025;FALSE;
