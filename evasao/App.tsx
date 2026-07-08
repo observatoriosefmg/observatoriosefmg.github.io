@@ -857,6 +857,13 @@ const App: React.FC = () => {
     return 3;
   };
 
+  const compararPosicao = (a: number | null, b: number | null) => {
+    if (a == null && b == null) return 0;
+    if (a == null) return 1;
+    if (b == null) return -1;
+    return a - b;
+  };
+
   const concursoEstaVencido = (dataVencimento: string): boolean => {
     const data = analisarDataBrasil(dataVencimento);
     if (!data) return false;
@@ -992,7 +999,9 @@ const App: React.FC = () => {
           if (porTipo !== 0) return porTipo;
           const porCargo = a.cargo.localeCompare(b.cargo);
           if (porCargo !== 0) return porCargo;
-          return a.modalidade.localeCompare(b.modalidade);
+          const porModalidade = a.modalidade.localeCompare(b.modalidade);
+          if (porModalidade !== 0) return porModalidade;
+          return compararPosicao(a.posicao, b.posicao);
         });
 
         return {
@@ -1007,6 +1016,19 @@ const App: React.FC = () => {
       pessoasConsolidadas.sort((a, b) => {
         const porTipo = ordemTipoAprovacao(a.tipoAprovacao) - ordemTipoAprovacao(b.tipoAprovacao);
         if (porTipo !== 0) return porTipo;
+
+        const aPrimeira = a.aprovacoes[0];
+        const bPrimeira = b.aprovacoes[0];
+
+        if (aPrimeira && bPrimeira) {
+          const porCargo = aPrimeira.cargo.localeCompare(bPrimeira.cargo);
+          if (porCargo !== 0) return porCargo;
+          const porModalidade = aPrimeira.modalidade.localeCompare(bPrimeira.modalidade);
+          if (porModalidade !== 0) return porModalidade;
+          const porPosicao = compararPosicao(aPrimeira.posicao, bPrimeira.posicao);
+          if (porPosicao !== 0) return porPosicao;
+        }
+
         return a.name.localeCompare(b.name);
       });
 
