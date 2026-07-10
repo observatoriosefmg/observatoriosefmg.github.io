@@ -19,26 +19,105 @@ const DetailedTable: React.FC<DetailedTableProps> = ({
   const normalizarNomeChave = (valor: string | null | undefined) => 
     String(valor ?? '').trim().replace(/\s+/g, ' ').toUpperCase();
 
-  // Verificar se um auditor está aguardando nomeação em outro concurso
-  const estaAguardandoNomeacao = (nome?: string): boolean => {
-    if (!nome || dadosAprovacoesOutrosConcursos.length === 0) return false;
-    
+  const parseNumber = (valor: string | number | null | undefined): number | null => {
+    if (valor === null || valor === undefined || valor === '') return null;
+    const texto = String(valor).trim().replace(/\./g, '').replace(',', '.');
+    const numero = Number(texto);
+    return Number.isFinite(numero) ? numero : null;
+  };
+
+  const analisarDataBrasil = (valor: string | null | undefined): Date | null => {
+    if (!valor) return null;
+    const match = String(valor).trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!match) return null;
+    const dia = Number(match[1]);
+    const mes = Number(match[2]) - 1;
+    const ano = Number(match[3]);
+    const data = new Date(ano, mes, dia);
+    if (Number.isNaN(data.getTime())) return null;
+    data.setHours(0, 0, 0, 0);
+    return data;
+  };
+
+  const concursoEstaVencido = (dataVencimento: string | null | undefined): boolean => {
+    const vencimento = analisarDataBrasil(dataVencimento ?? '');
+    if (!vencimento) return false;
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    return vencimento.getTime() < hoje.getTime();
+  };
+
+  const construirChaveTripla = (concurso: string, cargo: string, modalidade: string) =>
+    `${String(concurso ?? '').trim().toLowerCase()}|${String(cargo ?? '').trim().toLowerCase()}|${String(modalidade ?? '').trim().toLowerCase()}`;
+
+  // Verificar quais órgãos/locais o auditor está aguardando nomeação em outros concursos
+  const getAguardandoNomeacaoPorOrgao = (nome?: string): string[] => {
+    if (!nome || dadosAprovacoesOutrosConcursos.length === 0 || dadosOutrosConcursos.length === 0) return [];
+
     const nomeNormalizado = normalizarNomeChave(nome);
-    
-    for (const aprovacao of dadosAprovacoesOutrosConcursos) {
-      const nomeAprovacao = normalizarNomeChave(aprovacao['NOME'] || aprovacao['Nome'] || '');
-      if (nomeAprovacao === nomeNormalizado) {
-        // Verificar se não está ignorado ou renunciado
-        const ignorar = String(aprovacao['IGNORAR'] || aprovacao['Ignorar'] || '').toLowerCase() === 'true';
-        const renunciou = String(aprovacao['RENUNCIOU'] || aprovacao['RENUNCIOU?'] || '').toLowerCase() === 'true';
-        
-        if (!ignorar && !renunciou) {
-          return true;
-        }
+    const mapaConcursosInfo = new Map<string, any>();
+    for (const concursoRaw of dadosOutrosConcursos) {
+      const chave = construirChaveTripla(
+        concursoRaw['CONCURSO'] || concursoRaw['concurso'] || '',
+        concursoRaw['CARGO'] || concursoRaw['cargo'] || '',
+        concursoRaw['MODALIDADE'] || concursoRaw['modalidade'] || '',
+      );
+      if (!mapaConcursosInfo.has(chave)) {
+        mapaConcursosInfo.set(chave, concursoRaw);
       }
     }
-    return false;
+
+    const orgaos = new Set<string>();
+
+    for (const aprovacao of dadosAprovacoesOutrosConcursos) {
+      const nomeAprovacao = normalizarNomeChave(aprovacao['NOME'] || aprovacao['Nome'] || '');
+      if (nomeAprovacao !== nomeNormalizado) continue;
+
+      const ignorar = String(aprovacao['IGNORAR'] || aprovacao['Ignorar'] || '').toLowerCase() === 'true';
+      const renunciou = String(aprovacao['RENUNCIOU'] || aprovacao['RENUNCIOU?'] || '').toLowerCase() === 'true';
+      if (ignorar || renunciou) continue;
+
+      const concurso = String(aprovacao['CONCURSO'] || aprovacao['Concurso'] || '').trim();
+      const cargo = String(aprovacao['CARGO'] || aprovacao['Cargo'] || '').trim();
+      const modalidade = String(aprovacao['MODALIDADE'] || aprovacao['Modalidade'] || '').trim();
+      const concursoRelacionado = mapaConcursosInfo.get(construirChaveTripla(concurso, cargo, modalidade));
+      if (!concursoRelacionado) continue;
+
+      const posicaoNumero = parseNumber(aprovacao['POSICAO'] || aprovacao['Posicao'] || '');
+      const numeroVagas = parseNumber(concursoRelacionado['NUMERO_VAGAS'] || concursoRelacionado['NUMERO VAGAS'] || '');
+      const ultimaVagaNomeada = parseNumber(concursoRelacionado['ULTIMA_VAGA_NOMEADA'] || concursoRelacionado['ULTIMA VAGA NOMEADA'] || '');
+      const fimDeFila = String(aprovacao['FIM_DE_FILA'] || aprovacao['FIM DE FILA'] || '').toLowerCase() === 'true';
+      const tipoAprovacao = fimDeFila
+        ? 'Fim de Fila'
+        : (
+            posicaoNumero != null &&
+            ultimaVagaNomeada != null &&
+            ultimaVagaNomeada > 0 &&
+            posicaoNumero <= ultimaVagaNomeada
+          )
+          ? 'Nomeado'
+          : (
+              posicaoNumero != null &&
+              numeroVagas != null &&
+              numeroVagas > 0 &&
+              posicaoNumero <= numeroVagas
+            )
+            ? 'Aprovado nas vagas'
+            : 'Cadastro de Reservas';
+
+      if (concursoEstaVencido(concursoRelacionado['DATA_VENCIMENTO'] || concursoRelacionado['DATA VENCIMENTO'] || '') && tipoAprovacao !== 'Nomeado') {
+        continue;
+      }
+
+      if (concurso) {
+        orgaos.add(concurso);
+      }
+    }
+
+    return Array.from(orgaos).sort((a, b) => a.localeCompare(b));
   };
+
+  const estaAguardandoNomeacao = (nome?: string): boolean => getAguardandoNomeacaoPorOrgao(nome).length > 0;
 
   // Debug: log dos dados recebidos
   console.log('DetailedTable data:', data);
@@ -254,12 +333,12 @@ const DetailedTable: React.FC<DetailedTableProps> = ({
                           <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVACAO'] || ''}>
                             {item['OBSERVACAO'] || '-'}
                           </td>
-                          <td className="px-3 py-2 whitespace-nowrap">
+                          <td className="px-3 py-2 whitespace-normal">
                             {(() => {
-                              const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && estaAguardandoNomeacao(item['NOME']));
-                              return aguardando ? (
-                                <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">
-                                  Sim
+                              const orgaos = item['SITUACAO'] === 'EM EXERCÍCIO' ? getAguardandoNomeacaoPorOrgao(item['NOME']) : [];
+                              return orgaos.length > 0 ? (
+                                <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium whitespace-normal">
+                                  {orgaos.join(', ')}
                                 </span>
                               ) : (
                                 '-'
@@ -311,12 +390,12 @@ const DetailedTable: React.FC<DetailedTableProps> = ({
                           <td className="px-3 py-2 text-gray-400 text-xs max-w-xs truncate" title={item['OBSERVACAO'] || ''}>
                             {item['OBSERVACAO'] || '-'}
                           </td>
-                          <td className="px-3 py-2 whitespace-nowrap">
+                          <td className="px-3 py-2 whitespace-normal">
                             {(() => {
-                              const aguardando = (item['SITUACAO'] === 'EM EXERCÍCIO' && estaAguardandoNomeacao(item['NOME']));
-                              return aguardando ? (
-                                <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">
-                                  Sim
+                              const orgaos = item['SITUACAO'] === 'EM EXERCÍCIO' ? getAguardandoNomeacaoPorOrgao(item['NOME']) : [];
+                              return orgaos.length > 0 ? (
+                                <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium whitespace-normal">
+                                  {orgaos.join(', ')}
                                 </span>
                               ) : (
                                 '-'
