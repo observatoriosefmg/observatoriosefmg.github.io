@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-10T11:29:31.925Z",
-  "commitCount": 157,
-  "totalChangeCount": 52,
+  "generatedAt": "2026-07-13T19:47:38.585Z",
+  "commitCount": 158,
+  "totalChangeCount": 53,
   "history": [
     {
       "commit": {
@@ -1485,6 +1485,39 @@
             "NOME": "LEOPOLDO LUIZ BALESTRINI",
             "SITUACAO": "APOSENTADO",
             "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "28b11bde13e55b33543a350fbc3ab0c799ba0820",
+        "date": "2026-07-13T19:47:15Z",
+        "author": "observatoriosefmg",
+        "message": "gerberson"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556525",
+          "inscricao": "266000697",
+          "nome": "GERBESON SAMPAIO CLARINDO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ PI",
+          "before": {
+            "MASP": "7556525",
+            "INSCRICAO": "266000697",
+            "NOME": "GERBESON SAMPAIO CLARINDO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556525",
+            "INSCRICAO": "266000697",
+            "NOME": "GERBESON SAMPAIO CLARINDO",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ PI"
           }
         }
       ]
