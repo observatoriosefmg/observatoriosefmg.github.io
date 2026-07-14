@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranking Fiscos Estaduais
+</title>
+  <style>
+    :root {
+      --bg1: #000000;
+      --bg2: #070707;
+      --card: #070707ee;
+      --text: #f5f5f5;
+      --muted: #d4af37;
+      --accent: #d62828;
+      --accent2: #f2c230;
+      --border: #2a2a2a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, #1b1b1b 0%, transparent 32%),
+        radial-gradient(circle at 85% 8%, #220808 0%, transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: min(1100px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .top {
+      padding: 18px 22px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--accent2);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .view-toggle {
+      display: inline-flex;
+      background: #130909;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .view-btn {
+      border: 0;
+      background: transparent;
+      color: #f7d46a;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .view-btn.active {
+      background: #321010;
+      color: #ffd447;
+    }
+
+    .pill {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--accent2);
+      background: #130909;
+      font-size: 0.85rem;
+    }
+
+    .timeline {
+      padding: 12px 14px 0;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .phase-chip {
+      border: 1px solid var(--border);
+      background: #130909;
+      color: #f7d46a;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+      user-select: none;
+    }
+
+    .phase-chip:hover {
+      transform: translateY(-1px);
+      background: #271010;
+      border-color: #8f2a2a;
+    }
+
+    .phase-chip.active {
+      border-color: #d62828;
+      color: #ffd447;
+      background: #321010;
+    }
+
+    .content {
+      padding: 14px;
+    }
+
+    .canvas-box {
+      padding: 0;
+    }
+
+    .echart-box {
+      width: 100%;
+      height: 640px;
+      border-radius: 14px;
+      border: 1px solid #2a0f0f;
+      background: linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      max-height: none;
+      background: #0b0b0b;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 0;
+      table-layout: fixed;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #1a0b0b;
+      color: #ffd447;
+      text-align: left;
+      font-size: 0.72rem;
+      border-bottom: 1px solid #3a1b1b;
+      padding: 6px 5px;
+    }
+
+    tbody td {
+      border-bottom: 1px solid #241717;
+      color: #f5f5f5;
+      font-size: 0.7rem;
+      padding: 4px 5px;
+      vertical-align: top;
+      line-height: 1.2;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: #0e0e0e;
+    }
+
+    .cell-pos {
+      color: #f2c230;
+      font-weight: 700;
+      margin-bottom: 1px;
+    }
+
+    .cell-val {
+      color: #e7d3a1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    canvas {
+      width: 100%;
+      height: 640px;
+      display: block;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
+      border: 1px solid #2a0f0f;
+    }
+
+    .foot {
+      padding: 8px 16px 16px;
+      color: #b48a2b;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 900px) {
+      canvas {
+        height: 560px;
+      }
+      .echart-box {
+        height: 560px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 10px;
+      }
+      .top {
+        padding: 14px;
+      }
+      .title {
+        font-size: 1rem;
+      }
+      .subtitle {
+        font-size: 0.8rem;
+      }
+      .phase-chip {
+        font-size: 0.78rem;
+      }
+      canvas {
+        height: 500px;
+      }
+      .echart-box {
+        height: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1 class="title">Ranking remuneração Líquida - Fiscos Estaduais</h1>
+        <p class="subtitle">Selecione o modo de visualização</p>
+      </div>
+      <div class="controls">
+        <div class="view-toggle">
+          <button id="viewBars" class="view-btn active">Barras</button>
+          <button id="viewLines" class="view-btn">Linhas</button>
+          <button id="viewTable" class="view-btn">Tabela Detalhada</button>
+        </div>
+        
+      </div>
+    </div>
+
+    <div class="timeline" id="timeline"></div>
+
+    <div class="content">
+      <div class="canvas-box" id="canvasBox">
+        <canvas id="raceCanvas"></canvas>
+      </div>
+      <div class="hidden" id="lineChartBox">
+        <div id="lineChart" class="echart-box"></div>
+      </div>
+      <div class="table-wrap hidden" id="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>UF</th>
+              <th>Inicial</th>
+              <th>5 anos</th>
+              <th>10 anos</th>
+              <th>15 anos</th>
+              <th>Final</th>
+            </tr>
+          </thead>
+          <tbody id="detailTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="foot">
+      Fonte: Pifado (@concurseiropifado). Atualizado em nov 2025.
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script>
+    const CSV_FILE = "ranking_remuneracao_fiscos_estaduais.csv";
+
+    const phases = [
+      { key: "Inicial", posKey: "Pos_Inicial", label: "Inicial" },
+      { key: "5_anos", posKey: "Pos_5_anos", label: "5 anos" },
+      { key: "10_anos", posKey: "Pos_10_anos", label: "10 anos" },
+      { key: "15_anos", posKey: "Pos_15_anos", label: "15 anos" },
+      { key: "Final", posKey: "Pos_Final", label: "Final" }
+    ];
+
+    const canvas = document.getElementById("raceCanvas");
+    const ctx = canvas.getContext("2d");
+    const phaseLabel = document.getElementById("phaseLabel");
+    const timeline = document.getElementById("timeline");
+    const canvasBox = document.getElementById("canvasBox");
+    const lineChartBox = document.getElementById("lineChartBox");
+    const lineChartEl = document.getElementById("lineChart");
+    const tableWrap = document.getElementById("tableWrap");
+    const detailTableBody = document.getElementById("detailTableBody");
+    const viewBarsBtn = document.getElementById("viewBars");
+    const viewLinesBtn = document.getElementById("viewLines");
+    const viewTableBtn = document.getElementById("viewTable");
+
+    let data = [];
+    let minInitialValue = 0;
+    let axisMin = 0;
+    let axisMax = 0;
+    let phaseBounds = [];
+    let currentPhaseIndex = 0;
+    let fromPhaseIndex = 0;
+    let toPhaseIndex = 0;
+    let viewMode = "bars";
+    let transitionStart = performance.now();
+    const transitionMs = 420;
+    let currentRows = [];
+    const flagImages = new Map();
+    let lineChart = null;
+
+    function onResize() {
+      resizeCanvas();
+      if (lineChart) {
+        lineChart.resize();
+        if (viewMode === "lines") {
+          renderLineChartECharts();
+        }
+      }
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function parseCsv(text) {
+      const lines = text.trim().split(/\r?\n/);
+
+      const normalizeCell = (value) => {
+        const trimmed = String(value || "").trim();
+        return trimmed.replace(/^"|"$/g, "").trim();
+      };
+
+      const headers = lines[0].split(";").map((h) =>
+        normalizeCell(h).replace(/^\uFEFF/, "")
+      );
+
+      const parsed = lines.slice(1).map((line) => {
+        const cols = line.split(";");
+        const row = {};
+        headers.forEach((h, i) => {
+          row[h] = normalizeCell(cols[i] || "");
+        });
+
+        phases.forEach((p) => {
+          row[p.key] = Number(row[p.key] || 0);
+        });
+
+        return row;
+      });
+
+      return computeDynamicPositions(parsed);
+    }
+
+    function computeDynamicPositions(rows) {
+      phases.forEach((p) => {
+        const ordered = [...rows].sort((a, b) => b[p.key] - a[p.key]);
+        ordered.forEach((row, idx) => {
+          row[p.posKey] = idx + 1;
+        });
+      });
+      return rows;
+    }
+
+    function formatCurrencyBR(value) {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function colorByPosition(index, total) {
+      if (total <= 1) {
+        return "hsl(120, 72%, 48%)";
+      }
+      const t = index / (total - 1);
+      const hue = 120 * (1 - t);
+      return `hsl(${hue}, 74%, 50%)`;
+    }
+
+    const REGION_COLOR = {
+      Norte: "#22c55e",
+      Nordeste: "#f59e0b",
+      "Centro-Oeste": "#a855f7",
+      Sudeste: "#ef4444",
+      Sul: "#3b82f6"
+    };
+
+    function regionByUF(uf) {
+      const north = new Set(["AC", "AP", "AM", "PA", "RO", "RR", "TO"]);
+      const northeast = new Set(["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"]);
+      const centerWest = new Set(["DF", "GO", "MT", "MS"]);
+      const southeast = new Set(["ES", "MG", "RJ", "SP"]);
+      const south = new Set(["PR", "RS", "SC"]);
+
+      if (north.has(uf)) return "Norte";
+      if (northeast.has(uf)) return "Nordeste";
+      if (centerWest.has(uf)) return "Centro-Oeste";
+      if (southeast.has(uf)) return "Sudeste";
+      if (south.has(uf)) return "Sul";
+      return "Norte";
+    }
+
+    function colorForUF(uf) {
+      return REGION_COLOR[regionByUF(uf)] || "#f7d46a";
+    }
+
+    function flagSrcForUF(uf) {
+      if (uf === "CE") {
+        return "bandeiras/Ceara.jpg";
+      }
+      return `bandeiras/${uf}.jpg`;
+    }
+
+    function preloadFlags(rows) {
+      const tasks = rows.map((row) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = flagSrcForUF(row.UF);
+          flagImages.set(row.UF, img);
+        });
+      });
+
+      return Promise.all(tasks);
+    }
+
+    function getFrameData(tNorm, fromIdx, toIdx) {
+      const cur = phases[fromIdx];
+      const nxt = phases[toIdx];
+      const eased = easeInOutCubic(tNorm);
+
+      return data.map((row) => {
+        const valueA = row[cur.key];
+        const valueB = row[nxt.key];
+        const valueNow = lerp(valueA, valueB, eased);
+        return {
+          uf: row.UF,
+          value: valueNow
+        };
+      }).sort((a, b) => b.value - a.value);
+    }
+
+    function computePhaseBounds(rows) {
+      return phases.map((p) => {
+        const values = rows.map((r) => r[p.key]);
+        return {
+          min: Math.min(...values),
+          max: Math.max(...values)
+        };
+      });
+    }
+
+    function buildTimeline() {
+      timeline.innerHTML = "";
+      phases.forEach((p, idx) => {
+        const chip = document.createElement("div");
+        chip.className = "phase-chip" + (idx === 0 ? " active" : "");
+        chip.textContent = p.label;
+
+        chip.addEventListener("mouseenter", () => {
+          if (viewMode !== "bars") {
+            return;
+          }
+          if (idx === toPhaseIndex) {
+            return;
+          }
+          fromPhaseIndex = currentPhaseIndex;
+          toPhaseIndex = idx;
+          transitionStart = performance.now();
+          setActiveChip(idx);
+        });
+
+        timeline.appendChild(chip);
+      });
+    }
+
+    function setActiveChip(idx) {
+      const chips = timeline.querySelectorAll(".phase-chip");
+      chips.forEach((chip, chipIdx) => {
+        chip.classList.toggle("active", chipIdx === idx);
+      });
+    }
+
+    function drawBars(frameRows, fromIdx, toIdx, toLabel, tNorm) {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const margin = { top: 50, right: 130, bottom: 28, left: 128 };
+      const chartW = w - margin.left - margin.right;
+      const chartH = h - margin.top - margin.bottom;
+
+      const rows = frameRows;
+      const rowGap = 4;
+      const barH = (chartH - (rows.length - 1) * rowGap) / rows.length;
+
+      const fromBounds = phaseBounds[fromIdx] || { min: 0, max: 1 };
+      const toBounds = phaseBounds[toIdx] || { min: 0, max: 1 };
+      const phaseMin = lerp(fromBounds.min, toBounds.min, tNorm);
+      const phaseMax = lerp(fromBounds.max, toBounds.max, tNorm);
+      const phaseSpan = Math.max(1, phaseMax - phaseMin);
+      const dynamicAxisMin = Math.max(0, phaseMin - phaseSpan * 0.08);
+      const dynamicAxisMax = phaseMax + phaseSpan * 0.05;
+      const domain = Math.max(1, dynamicAxisMax - dynamicAxisMin);
+
+      ctx.strokeStyle = "rgba(242,194,48,0.22)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) {
+        const tickValue = dynamicAxisMin + (i / 5) * domain;
+        const x = margin.left + ((tickValue - dynamicAxisMin) / domain) * chartW;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top - 10);
+        ctx.lineTo(x, margin.top + chartH + 4);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(242,194,48,0.92)";
+        ctx.font = "600 11px Segoe UI, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.fillText(formatCurrencyBR(tickValue), x, margin.top - 12);
+      }
+
+      rows.forEach((d, idx) => {
+        const y = margin.top + idx * (barH + rowGap);
+        const barW = Math.max(2, ((d.value - dynamicAxisMin) / domain) * chartW);
+        const barColor = colorByPosition(idx, rows.length);
+
+        ctx.fillStyle = "rgba(255,255,255,0.035)";
+        ctx.fillRect(margin.left, y, chartW, barH);
+
+        ctx.fillStyle = barColor;
+        ctx.fillRect(margin.left, y, barW, barH);
+
+        const flag = flagImages.get(d.uf);
+        const flagH = Math.max(10, barH * 0.78);
+        const flagW = flagH * 1.45;
+        const flagX = margin.left - 76;
+        const flagY = y + (barH - flagH) / 2;
+
+        ctx.fillStyle = "#f2c230";
+        ctx.font = `600 ${Math.max(10, barH * 0.33)}px Segoe UI, sans-serif`;
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "right";
+        ctx.fillText(String(idx + 1), flagX - 10, y + barH / 2);
+
+        if (flag && flag.complete && flag.naturalWidth > 0) {
+          ctx.drawImage(flag, flagX, flagY, flagW, flagH);
+          ctx.strokeStyle = "rgba(242,194,48,0.5)";
+          ctx.strokeRect(flagX, flagY, flagW, flagH);
+        }
+
+        ctx.fillStyle = "#fff2c2";
+        ctx.font = `600 ${Math.max(11, barH * 0.38)}px Segoe UI, sans-serif`;
+        ctx.textAlign = "right";
+        ctx.fillText(d.uf, margin.left - 10, y + barH / 2);
+
+        ctx.textAlign = "left";
+        const valueText = formatCurrencyBR(d.value);
+        const valX = margin.left + Math.min(barW + 8, chartW - 110);
+        ctx.fillText(valueText, valX, y + barH / 2);
+      });
+
+      const progressPct = Math.round(tNorm * 100);
+      //phaseLabel.textContent = `Barras: ${toLabel} (${progressPct}%)`;
+    }
+
+    function renderLineChartECharts() {
+      if (!window.echarts) {
+        phaseLabel.textContent = "Erro: Apache ECharts nao carregou";
+        return;
+      }
+
+      if (!lineChart) {
+        lineChart = window.echarts.init(lineChartEl);
+      }
+
+      const legendData = data.map((row) => row.UF);
+      const series = data.map((row) => ({
+        name: row.UF,
+        type: "line",
+        smooth: true,
+        symbol: "circle",
+        symbolSize: 6,
+        data: phases.map((p) => row[p.posKey]),
+        lineStyle: {
+          width: 1.8,
+          opacity: 0.35,
+          color: colorForUF(row.UF)
+        },
+        itemStyle: {
+          color: colorForUF(row.UF),
+          opacity: 0.8
+        },
+        emphasis: {
+          focus: "series",
+          lineStyle: { width: 4, opacity: 1 },
+          itemStyle: { opacity: 1 }
+        },
+        blur: {
+          lineStyle: { opacity: 0.04 },
+          itemStyle: { opacity: 0.04 }
+        }
+      }));
+
+      const xCategories = phases.map((p) => p.label);
+      const legendBreak = Math.ceil(legendData.length / 2);
+      const legendRow1 = legendData.slice(0, legendBreak);
+      const legendRow2 = legendData.slice(legendBreak);
+      const rowByUF = new Map(data.map((row) => [row.UF, row]));
+
+      lineChart.setOption({
+        backgroundColor: "transparent",
+        animationDuration: 500,
+        color: legendData.map((uf) => colorForUF(uf)),
+        tooltip: {
+          trigger: "item",
+          backgroundColor: "rgba(15, 10, 10, 0.95)",
+          borderColor: "#f2c230",
+          borderWidth: 1,
+          textStyle: {
+            color: "#fff2c2"
+          },
+          formatter: (params) => {
+            const uf = params.seriesName;
+            const phaseIndex = Number(params.dataIndex || 0);
+            const phase = phases[phaseIndex];
+            const row = rowByUF.get(uf);
+
+            if (!row || !phase) {
+              return `${uf}`;
+            }
+
+            const remuneracao = formatCurrencyBR(row[phase.key]);
+            const posicao = `#${row[phase.posKey]}`;
+
+            return `<strong>${uf}</strong><br/>${phase.label}<br/>Posicao: ${posicao}<br/>Remuneracao liquida: ${remuneracao}`;
+          }
+        },
+        legend: [
+          {
+            type: "plain",
+            top: 6,
+            left: 12,
+            right: 12,
+            itemWidth: 10,
+            itemHeight: 8,
+            textStyle: {
+              color: "#f7d46a",
+              fontSize: 10
+            },
+            data: legendRow1
+          },
+          {
+            type: "plain",
+            top: 24,
+            left: 12,
+            right: 12,
+            itemWidth: 10,
+            itemHeight: 8,
+            textStyle: {
+              color: "#f7d46a",
+              fontSize: 10
+            },
+            data: legendRow2
+          }
+        ],
+        grid: {
+          left: 52,
+          right: 24,
+          top: 92,
+          bottom: 34,
+          containLabel: true
+        },
+        xAxis: {
+          type: "category",
+          data: xCategories,
+          axisLabel: { color: "#f7d46a" },
+          axisLine: { lineStyle: { color: "rgba(242,194,48,0.35)" } },
+          axisTick: { show: false }
+        },
+        yAxis: {
+          type: "value",
+          min: 1,
+          max: 27,
+          interval: 1,
+          inverse: true,
+          axisLabel: {
+            color: "#f2c230",
+            formatter: (v) => `#${v}`
+          },
+          axisLine: { show: false },
+          splitLine: { lineStyle: { color: "rgba(242,194,48,0.16)" } }
+        },
+        series
+      }, true);
+
+      const rightLabels = [];
+      const sortedByFinal = [...data].sort((a, b) => a.Pos_Final - b.Pos_Final);
+
+      const focusSeries = (uf) => {
+        lineChart.dispatchAction({ type: "downplay", seriesIndex: "all" });
+        lineChart.dispatchAction({ type: "highlight", seriesName: uf });
+      };
+
+      const clearFocus = () => {
+        lineChart.dispatchAction({ type: "downplay", seriesIndex: "all" });
+      };
+
+      sortedByFinal.forEach((row) => {
+        const anchor = lineChart.convertToPixel(
+          { xAxisIndex: 0, yAxisIndex: 0 },
+          [xCategories[xCategories.length - 1], row.Pos_Final]
+        );
+
+        if (!Array.isArray(anchor)) {
+          return;
+        }
+
+        const baseX = anchor[0] + 8;
+        const baseY = anchor[1] - 6;
+
+        rightLabels.push({
+          type: "image",
+          z: 100,
+          silent: false,
+          onclick: () => focusSeries(row.UF),
+          onmouseover: () => focusSeries(row.UF),
+          onmouseout: () => clearFocus(),
+          style: {
+            image: flagSrcForUF(row.UF),
+            x: baseX,
+            y: baseY,
+            width: 14,
+            height: 10
+          }
+        });
+
+        rightLabels.push({
+          type: "text",
+          z: 101,
+          silent: false,
+          onclick: () => focusSeries(row.UF),
+          onmouseover: () => focusSeries(row.UF),
+          onmouseout: () => clearFocus(),
+          style: {
+            x: baseX + 18,
+            y: baseY + 1,
+            text: row.UF,
+            fill: "#f7d46a",
+            font: "700 10px Segoe UI"
+          }
+        });
+      });
+
+      lineChart.setOption({ graphic: rightLabels });
+
+      //phaseLabel.textContent = "Linhas (Bump): X = phases | Y = posicao";
+    }
+
+    function renderDetailedTable() {
+      const rows = [...data].sort((a, b) => a.Pos_Final - b.Pos_Final);
+      const html = rows.map((row) => {
+        const phaseCells = phases.map((p) => {
+          return `<td><div class="cell-pos">#${row[p.posKey]} - <span class="cell-val">${formatCurrencyBR(row[p.key])}</span></div></td>`;
+        }).join("");
+        return `<tr><td><strong>${row.UF}</strong></td>${phaseCells}</tr>`;
+      }).join("");
+      detailTableBody.innerHTML = html;
+      //phaseLabel.textContent = "Tabela Detalhado";
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      viewBarsBtn.classList.toggle("active", mode === "bars");
+      viewLinesBtn.classList.toggle("active", mode === "lines");
+      viewTableBtn.classList.toggle("active", mode === "table");
+
+      if (mode === "bars") {
+        timeline.classList.remove("hidden");
+        canvasBox.classList.remove("hidden");
+        tableWrap.classList.add("hidden");
+        return;
+      }
+
+      timeline.classList.add("hidden");
+
+      if (mode === "lines") {
+        canvasBox.classList.add("hidden");
+        lineChartBox.classList.remove("hidden");
+        tableWrap.classList.add("hidden");
+        renderLineChartECharts();
+        return;
+      }
+
+      canvasBox.classList.add("hidden");
+      lineChartBox.classList.add("hidden");
+      tableWrap.classList.remove("hidden");
+      renderDetailedTable();
+    }
+
+    function tick(now) {
+      const elapsed = now - transitionStart;
+      const t = Math.max(0, Math.min(1, elapsed / transitionMs));
+
+      if (viewMode === "bars") {
+        currentRows = getFrameData(t, fromPhaseIndex, toPhaseIndex);
+        drawBars(currentRows, fromPhaseIndex, toPhaseIndex, phases[toPhaseIndex].label, t);
+
+        if (t >= 1) {
+          currentPhaseIndex = toPhaseIndex;
+          fromPhaseIndex = toPhaseIndex;
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    async function init() {
+      resizeCanvas();
+      window.addEventListener("resize", onResize);
+
+      const res = await fetch(CSV_FILE);
+      if (!res.ok) {
+        throw new Error("Nao foi possivel carregar o arquivo CSV.");
+      }
+
+      data = parseCsv(await res.text());
+      phaseBounds = computePhaseBounds(data);
+      minInitialValue = Math.min(...data.map((r) => r.Inicial));
+      const allValues = data.flatMap((r) => phases.map((p) => r[p.key]));
+      const allMax = Math.max(...allValues);
+      const initialSpread = Math.max(1, Math.max(...data.map((r) => r.Inicial)) - minInitialValue);
+
+      axisMin = Math.max(0, minInitialValue - initialSpread * 0.1);
+      axisMax = allMax + initialSpread * 0.05;
+
+      currentPhaseIndex = 0;
+      fromPhaseIndex = 0;
+      toPhaseIndex = 0;
+      transitionStart = performance.now();
+      buildTimeline();
+
+      viewBarsBtn.addEventListener("click", () => setViewMode("bars"));
+      viewLinesBtn.addEventListener("click", () => setViewMode("lines"));
+      viewTableBtn.addEventListener("click", () => setViewMode("table"));
+
+      await preloadFlags(data);
+      currentRows = getFrameData(1, 0, 0);
+      setViewMode("bars");
+      requestAnimationFrame(tick);
+    }
+
+    init().catch((err) => {
+      console.error(err);
+      phaseLabel.textContent = "Erro ao carregar CSV";
+    });
+  </script>
+</body>
+</html>
