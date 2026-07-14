@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-13T19:47:38.585Z",
-  "commitCount": 158,
-  "totalChangeCount": 53,
+  "generatedAt": "2026-07-14T14:09:18.464Z",
+  "commitCount": 159,
+  "totalChangeCount": 54,
   "history": [
     {
       "commit": {
@@ -1518,6 +1518,39 @@
             "NOME": "GERBESON SAMPAIO CLARINDO",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "SEFAZ PI"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "02bf9b94931b2880d0d7b2c14908f3d554fdba7f",
+        "date": "2026-07-14T14:08:24Z",
+        "author": "observatoriosefmg",
+        "message": "AFASTAMENTO SEBASTIAO"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "3877602",
+          "inscricao": "",
+          "nome": "SEBASTIAO LUIZ VALADARES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3877602",
+            "INSCRICAO": "",
+            "NOME": "SEBASTIAO LUIZ VALADARES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3877602",
+            "INSCRICAO": "",
+            "NOME": "SEBASTIAO LUIZ VALADARES",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
           }
         }
       ]
