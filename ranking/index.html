@@ -328,6 +328,10 @@
           <input type="checkbox" id="simMgAllowance" />
           Simular ajuda de custo MG (R$428,30/dia)
         </label>
+          <label class="sim-toggle">
+            <input type="checkbox" id="useHourly" />
+            Usar valores por hora (R$/h)
+          </label>
         
       </div>
     </div>
@@ -406,6 +410,7 @@
     const flagImages = new Map();
     let lineChart = null;
     let simulateMgAllowance = false;
+    let useHourly = false;
 
     function onResize() {
       resizeCanvas();
@@ -444,9 +449,11 @@
           row[h] = normalizeCell(cols[i] || "");
         });
 
+        // parse numeric phase values and carga horaria (CH)
         phases.forEach((p) => {
-          row[p.key] = Number(row[p.key] || 0);
+          row[p.key] = Number((row[p.key] || 0));
         });
+        row.CH = Number(row.CH || 0);
 
         return row;
       });
@@ -459,9 +466,26 @@
         const mgRow = rows.find((row) => row.UF === "MG");
         if (mgRow) {
           phases.forEach((p) => {
-            mgRow[p.key] = Number(mgRow[p.key] || 0) + MG_ALLOWANCE;
+            const baseVal = Number(mgRow[p.key] || 0);
+            if (useHourly && mgRow.CH > 0) {
+              mgRow[p.key] = baseVal + (MG_ALLOWANCE / (mgRow.CH * 4.5));
+            } else {
+              mgRow[p.key] = baseVal + MG_ALLOWANCE;
+            }
           });
         }
+      }
+
+      // if hourly view is requested, convert all phase values to hourly rates
+      if (useHourly) {
+        rows.forEach((r) => {
+          const ch = Number(r.CH || 0);
+          if (ch > 0) {
+            phases.forEach((p) => {
+              r[p.key] = Number(r[p.key] || 0) / (ch * 4.5);
+            });
+          }
+        });
       }
 
       return computeDynamicPositions(rows);
@@ -478,11 +502,13 @@
     }
 
     function formatCurrencyBR(value) {
-      return new Intl.NumberFormat("pt-BR", {
+      const opts = {
         style: "currency",
         currency: "BRL",
-        maximumFractionDigits: 0
-      }).format(value);
+        maximumFractionDigits: useHourly ? 2 : 0
+      };
+      const str = new Intl.NumberFormat("pt-BR", opts).format(value);
+      return useHourly ? `${str} /h` : str;
     }
 
     function lerp(a, b, t) {
@@ -1034,6 +1060,12 @@
 
       simMgAllowanceCheckbox.addEventListener("change", (event) => {
         simulateMgAllowance = Boolean(event.target.checked);
+        refreshComputedData();
+      });
+
+      const useHourlyCheckbox = document.getElementById("useHourly");
+      useHourlyCheckbox.addEventListener("change", (event) => {
+        useHourly = Boolean(event.target.checked);
         refreshComputedData();
       });
 
