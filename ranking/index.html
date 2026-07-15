@@ -79,6 +79,26 @@
       flex-wrap: wrap;
     }
 
+    .sim-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #130909;
+      color: #f7d46a;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .sim-toggle input {
+      accent-color: #f59e0b;
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+
     .view-toggle {
       display: inline-flex;
       background: #130909;
@@ -229,6 +249,16 @@
       font-size: 0.85rem;
     }
 
+    .foot a {
+      color: #f2c230;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .foot a:hover {
+      color: #ffd447;
+    }
+
     @media (max-width: 900px) {
       canvas {
         height: 560px;
@@ -276,6 +306,10 @@
           <button id="viewLines" class="view-btn">Linhas</button>
           <button id="viewTable" class="view-btn">Tabela Detalhada</button>
         </div>
+        <label class="sim-toggle">
+          <input type="checkbox" id="simMgAllowance" />
+          Simular ajuda de custo MG (R$428,30/dia)
+        </label>
         
       </div>
     </div>
@@ -307,13 +341,14 @@
     </div>
 
     <div class="foot">
-      Fonte: Pifado (@concurseiropifado). Atualizado em nov 2025.
+      Fonte: Pifado (@concurseiropifado). Atualizado em nov 2025. <a href="Ranking Remuneralção Fiscos estaduais.pdf" target="_blank" rel="noopener noreferrer">Ver PDF</a>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   <script>
     const CSV_FILE = "ranking_remuneracao_fiscos_estaduais.csv";
+    const MG_ALLOWANCE = 5223.12;
 
     const phases = [
       { key: "Inicial", posKey: "Pos_Inicial", label: "Inicial" },
@@ -335,7 +370,9 @@
     const viewBarsBtn = document.getElementById("viewBars");
     const viewLinesBtn = document.getElementById("viewLines");
     const viewTableBtn = document.getElementById("viewTable");
+    const simMgAllowanceCheckbox = document.getElementById("simMgAllowance");
 
+    let rawData = [];
     let data = [];
     let minInitialValue = 0;
     let axisMin = 0;
@@ -350,6 +387,7 @@
     let currentRows = [];
     const flagImages = new Map();
     let lineChart = null;
+    let simulateMgAllowance = false;
 
     function onResize() {
       resizeCanvas();
@@ -381,7 +419,7 @@
         normalizeCell(h).replace(/^\uFEFF/, "")
       );
 
-      const parsed = lines.slice(1).map((line) => {
+      return lines.slice(1).map((line) => {
         const cols = line.split(";");
         const row = {};
         headers.forEach((h, i) => {
@@ -394,8 +432,21 @@
 
         return row;
       });
+    }
 
-      return computeDynamicPositions(parsed);
+    function buildComputedData(baseRows, useMgAllowance) {
+      const rows = baseRows.map((row) => ({ ...row }));
+
+      if (useMgAllowance) {
+        const mgRow = rows.find((row) => row.UF === "MG");
+        if (mgRow) {
+          phases.forEach((p) => {
+            mgRow[p.key] = Number(mgRow[p.key] || 0) + MG_ALLOWANCE;
+          });
+        }
+      }
+
+      return computeDynamicPositions(rows);
     }
 
     function computeDynamicPositions(rows) {
@@ -464,7 +515,7 @@
 
     function flagSrcForUF(uf) {
       if (uf === "CE") {
-        return "bandeiras/Ceara.jpg";
+        return "bandeiras/CE.jpg";
       }
       return `bandeiras/${uf}.jpg`;
     }
@@ -507,6 +558,26 @@
           max: Math.max(...values)
         };
       });
+    }
+
+    function refreshComputedData() {
+      data = buildComputedData(rawData, simulateMgAllowance);
+      phaseBounds = computePhaseBounds(data);
+      minInitialValue = Math.min(...data.map((r) => r.Inicial));
+      const allValues = data.flatMap((r) => phases.map((p) => r[p.key]));
+      const allMax = Math.max(...allValues);
+      const initialSpread = Math.max(1, Math.max(...data.map((r) => r.Inicial)) - minInitialValue);
+
+      axisMin = Math.max(0, minInitialValue - initialSpread * 0.1);
+      axisMax = allMax + initialSpread * 0.05;
+
+      currentRows = getFrameData(1, fromPhaseIndex, toPhaseIndex);
+
+      if (viewMode === "lines") {
+        renderLineChartECharts();
+      } else if (viewMode === "table") {
+        renderDetailedTable();
+      }
     }
 
     function buildTimeline() {
@@ -552,7 +623,6 @@
 
       const rows = frameRows;
       const rowGap = 4;
-      const barH = (chartH - (rows.length - 1) * rowGap) / rows.length;
 
       const fromBounds = phaseBounds[fromIdx] || { min: 0, max: 1 };
       const toBounds = phaseBounds[toIdx] || { min: 0, max: 1 };
@@ -580,16 +650,56 @@
         ctx.fillText(formatCurrencyBR(tickValue), x, margin.top - 12);
       }
 
-      rows.forEach((d, idx) => {
-        const y = margin.top + idx * (barH + rowGap);
-        const barW = Math.max(2, ((d.value - dynamicAxisMin) / domain) * chartW);
-        const barColor = colorByPosition(idx, rows.length);
+      const avgValue = rows.reduce((acc, r) => acc + r.value, 0) / Math.max(1, rows.length);
+      let avgInsertIndex = rows.findIndex((r) => r.value < avgValue);
+      if (avgInsertIndex < 0) {
+        avgInsertIndex = rows.length;
+      }
+
+      const displayRows = rows.map((row, idx) => ({ type: "state", row, stateIndex: idx }));
+      displayRows.splice(avgInsertIndex, 0, { type: "avg", value: avgValue });
+
+      const barH = (chartH - (displayRows.length - 1) * rowGap) / displayRows.length;
+
+      displayRows.forEach((item, displayIdx) => {
+        const y = margin.top + displayIdx * (barH + rowGap);
 
         ctx.fillStyle = "rgba(255,255,255,0.035)";
         ctx.fillRect(margin.left, y, chartW, barH);
 
+        if (item.type === "avg") {
+          const avgBarW = Math.max(2, ((item.value - dynamicAxisMin) / domain) * chartW);
+          const avgBarColor = "rgba(255,255,255,0.88)";
+
+          ctx.fillStyle = avgBarColor;
+          ctx.fillRect(margin.left, y, avgBarW, barH);
+
+          ctx.strokeStyle = avgBarColor;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(margin.left, y, avgBarW, barH);
+
+          ctx.fillStyle = "#ffffff";
+          ctx.font = `700 ${Math.max(9, barH * 0.30)}px Segoe UI, sans-serif`;
+          ctx.textAlign = "right";
+          ctx.textBaseline = "middle";
+          ctx.fillText("MÉDIA", margin.left - 10, y + barH / 2);
+
+          ctx.textAlign = "left";
+          ctx.fillText(formatCurrencyBR(item.value), margin.left + Math.min(avgBarW + 8, chartW - 130), y + barH / 2);
+          return;
+        }
+
+        const d = item.row;
+        const stateRank = item.stateIndex + 1;
+        const barW = Math.max(2, ((d.value - dynamicAxisMin) / domain) * chartW);
+        const isMG = d.uf === "MG";
+        const barColor = isMG ? "#d62828" : "#6f8f6f";
+
         ctx.fillStyle = barColor;
         ctx.fillRect(margin.left, y, barW, barH);
+        ctx.strokeStyle = barColor;
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(margin.left, y, barW, barH);
 
         const flag = flagImages.get(d.uf);
         const flagH = Math.max(10, barH * 0.78);
@@ -601,7 +711,7 @@
         ctx.font = `600 ${Math.max(10, barH * 0.33)}px Segoe UI, sans-serif`;
         ctx.textBaseline = "middle";
         ctx.textAlign = "right";
-        ctx.fillText(String(idx + 1), flagX - 10, y + barH / 2);
+        ctx.fillText(String(stateRank), flagX - 10, y + barH / 2);
 
         if (flag && flag.complete && flag.naturalWidth > 0) {
           ctx.drawImage(flag, flagX, flagY, flagW, flagH);
@@ -885,15 +995,7 @@
         throw new Error("Nao foi possivel carregar o arquivo CSV.");
       }
 
-      data = parseCsv(await res.text());
-      phaseBounds = computePhaseBounds(data);
-      minInitialValue = Math.min(...data.map((r) => r.Inicial));
-      const allValues = data.flatMap((r) => phases.map((p) => r[p.key]));
-      const allMax = Math.max(...allValues);
-      const initialSpread = Math.max(1, Math.max(...data.map((r) => r.Inicial)) - minInitialValue);
-
-      axisMin = Math.max(0, minInitialValue - initialSpread * 0.1);
-      axisMax = allMax + initialSpread * 0.05;
+      rawData = parseCsv(await res.text());
 
       currentPhaseIndex = 0;
       fromPhaseIndex = 0;
@@ -905,7 +1007,13 @@
       viewLinesBtn.addEventListener("click", () => setViewMode("lines"));
       viewTableBtn.addEventListener("click", () => setViewMode("table"));
 
-      await preloadFlags(data);
+      simMgAllowanceCheckbox.addEventListener("change", (event) => {
+        simulateMgAllowance = Boolean(event.target.checked);
+        refreshComputedData();
+      });
+
+      refreshComputedData();
+      await preloadFlags(rawData);
       currentRows = getFrameData(1, 0, 0);
       setViewMode("bars");
       requestAnimationFrame(tick);
