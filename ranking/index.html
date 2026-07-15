@@ -569,16 +569,24 @@
       });
     }
 
+    function floorBelowMultiple(value, step) {
+      return Math.floor((value - Number.EPSILON) / step) * step;
+    }
+
+    function ceilAboveMultiple(value, step) {
+      return Math.ceil((value + Number.EPSILON) / step) * step;
+    }
+
     function refreshComputedData() {
       data = buildComputedData(rawData, simulateMgAllowance);
       phaseBounds = computePhaseBounds(data);
       minInitialValue = Math.min(...data.map((r) => r.Inicial));
       const allValues = data.flatMap((r) => phases.map((p) => r[p.key]));
+      const allMin = Math.min(...allValues);
       const allMax = Math.max(...allValues);
-      const initialSpread = Math.max(1, Math.max(...data.map((r) => r.Inicial)) - minInitialValue);
 
-      axisMin = Math.max(0, minInitialValue - initialSpread * 0.1);
-      axisMax = allMax + initialSpread * 0.05;
+      axisMin = Math.max(0, floorBelowMultiple(allMin, 1000));
+      axisMax = Math.max(axisMin + 1000, ceilAboveMultiple(allMax, 1000));
 
       currentRows = getFrameData(1, fromPhaseIndex, toPhaseIndex);
 
@@ -639,20 +647,13 @@
       const rows = frameRows;
       const rowGap = isCompact ? 2 : 4;
 
-      const fromBounds = phaseBounds[fromIdx] || { min: 0, max: 1 };
-      const toBounds = phaseBounds[toIdx] || { min: 0, max: 1 };
-      const phaseMin = lerp(fromBounds.min, toBounds.min, tNorm);
-      const phaseMax = lerp(fromBounds.max, toBounds.max, tNorm);
-      const phaseSpan = Math.max(1, phaseMax - phaseMin);
-      const dynamicAxisMin = Math.max(0, phaseMin - phaseSpan * 0.08);
-      const dynamicAxisMax = phaseMax + phaseSpan * 0.05;
-      const domain = Math.max(1, dynamicAxisMax - dynamicAxisMin);
+      const domain = Math.max(1, axisMax - axisMin);
 
       ctx.strokeStyle = "rgba(242,194,48,0.22)";
       ctx.lineWidth = 1;
       for (let i = 0; i <= 5; i++) {
-        const tickValue = dynamicAxisMin + (i / 5) * domain;
-        const x = margin.left + ((tickValue - dynamicAxisMin) / domain) * chartW;
+        const tickValue = axisMin + (i / 5) * domain;
+        const x = margin.left + ((tickValue - axisMin) / domain) * chartW;
         ctx.beginPath();
         ctx.moveTo(x, margin.top - 10);
         ctx.lineTo(x, margin.top + chartH + 4);
@@ -683,7 +684,7 @@
         ctx.fillRect(margin.left, y, chartW, barH);
 
         if (item.type === "avg") {
-          const avgBarW = Math.max(2, ((item.value - dynamicAxisMin) / domain) * chartW);
+          const avgBarW = Math.max(2, ((item.value - axisMin) / domain) * chartW);
           const avgBarColor = "rgba(255,255,255,0.88)";
 
           ctx.fillStyle = avgBarColor;
@@ -706,7 +707,7 @@
 
         const d = item.row;
         const stateRank = item.stateIndex + 1;
-        const barW = Math.max(2, ((d.value - dynamicAxisMin) / domain) * chartW);
+        const barW = Math.max(2, ((d.value - axisMin) / domain) * chartW);
         const isMG = d.uf === "MG";
         const barColor = isMG ? "#d62828" : "#6f8f6f";
 
