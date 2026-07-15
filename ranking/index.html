@@ -785,18 +785,21 @@
           ctx.strokeRect(flagX, flagY, flagW, flagH);
         }
 
+
         ctx.fillStyle = "#fff2c2";
         ctx.font = `600 ${Math.max(11, barH * 0.38)}px Segoe UI, sans-serif`;
         ctx.textAlign = "right";
         const ufX = margin.left - 10;
         ctx.fillText(d.uf, ufX, y + barH / 2);
 
-        // show carga horaria next to the flag (small, muted)
+        // show carga horaria immediately to the right of the flag image
         ctx.fillStyle = "rgba(242,194,48,0.9)";
         ctx.font = `600 ${Math.max(9, barH * 0.28)}px Segoe UI, sans-serif`;
         ctx.textAlign = "left";
+        const flagRightX = flagX + flagW;
         const chText = (d.ch || d.CH) ? `${Number(d.ch || d.CH)}h` : "";
-        ctx.fillText(chText, ufX + 18, y + barH / 2);
+        const chX = flagRightX + 6;
+        ctx.fillText(chText, chX, y + barH / 2);
 
         ctx.fillStyle = "#fff2c2";
         ctx.textAlign = "left";
