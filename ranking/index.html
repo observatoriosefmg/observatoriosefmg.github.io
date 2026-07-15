@@ -23,6 +23,7 @@
 
     body {
       margin: 0;
+      overflow-x: hidden;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       color: var(--text);
       background:
@@ -169,6 +170,8 @@
 
     .canvas-box {
       padding: 0;
+      width: 100%;
+      overflow: hidden;
     }
 
     .echart-box {
@@ -272,6 +275,9 @@
       body {
         padding: 10px;
       }
+      .wrap {
+        width: min(1100px, calc(100% - 12px));
+      }
       .top {
         padding: 14px;
       }
@@ -289,6 +295,9 @@
       }
       .echart-box {
         height: 500px;
+      }
+      .content {
+        padding: 10px;
       }
     }
   </style>
@@ -617,12 +626,18 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      const margin = { top: 50, right: 130, bottom: 28, left: 128 };
-      const chartW = w - margin.left - margin.right;
-      const chartH = h - margin.top - margin.bottom;
+      const isCompact = w < 640;
+      const margin = {
+        top: isCompact ? 28 : 50,
+        right: isCompact ? 24 : 130,
+        bottom: isCompact ? 22 : 28,
+        left: isCompact ? 72 : 128
+      };
+      const chartW = Math.max(1, w - margin.left - margin.right);
+      const chartH = Math.max(1, h - margin.top - margin.bottom);
 
       const rows = frameRows;
-      const rowGap = 4;
+      const rowGap = isCompact ? 2 : 4;
 
       const fromBounds = phaseBounds[fromIdx] || { min: 0, max: 1 };
       const toBounds = phaseBounds[toIdx] || { min: 0, max: 1 };
