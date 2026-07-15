@@ -589,7 +589,8 @@
         const valueNow = lerp(valueA, valueB, eased);
         return {
           uf: row.UF,
-          value: valueNow
+          value: valueNow,
+          ch: row.CH
         };
       }).sort((a, b) => b.value - a.value);
     }
@@ -620,8 +621,9 @@
       const allMin = Math.min(...allValues);
       const allMax = Math.max(...allValues);
 
-      axisMin = Math.max(0, floorBelowMultiple(allMin, 1000));
-      axisMax = Math.max(axisMin + 1000, ceilAboveMultiple(allMax, 1000));
+      const step = useHourly ? 20 : 1000;
+      axisMin = Math.max(0, floorBelowMultiple(allMin, step));
+      axisMax = Math.max(axisMin + step, ceilAboveMultiple(allMax, step));
 
       currentRows = getFrameData(1, fromPhaseIndex, toPhaseIndex);
 
