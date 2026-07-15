@@ -462,17 +462,20 @@
     function buildComputedData(baseRows, useMgAllowance) {
       const rows = baseRows.map((row) => ({ ...row }));
 
+      // apply MG allowance. If converting to hourly, we'll convert the
+      // monthly allowance to an hourly increment using 168h/month.
+      let mgHourlyExtra = 0;
       if (useMgAllowance) {
         const mgRow = rows.find((row) => row.UF === "MG");
         if (mgRow) {
-          phases.forEach((p) => {
-            const baseVal = Number(mgRow[p.key] || 0);
-            if (useHourly && mgRow.CH > 0) {
-              mgRow[p.key] = baseVal + (MG_ALLOWANCE / (mgRow.CH * 4.5));
-            } else {
-              mgRow[p.key] = baseVal + MG_ALLOWANCE;
-            }
-          });
+          if (useHourly) {
+            // do not mutate monthly values here; compute hourly extra separately
+            mgHourlyExtra = MG_ALLOWANCE / 168;
+          } else {
+            phases.forEach((p) => {
+              mgRow[p.key] = Number(mgRow[p.key] || 0) + MG_ALLOWANCE;
+            });
+          }
         }
       }
 
@@ -486,6 +489,16 @@
             });
           }
         });
+
+        // add MG hourly extra after conversion
+        if (mgHourlyExtra > 0) {
+          const mgRow = rows.find((row) => row.UF === "MG");
+          if (mgRow) {
+            phases.forEach((p) => {
+              mgRow[p.key] = Number(mgRow[p.key] || 0) + mgHourlyExtra;
+            });
+          }
+        }
       }
 
       return computeDynamicPositions(rows);
@@ -775,8 +788,17 @@
         ctx.fillStyle = "#fff2c2";
         ctx.font = `600 ${Math.max(11, barH * 0.38)}px Segoe UI, sans-serif`;
         ctx.textAlign = "right";
-        ctx.fillText(d.uf, margin.left - 10, y + barH / 2);
+        const ufX = margin.left - 10;
+        ctx.fillText(d.uf, ufX, y + barH / 2);
 
+        // show carga horaria next to the flag (small, muted)
+        ctx.fillStyle = "rgba(242,194,48,0.9)";
+        ctx.font = `600 ${Math.max(9, barH * 0.28)}px Segoe UI, sans-serif`;
+        ctx.textAlign = "left";
+        const chText = (d.ch || d.CH) ? `${Number(d.ch || d.CH)}h` : "";
+        ctx.fillText(chText, ufX + 18, y + barH / 2);
+
+        ctx.fillStyle = "#fff2c2";
         ctx.textAlign = "left";
         const valueText = formatCurrencyBR(d.value);
         const valX = margin.left + Math.min(barW + 8, chartW - 110);
