@@ -383,7 +383,7 @@
         },
         {
           "id": "pro_labore",
-          "nome": "Pro Labor",
+          "nome": "Pro Labore",
           "natureza": "remuneratoria",
           "recorrencia": "mensal",
           "observacoes": "Remuneração fixa em 1.680 cotas para Assistente Fiscal.",
@@ -400,11 +400,13 @@
           "nome": "Quinquênio",
           "natureza": "remuneratoria",
           "recorrencia": "mensal",
-          "observacoes": "Calculado sobre o vencimento básico pela fórmula 1,05ⁿ⁻¹, onde n é o número de quinquênios completos de serviço.",
+          "observacoes": "Calculado sobre o vencimento básico, o Pro Labore e o prêmio de produtividade pela fórmula 1,05^(n-1), onde n é o número de quinquênios completos de serviço.",
           "baseCalculo": {
             "tipo": "quinquenio",
             "base": [
-              "vencimento_basico"
+              "vencimento_basico",
+              "pro_labore",
+              "premio_produtividade"
             ],
             "taxaPorPeriodo": 0.05,
             "intervaloAnos": 5
@@ -415,11 +417,13 @@
           "nome": "Sexta Parte",
           "natureza": "remuneratoria",
           "recorrencia": "mensal",
-          "observacoes": "Adicional de 16,66% sobre o vencimento básico a cada 20 anos completos de serviço.",
+          "observacoes": "Adicional de 16,66% sobre o vencimento básico, o Pro Labore e o prêmio de produtividade a cada 20 anos completos de serviço.",
           "baseCalculo": {
             "tipo": "sexta_parte",
             "base": [
-              "vencimento_basico"
+              "vencimento_basico",
+              "pro_labore",
+              "premio_produtividade"
             ],
             "percentualPorFaixa": 0.1666,
             "intervaloAnos": 20
