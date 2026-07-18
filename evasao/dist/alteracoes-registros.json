@@ -1,12 +1,12 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-17T19:51:45.178Z",
+  "generatedAt": "2026-07-18T13:58:37.899Z",
   "commitCount": 159,
   "totalChangeCount": 54,
   "history": [
     {
       "commit": {
-        "hash": "afdc880a715b84f22d998b9553c7eb996b8e415d",
+        "hash": "7bbe3d4cc8eeec576f69c57bb5187691c70bf375",
         "date": "2025-11-12T10:17:51Z",
         "author": "observatoriosefmg",
         "message": "atualização de dados"
@@ -39,7 +39,7 @@
     },
     {
       "commit": {
-        "hash": "128122d85e827a27d2f67030133d02802b7d2b08",
+        "hash": "188b7d2a9f7bbf878a16db907f3a05e29029721f",
         "date": "2025-11-19T18:06:56-03:00",
         "author": "observatoriosefmg",
         "message": "Atualização Dados"
@@ -94,7 +94,7 @@
     },
     {
       "commit": {
-        "hash": "914b96085d6e3f91a40d1e6acd441144c61d611f",
+        "hash": "4345d3bed7965ac44708579b2ed41342d9c6f04e",
         "date": "2025-11-19T23:03:04Z",
         "author": "observatoriosefmg",
         "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
@@ -149,7 +149,7 @@
     },
     {
       "commit": {
-        "hash": "f1ceb83019a8aa6954871b47e52c04361a1a5586",
+        "hash": "7bba2792395973bb2e5e20a1efe65abefea95ebe",
         "date": "2025-11-21T16:58:57-08:00",
         "author": "observatoriosefmg",
         "message": "Atualização de dados"
@@ -182,7 +182,7 @@
     },
     {
       "commit": {
-        "hash": "3ef63660fa0f8f84c4cc3f34297137049a936850",
+        "hash": "6c1fc25643e907d515acd0e263c1874f8f1765a5",
         "date": "2025-11-29T02:28:41Z",
         "author": "observatoriosefmg",
         "message": "Atualização de dados, 101 evasões."
@@ -215,7 +215,7 @@
     },
     {
       "commit": {
-        "hash": "1bdae002b27001a04c2460fa5f2f157cf6c6b610",
+        "hash": "82c85fd938fcde50d660c51e6b0f3a65db02c201",
         "date": "2025-12-09T21:30:01Z",
         "author": "observatoriosefmg",
         "message": "ATUALIZAÇAO DADOS"
@@ -248,7 +248,7 @@
     },
     {
       "commit": {
-        "hash": "85e153d79040ea964d28c9daa28e951523cb26d6",
+        "hash": "cb369e061782f4696f1100d4298c359d1c708133",
         "date": "2026-01-14T09:34:37-03:00",
         "author": "observatoriosefmg",
         "message": "RACHID"
@@ -281,7 +281,7 @@
     },
     {
       "commit": {
-        "hash": "33be2a179187cddad8f630433efb3a5e0f05a65f",
+        "hash": "829f9e048dfa7e6f0c2d6c01ab1b563af4854f55",
         "date": "2026-01-15T11:21:35Z",
         "author": "observatoriosefmg",
         "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
@@ -314,7 +314,7 @@
     },
     {
       "commit": {
-        "hash": "93e043dd8647febb18a3fcf38d02687bc57c5863",
+        "hash": "e5a8d10df3dba562b6c170eee6627bbea2747e79",
         "date": "2026-01-16T10:28:38-03:00",
         "author": "observatoriosefmg",
         "message": "SEFA PR"
@@ -369,7 +369,7 @@
     },
     {
       "commit": {
-        "hash": "c826ed4322c52730adec9bafa89e634bd408f01f",
+        "hash": "05aaea79888d4cdad26072bb649cb9603196d83f",
         "date": "2026-02-05T11:32:49Z",
         "author": "observatoriosefmg",
         "message": "Merge branch 'main' of https://github.com/observatoriosefmg/observatoriosefmg.github.io"
@@ -424,7 +424,7 @@
     },
     {
       "commit": {
-        "hash": "7d71d1b190dbe8c8f23fd17fe839d65aeb253c5d",
+        "hash": "c74b29c4df30005c3da9f75eb42c184fb436b6f3",
         "date": "2026-02-10T16:14:31-03:00",
         "author": "observatoriosefmg",
         "message": "Dados"
@@ -457,7 +457,7 @@
     },
     {
       "commit": {
-        "hash": "65ee3486a46a02d2068209cbf9619d4b41a690a2",
+        "hash": "c255ecc66fce20553f4ff091244e09f3c818cc8c",
         "date": "2026-02-11T12:08:41Z",
         "author": "observatoriosefmg",
         "message": "dados"
@@ -600,7 +600,7 @@
     },
     {
       "commit": {
-        "hash": "2ef061a9ebfac493d436bb9d3931793b04d1bc65",
+        "hash": "c8c7c1ab2d840ea7c51d4d5a72b77ed93a5bdd69",
         "date": "2026-02-26T11:15:21Z",
         "author": "observatoriosefmg",
         "message": "dados"
@@ -655,7 +655,7 @@
     },
     {
       "commit": {
-        "hash": "f7f5026b32d9f6f9a82e06a90c028d051fcfc3f8",
+        "hash": "63523849234fd5d2a36c666b128ceac4b6dc6dad",
         "date": "2026-03-11T23:18:39Z",
         "author": "observatoriosefmg",
         "message": "dados"
@@ -754,7 +754,7 @@
     },
     {
       "commit": {
-        "hash": "dc71a95f5773595dae23836e6f874f4b70bdb762",
+        "hash": "ba4403d7059680e3d2cef9e3fe49db06b36ee99f",
         "date": "2026-03-13T10:01:57Z",
         "author": "observatoriosefmg",
         "message": "Nomeação Lilian - Exoneração Bressane"
@@ -787,7 +787,7 @@
     },
     {
       "commit": {
-        "hash": "f0398411b44ed051540036004a4f0f772d019b9e",
+        "hash": "2636aad9508c21c3ce2001526c3906864d4acbf5",
         "date": "2026-03-24T15:32:31Z",
         "author": "observatoriosefmg",
         "message": " terafael"
@@ -820,7 +820,7 @@
     },
     {
       "commit": {
-        "hash": "84d752bcb17520434881f4d1c5250ee7c1e3bf5f",
+        "hash": "bd4eea16a0fbfacee5ad216d179a223526964ef5",
         "date": "2026-04-01T12:33:05Z",
         "author": "observatoriosefmg",
         "message": "afastamentos"
@@ -875,7 +875,7 @@
     },
     {
       "commit": {
-        "hash": "9797e4d21533e7d36935182faa67add9c495df84",
+        "hash": "9bb60dce0ba170c0f66b62217d67cbc89b74900c",
         "date": "2026-04-03T12:57:46Z",
         "author": "observatoriosefmg",
         "message": "EDGARD"
@@ -908,7 +908,7 @@
     },
     {
       "commit": {
-        "hash": "6f7be10bd2c15d46761af3569d2ed6389e00af65",
+        "hash": "1ce3e865a554c67aa6267dee5216eb6d010aec76",
         "date": "2026-04-08T18:10:00Z",
         "author": "observatoriosefmg",
         "message": "Matheus Reis"
@@ -941,7 +941,7 @@
     },
     {
       "commit": {
-        "hash": "4f61a04fa402b27bfedc0d9577963515a508f4cb",
+        "hash": "3fbcd61379c84345258842e9a9c1c19ce3bd9b7e",
         "date": "2026-04-10T09:47:30Z",
         "author": "observatoriosefmg",
         "message": "AULO CLESIO FERNANDES"
@@ -974,7 +974,7 @@
     },
     {
       "commit": {
-        "hash": "c94e0dd44f99106bccf45e23b7f9eb2e8ec0537d",
+        "hash": "987b49482d51d04beb27dcf77631431724bdd378",
         "date": "2026-04-11T11:52:34Z",
         "author": "observatoriosefmg",
         "message": "GUILHERME COUTO SOARES"
@@ -1007,7 +1007,7 @@
     },
     {
       "commit": {
-        "hash": "c51036c013ea34b0b8aaa8ab35c12e46a5d3993c",
+        "hash": "2b7775511a4fa491494d6e17285bae42ff27f2b8",
         "date": "2026-04-14T10:44:50Z",
         "author": "observatoriosefmg",
         "message": "desistencias"
@@ -1128,7 +1128,7 @@
     },
     {
       "commit": {
-        "hash": "10767a0bccc4e806c8b0f39ae43d44dcddcc39aa",
+        "hash": "86dee54d95193ee70c2dbfd6257a775925573eed",
         "date": "2026-04-24T10:31:13Z",
         "author": "observatoriosefmg",
         "message": "GILBERTO MAGALHAES LEITE"
@@ -1161,7 +1161,7 @@
     },
     {
       "commit": {
-        "hash": "b24e9c41a2ff626ec1ab2cbc1914392339c1f9fb",
+        "hash": "4c3ad840d855e37261e1d7c2e5bccc2634ff7073",
         "date": "2026-04-30T14:59:52Z",
         "author": "observatoriosefmg",
         "message": "aposentadoria"
@@ -1194,7 +1194,7 @@
     },
     {
       "commit": {
-        "hash": "30ed674f9b46df39f92b8fb4fc00cff3927e52d5",
+        "hash": "a66ede3c0247cb5516f228af5cb5ea76202adf4c",
         "date": "2026-05-08T02:26:54Z",
         "author": "observatoriosefmg",
         "message": "bruno L"
@@ -1227,7 +1227,7 @@
     },
     {
       "commit": {
-        "hash": "b7f7afc0d3bcee448258eef9c902cbcca2fb2add",
+        "hash": "301ec78e627bbbaafced3bda16ab5379324a52b4",
         "date": "2026-05-25T16:02:03Z",
         "author": "observatoriosefmg",
         "message": "aposentados"
@@ -1282,7 +1282,7 @@
     },
     {
       "commit": {
-        "hash": "04101d2026823de532308dc0b43ba2a42f3bf19e",
+        "hash": "9ca5960bc4de2c00f3133fe02947149396614ce5",
         "date": "2026-05-25T16:49:42Z",
         "author": "observatoriosefmg",
         "message": "desistentes"
@@ -1337,7 +1337,7 @@
     },
     {
       "commit": {
-        "hash": "2ad97047aa919924e869451c58ddfb13cbee9aa7",
+        "hash": "1fe2abf5965451bee9bb904a7ad0080b08f7d254",
         "date": "2026-06-02T12:11:48Z",
         "author": "observatoriosefmg",
         "message": "dados"
@@ -1392,7 +1392,7 @@
     },
     {
       "commit": {
-        "hash": "3ad923cce91d8ebe677f446a4bb099c3b79a14ed",
+        "hash": "1bc23cb23714797b99546b2017f17120c9d83064",
         "date": "2026-06-11T11:10:39Z",
         "author": "observatoriosefmg",
         "message": "atualização dados"
@@ -1425,7 +1425,7 @@
     },
     {
       "commit": {
-        "hash": "6702f2e026ea8648d9b390976e6f94d7089dfeaa",
+        "hash": "6f512731674c27f09080ff786197a97dbc86db98",
         "date": "2026-06-15T11:34:10Z",
         "author": "observatoriosefmg",
         "message": "AFASTAMENTOS"
@@ -1458,7 +1458,7 @@
     },
     {
       "commit": {
-        "hash": "b38ee7c421a722fd6aca6186e71ebc791a52cc6b",
+        "hash": "3521601bb0a16dbe8f0f4ca57c59efb05420053c",
         "date": "2026-06-18T12:07:07Z",
         "author": "observatoriosefmg",
         "message": "aposentadoria"
@@ -1491,7 +1491,7 @@
     },
     {
       "commit": {
-        "hash": "28b11bde13e55b33543a350fbc3ab0c799ba0820",
+        "hash": "f7a12e1fcc25bda83a08eabfe47b287c0e91d1cd",
         "date": "2026-07-13T19:47:15Z",
         "author": "observatoriosefmg",
         "message": "gerberson"
@@ -1524,7 +1524,7 @@
     },
     {
       "commit": {
-        "hash": "02bf9b94931b2880d0d7b2c14908f3d554fdba7f",
+        "hash": "f50d40028ba6a6c9ff110d96ed1e48acf2652f85",
         "date": "2026-07-14T14:08:24Z",
         "author": "observatoriosefmg",
         "message": "AFASTAMENTO SEBASTIAO"
