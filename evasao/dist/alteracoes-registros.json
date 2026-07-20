@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-20T14:20:08.620Z",
-  "commitCount": 160,
-  "totalChangeCount": 54,
+  "generatedAt": "2026-07-20T14:24:01.440Z",
+  "commitCount": 161,
+  "totalChangeCount": 55,
   "history": [
     {
       "commit": {
@@ -1550,6 +1550,39 @@
             "INSCRICAO": "",
             "NOME": "SEBASTIAO LUIZ VALADARES",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "15fcad944b46ca975b1530c6ad0cab3a062e657f",
+        "date": "2026-07-20T14:23:51Z",
+        "author": "observatoriosefmg",
+        "message": "VINICIUS SANTANA"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556913",
+          "inscricao": "266025540",
+          "nome": "VINICIUS AMADEU SANTANA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "7556913",
+            "INSCRICAO": "266025540",
+            "NOME": "VINICIUS AMADEU SANTANA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556913",
+            "INSCRICAO": "266025540",
+            "NOME": "VINICIUS AMADEU SANTANA",
+            "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": ""
           }
         }
