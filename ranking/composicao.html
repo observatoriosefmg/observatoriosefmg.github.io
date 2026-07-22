@@ -58,8 +58,8 @@
   }
   .instagram-callout-midia {
     flex: 0 0 auto;
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     border-radius: 0;
     overflow: visible;
     background: none;
@@ -131,6 +131,8 @@
     flex-direction: column;
     position: sticky;
     top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow: hidden;
     border-right: 1px solid var(--cor-borda);
     padding-right: 18px;
   }
@@ -138,7 +140,14 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  .menu-lateral-lista::-webkit-scrollbar { display: none; }
   .menu-lateral button {
     font-family: inherit;
     text-align: left;
@@ -202,7 +211,7 @@
   @media (max-width: 700px) {
     .pagina { padding: 24px 18px; }
     .instagram-callout { flex-direction: column; }
-    .instagram-callout-midia { width: 64px; height: 64px; }
+    .instagram-callout-midia { width: 80px; height: 80px; }
     .layout-principal { display: block; }
     .botao-menu-mobile { display: flex; }
     .menu-lateral {
@@ -220,14 +229,18 @@
       border-radius: 18px 18px 0 0;
       background: #fff;
       padding: 14px 24px 24px;
-      overflow-y: auto;
+      overflow-y: hidden;
       box-shadow: 0 -8px 24px rgba(20, 24, 38, 0.25);
       transform: translateY(100%);
       transition: transform 0.25s ease;
-      touch-action: none;
     }
     .menu-lateral.aberto { transform: translateY(0); }
-    .menu-lateral-alca { display: block; }
+    .menu-lateral.aberto .menu-lateral-lista {
+      overflow-y: auto;
+      max-height: calc(75vh - 60px);
+      -webkit-overflow-scrolling: touch;
+    }
+    .menu-lateral-alca { display: block; touch-action: none; }
     .menu-lateral-fechar {
       display: block;
       margin: 0 0 12px auto;
@@ -485,19 +498,20 @@ __menuBackdrop.addEventListener("click", fecharMenuMobile);
 
 // Gesto de arrastar para baixo (touch) para fechar o menu mobile
 (function () {
+  const __menuAlca = document.getElementById("menu-lateral-alca");
   let inicioY = null;
   let deslocamentoY = 0;
-  __navMenuLateral.addEventListener("touchstart", (ev) => {
+  __menuAlca.addEventListener("touchstart", (ev) => {
     inicioY = ev.touches[0].clientY;
     deslocamentoY = 0;
     __navMenuLateral.style.transition = "none";
   });
-  __navMenuLateral.addEventListener("touchmove", (ev) => {
+  __menuAlca.addEventListener("touchmove", (ev) => {
     if (inicioY === null) return;
     deslocamentoY = Math.max(0, ev.touches[0].clientY - inicioY);
     __navMenuLateral.style.transform = `translateY(${deslocamentoY}px)`;
   });
-  __navMenuLateral.addEventListener("touchend", () => {
+  __menuAlca.addEventListener("touchend", () => {
     __navMenuLateral.style.transition = "";
     __navMenuLateral.style.transform = "";
     if (deslocamentoY > 80) fecharMenuMobile();
