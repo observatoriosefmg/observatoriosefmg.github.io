@@ -1,1112 +1,2501 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranking Fiscos Estaduais
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calculadora de Remuneração dos Fiscos Estaduais
 </title>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NZ84J0PJBF"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', 'G-NZ84J0PJBF');
-  </script>
-  <style>
-    :root {
-      --bg1: #000000;
-      --bg2: #070707;
-      --card: #070707ee;
-      --text: #f5f5f5;
-      --muted: #d4af37;
-      --accent: #d62828;
-      --accent2: #f2c230;
-      --border: #2a2a2a;
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<style>
+  :root {
+    color-scheme: light dark;
+    --cor-borda: #d0d5dd;
+    --cor-fundo-cabecalho: #1f2a44;
+    --cor-texto-cabecalho: #ffffff;
+    --cor-linha-alt: #f5f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    margin: 0;
+    padding: 24px;
+    background: #fafbfc;
+    color: #1a1f2b;
+  }
+  h1 {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+  }
+  p.subtitulo {
+    margin-top: 0;
+    color: #555;
+    font-size: 0.9rem;
+  }
+  .cabecalho-pagina {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .cabecalho-pagina-titulo h1 {
+    margin-bottom: 4px;
+  }
+  .cabecalho-pagina-titulo p.subtitulo {
+    margin-bottom: 0;
+  }
+  .painel-controles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    background: #fff;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+  }
+  .campo label {
+    font-weight: 600;
+    color: #1f2a44;
+  }
+  .campo input, .campo select {
+    height: 36px;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    min-width: 140px;
+    background: #ffffff;
+    color: #1f2a44;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .campo input::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+  }
+  .campo input:focus,
+  .campo select:focus {
+    outline: none;
+    border-color: #1f2a44;
+    box-shadow: 0 0 0 3px rgba(31, 42, 68, 0.16);
+  }
+  .campo select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 34px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231f2a44' stroke-width='2'%3E%3Cpath d='M5 7l5 6 5-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 14px;
+  }
+  .campo input[type="number"] {
+    width: 120px;
+    min-width: 120px;
+  }
+  .campo input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 220px;
+    min-width: 220px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  .campo input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: #d0d5dd;
+    border-radius: 2px;
+  }
+  .campo input[type="range"]::-moz-range-track {
+    height: 4px;
+    background: #d0d5dd;
+    border-radius: 2px;
+    border: none;
+  }
+  .campo input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 24px;
+    border-radius: 3px;
+    background: var(--cor-fundo-cabecalho);
+    cursor: pointer;
+    border: none;
+    margin-top: -10px;
+  }
+  .campo input[type="range"]::-moz-range-thumb {
+    width: 8px;
+    height: 24px;
+    border-radius: 3px;
+    background: var(--cor-fundo-cabecalho);
+    cursor: pointer;
+    border: none;
+  }
+  .campo input[type="range"]:focus {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+  .campo-toggle .switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+  }
+  .campo-toggle .switch input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  .campo-toggle .slider {
+    position: absolute;
+    inset: 0;
+    background: #cbd5e1;
+    border: 1px solid #94a3b8;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .campo-toggle .slider::before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 2px;
+    top: 2px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease;
+  }
+  .campo-toggle .switch input:checked + .slider {
+    background: #1f2a44;
+    border-color: #1f2a44;
+  }
+  .campo-toggle .switch input:checked + .slider::before {
+    transform: translateX(22px);
+  }
+  .campo-toggle .switch input:focus-visible + .slider {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+  }
+  .tabela-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .cel-comparacao {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .cel-comparacao-valor {
+    font-weight: 700;
+    color: #0a7a3d;
+  }
+  .cel-comparacao-rank {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+  .cel-comparacao-rank-destaque {
+    font-weight: 800;
+    color: #1f2a44;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    background: var(--cor-fundo-cabecalho);
+    color: var(--cor-texto-cabecalho);
+    padding: 8px 10px;
+    text-align: center;
+    font-weight: 600;
+    white-space: normal;
+    word-break: break-word;
+    vertical-align: bottom;
+  }
+  thead th:nth-child(1),
+  thead th:nth-child(2) {
+    text-align: left;
+  }
+  tbody td {
+    padding: 6px 10px;
+    text-align: center;
+    border-bottom: 1px solid #eef0f3;
+  }
+  tbody td:nth-child(1),
+  tbody td:nth-child(2) {
+    text-align: left;
+    font-weight: 600;
+  }
+  tbody tr:nth-child(even) {
+    background: var(--cor-linha-alt);
+  }
+  table.tabela-comparacao thead th:nth-child(2),
+  table.tabela-comparacao tbody td:nth-child(2) {
+    text-align: center;
+    font-weight: normal;
+  }
+  td.liquido {
+    color: #0a7a3d;
+    font-weight: 700;
+  }
+  th.liquido {
+    font-weight: 600;
+  }
+  td.bruto, th.bruto {
+    font-weight: 700;
+  }
+  .rodape {
+    margin-top: 16px;
+    font-size: 0.75rem;
+    color: #777;
+  }
+  .erro {
+    background: #fdecec;
+    color: #7a1414;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #f2b8b8;
+  }
+  .grafico-wrapper {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    height: 760px;
+  }
+  #painel-barras {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #painel-barras #barras-echart {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .barras-controle-anos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+  }
+  .barras-controle-anos label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #1f2a44;
+    white-space: nowrap;
+  }
+  .barras-slider-wrapper {
+    position: relative;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 30px;
+  }
+  .barras-slider-bolha {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1f2a44;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+  }
+  .barras-slider-bolha.visivel {
+    opacity: 1;
+  }
+  .barras-slider-wrapper input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 24px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .barras-slider-wrapper input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: #d0d5dd;
+    border-radius: 2px;
+  }
+  .barras-slider-wrapper input[type="range"]::-moz-range-track {
+    height: 4px;
+    background: #d0d5dd;
+    border-radius: 2px;
+    border: none;
+  }
+  .barras-slider-wrapper input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 24px;
+    border-radius: 3px;
+    background: var(--cor-fundo-cabecalho);
+    cursor: pointer;
+    border: none;
+    margin-top: -10px;
+  }
+  .barras-slider-wrapper input[type="range"]::-moz-range-thumb {
+    width: 8px;
+    height: 24px;
+    border-radius: 3px;
+    background: var(--cor-fundo-cabecalho);
+    cursor: pointer;
+    border: none;
+  }
+  .barras-slider-wrapper input[type="range"]:focus {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+  }
+  .barras-regua {
+    position: relative;
+    height: 16px;
+    font-size: 0.72rem;
+    color: #94a3b8;
+  }
+  .barras-regua span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .barras-controle-anos input[type="number"] {
+    width: 70px;
+    min-width: 70px;
+    height: 36px;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .grafico-loading {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(1px);
+    z-index: 2;
+  }
+  .grafico-loading.ativo { display: flex; }
+  .grafico-loading-spinner {
+    width: 34px;
+    height: 34px;
+    border: 4px solid #dbe2ec;
+    border-top-color: var(--cor-fundo-cabecalho);
+    border-radius: 999px;
+    animation: girar-loading 0.8s linear infinite;
+  }
+  .grafico-loading-texto {
+    font-size: 0.84rem;
+    color: #334155;
+    font-weight: 600;
+  }
+  @keyframes girar-loading {
+    to { transform: rotate(360deg); }
+  }
+  .btn-vista {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.72);
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-link-composicao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    padding: 0 24px;
+    flex: 0 0 auto;
+    border: 1px solid var(--cor-fundo-cabecalho);
+    border-radius: 8px;
+    background: var(--cor-fundo-cabecalho);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .btn-link-composicao:hover { opacity: 0.85; }
+  .btn-vista:hover:not(.ativo) {
+    color: #fff;
+  }
+  .btn-vista.ativo {
+    background: #fff;
+    color: var(--cor-fundo-cabecalho);
+  }
+  .grupo-vista {
+    display: flex;
+    gap: 2px;
+    background: var(--cor-fundo-cabecalho);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .holerite-tooltip {
+    position: fixed;
+    background: #fff;
+    border: 1px solid var(--cor-borda);
+    border-radius: 10px;
+    padding: 0;
+    min-width: 300px;
+    max-width: 680px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+    pointer-events: none;
+    z-index: 9999;
+    font-size: 0.78rem;
+    overflow: hidden;
+  }
+  .holerite-tooltip.resumo {
+    min-width: 260px;
+    max-width: 340px;
+    pointer-events: auto;
+    padding: 12px 14px;
+  }
+  .tooltip-resumo-titulo {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #1f2a44;
+    margin-bottom: 8px;
+  }
+  .tooltip-resumo-nota {
+    font-size: 0.72rem;
+    color: #92400e;
+    background: #fff7ed;
+    border: 1px solid #fde3b6;
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .tooltip-resumo-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 3px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .tooltip-resumo-item:last-of-type { border-bottom: none; }
+  .tooltip-resumo-valor {
+    white-space: nowrap;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .tooltip-resumo-valor.pos { color: #0a7a3d; }
+  .tooltip-resumo-valor.neg { color: #b91c1c; }
+  .tooltip-resumo-acoes {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  .tooltip-resumo-acoes button,
+  .holerite-modal-fechar,
+  .holerite-modal-acao {
+    border: 1px solid var(--cor-borda);
+    background: #fff;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1f2a44;
+    cursor: pointer;
+    padding: 7px 12px;
+  }
+  .tooltip-resumo-acoes button:hover,
+  .holerite-modal-fechar:hover,
+  .holerite-modal-acao:hover {
+    background: #f5f7fa;
+  }
+  .holerite-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.56);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 10000;
+  }
+  .holerite-modal-backdrop.aberto { display: flex; }
+  .holerite-modal {
+    width: min(1120px, 100%);
+    max-height: min(92vh, 980px);
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.32);
+  }
+  .holerite-modal-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--cor-fundo-cabecalho);
+    color: #fff;
+  }
+  .holerite-modal-cabecalho strong { font-size: 0.95rem; }
+  .holerite-modal-cabecalho span { font-size: 0.78rem; opacity: 0.85; }
+  .holerite-modal-corpo {
+    overflow: auto;
+    padding: 14px;
+    background: #f8fafc;
+  }
+  .holerite-modal-painel {
+    background: #fff;
+    border: 1px solid var(--cor-borda);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  body.modal-aberto { overflow: hidden; }
+  .hol-layout {
+    display: flex;
+    align-items: stretch;
+  }
+  .hol-col-principal {
+    flex: 1 1 300px;
+    min-width: 0;
+  }
+  .hol-col-lateral {
+    flex: 0 0 220px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--cor-borda);
+  }
+  .hol-header {
+    background: var(--cor-fundo-cabecalho);
+    color: var(--cor-texto-cabecalho);
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .hol-header strong { font-size: 0.85rem; }
+  .hol-header span { font-size: 0.72rem; opacity: 0.8; }
+  .hol-body { padding: 10px 14px; }
+  .hol-secao {
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    margin: 4px 0 6px;
+  }
+  .hol-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .hol-item:last-child { border-bottom: none; }
+  .hol-item:has(+ .hol-subtotal) { border-bottom: none; }
+  .hol-verba-com-aviso {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 2px 0;
+  }
+  .hol-verba-com-aviso:last-child { border-bottom: none; }
+  .hol-verba-com-aviso:has(+ .hol-subtotal) { border-bottom: none; }
+  .hol-verba-conteudo {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .hol-verba-aviso {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 2px;
+  }
+  .hol-pos { color: #0a7a3d; font-weight: 600; white-space: nowrap; }
+  .hol-neg { color: #b91c1c; white-space: nowrap; }
+  .hol-subtotal {
+    font-weight: 700;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 2px solid #e5e7eb !important;
+    border-bottom: none !important;
+  }
+  .hol-liquido {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 2px solid #e5e7eb !important;
+    border-bottom: none !important;
+    color: #0a7a3d;
+  }
+  .hol-wip {
+    text-align: center;
+    padding: 18px 16px 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f8fafc, #eef2f7);
+    border: 1px solid #e2e8f0;
+  }
+  .hol-wip-imagem {
+    display: block;
+    width: 280px;
+    max-width: 100%;
+    margin: 0 auto 8px;
+    mix-blend-mode: multiply;
+  }
+  .hol-wip-titulo {
+    font-weight: 800;
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+    color: #1e293b;
+    margin-bottom: 6px;
+  }
+  .hol-wip-texto {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.45;
+    margin: 0 auto 12px;
+    max-width: 320px;
+  }
+  .hol-wip-barra {
+    position: relative;
+    height: 6px;
+    border-radius: 4px;
+    background: #dbe3ec;
+    overflow: hidden;
+  }
+  .hol-wip-barra-preenchimento {
+    position: absolute;
+    top: 0;
+    left: -35%;
+    height: 100%;
+    width: 35%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #93c5fd, #3b82f6);
+    animation: hol-wip-progresso 1.4s ease-in-out infinite;
+  }
+  @keyframes hol-wip-progresso {
+    0% { left: -35%; }
+    100% { left: 100%; }
+  }
+  .hol-notas {
+    background: #f8f9fa;
+    border-top: 1px solid var(--cor-borda);
+    padding: 8px 12px;
+    font-size: 0.7rem;
+    color: #555;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .hol-indices {
+    background: #f0f4ff;
+    border-top: 1px solid var(--cor-borda);
+    padding: 7px 12px;
+    font-size: 0.7rem;
+    color: #444;
+    line-height: 1.6;
+  }
+  .nota-ref { font-size: 0.65rem; color: #888; }
+  .tabela-meta { margin: 4px 4px 8px; font-size: 0.82rem; color: #444; font-weight: 600; }
+  .tabela-descricao { margin: 8px 4px 0; font-size: 0.82rem; color: #666; line-height: 1.5; }
+  @media (max-width: 820px) {
+    .holerite-tooltip.resumo {
+      min-width: min(340px, calc(100vw - 20px));
+      max-width: min(340px, calc(100vw - 20px));
     }
-
-    * {
-      box-sizing: border-box;
+    .holerite-modal {
+      width: min(100%, 100%);
+      max-height: 94vh;
     }
+    .holerite-modal-corpo { padding: 10px; }
+    .hol-layout { flex-direction: column; }
+    .hol-col-lateral { border-left: none; border-top: 1px solid var(--cor-borda); }
+  }
 
-    body {
-      margin: 0;
-      overflow-x: hidden;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 20% 20%, #1b1b1b 0%, transparent 32%),
-        radial-gradient(circle at 85% 8%, #220808 0%, transparent 30%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .wrap {
-      width: min(1100px, 100%);
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-      overflow: hidden;
-    }
-
-    .top {
-      padding: 18px 22px 12px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .title {
-      margin: 0;
-      font-size: 1.15rem;
-      letter-spacing: 0.02em;
-      font-weight: 700;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-
-    .subtitle {
-      margin: 4px 0 0;
-      color: var(--accent2);
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .sim-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #130909;
-      color: #f7d46a;
-      font-size: 0.78rem;
-      font-weight: 600;
-    }
-
-    .sim-toggle input {
-      accent-color: #f59e0b;
-      width: 14px;
-      height: 14px;
-      cursor: pointer;
-    }
-
-    .view-toggle {
-      display: inline-flex;
-      background: #130909;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .view-btn {
-      border: 0;
-      background: transparent;
-      color: #f7d46a;
-      padding: 8px 12px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .view-btn.active {
-      background: #321010;
-      color: #ffd447;
-    }
-
-    .pill {
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      color: var(--accent2);
-      background: #130909;
-      font-size: 0.85rem;
-    }
-
-    .timeline {
-      padding: 12px 14px 0;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .phase-chip {
-      border: 1px solid var(--border);
-      background: #130909;
-      color: #f7d46a;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 0.86rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
-      user-select: none;
-    }
-
-    .phase-chip:hover {
-      transform: translateY(-1px);
-      background: #271010;
-      border-color: #8f2a2a;
-    }
-
-    .phase-chip.active {
-      border-color: #d62828;
-      color: #ffd447;
-      background: #321010;
-    }
-
-    .content {
-      padding: 14px;
-    }
-
-    .canvas-box {
-      padding: 0;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .echart-box {
-      width: 100%;
-      height: 640px;
-      border-radius: 14px;
-      border: 1px solid #2a0f0f;
-      background: linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .table-wrap {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      max-height: none;
-      background: #0b0b0b;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 0;
-      table-layout: fixed;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: #1a0b0b;
-      color: #ffd447;
-      text-align: left;
-      font-size: 0.72rem;
-      border-bottom: 1px solid #3a1b1b;
-      padding: 6px 5px;
-    }
-
-    tbody td {
-      border-bottom: 1px solid #241717;
-      color: #f5f5f5;
-      font-size: 0.7rem;
-      padding: 4px 5px;
-      vertical-align: top;
-      line-height: 1.2;
-    }
-
-    tbody tr:nth-child(odd) {
-      background: #0e0e0e;
-    }
-
-    .cell-pos {
-      color: #f2c230;
-      font-weight: 700;
-      margin-bottom: 1px;
-    }
-
-    .cell-val {
-      color: #e7d3a1;
-      font-variant-numeric: tabular-nums;
-    }
-
-    canvas {
-      width: 100%;
-      height: 640px;
-      display: block;
-      border-radius: 14px;
-      background: linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
-      border: 1px solid #2a0f0f;
-    }
-
-    .foot {
-      padding: 8px 16px 16px;
-      color: #b48a2b;
-      font-size: 0.85rem;
-    }
-
-    .foot a {
-      color: #f2c230;
-      text-decoration: underline;
-      font-weight: 600;
-    }
-
-    .foot a:hover {
-      color: #ffd447;
-    }
-
-    @media (max-width: 900px) {
-      canvas {
-        height: 560px;
-      }
-      .echart-box {
-        height: 560px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      body {
-        padding: 10px;
-      }
-      .wrap {
-        width: min(1100px, calc(100% - 12px));
-      }
-      .top {
-        padding: 14px;
-      }
-      .title {
-        font-size: 1rem;
-      }
-      .subtitle {
-        font-size: 0.8rem;
-      }
-      .phase-chip {
-        font-size: 0.78rem;
-      }
-      canvas {
-        height: 500px;
-      }
-      .echart-box {
-        height: 500px;
-      }
-      .content {
-        padding: 10px;
-      }
-    }
-  </style>
+  .instagram-callout {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin: 20px 0 0;
+    padding: 14px 16px;
+    border: 1px solid rgba(31, 42, 68, 0.14);
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fff7e8 0%, #ffffff 52%, #eef4ff 100%);
+    box-shadow: 0 6px 18px rgba(31, 42, 68, 0.07);
+  }
+  .instagram-callout-texto {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .instagram-callout-midia {
+    flex: 0 0 auto;
+    width: 72px;
+    height: 72px;
+    border-radius: 0;
+    overflow: visible;
+    background: none;
+    box-shadow: none;
+  }
+  .instagram-callout-midia img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .instagram-callout p {
+    margin: 0;
+    color: #465061;
+    line-height: 1.45;
+    font-size: 0.88rem;
+    text-align: justify;
+  }
+  .instagram-acao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    background: #1f2a44;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .instagram-acao:hover { text-decoration: none; filter: brightness(1.05); }
+  .instagram-acao-icone {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+  }
+  @media (max-width: 700px) {
+    .instagram-callout { flex-direction: column; }
+    .instagram-callout-midia { width: 64px; height: 64px; }
+  }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <h1 class="title">Ranking remuneração Líquida - Fiscos Estaduais</h1>
-        <p class="subtitle">Selecione o modo de visualização</p>
+  <div class="cabecalho-pagina">
+    <div class="cabecalho-pagina-titulo">
+      <h1>Calculadora de Remuneração dos Fiscos Estaduais
+</h1>
+      <p class="subtitulo">
+        Simulação de 0 a 40 anos de carreira, com base no modelo de dados.
+      </p>
+    </div>
+    <a class="btn-link-composicao" href="./composicao.html">Ver composições detalhadas</a>
+  </div>
+
+  <div class="painel-controles">
+    <div class="campo">
+      <label>Visualização</label>
+      <div class="grupo-vista">
+        <button class="btn-vista ativo" id="btn-barras" onclick="setVista('barras')">Gráfico de barras</button>
+        <button class="btn-vista" id="btn-grafico" onclick="setVista('grafico')">Gráfico de linhas</button>
+        <button class="btn-vista" id="btn-tabela" onclick="setVista('tabela')">Tabela</button>
       </div>
-      <div class="controls">
-        <div class="view-toggle">
-          <button id="viewBars" class="view-btn active">Barras</button>
-          <button id="viewLines" class="view-btn">Linhas</button>
-          <button id="viewTable" class="view-btn">Tabela Detalhada</button>
-        </div>
-        <label class="sim-toggle">
-          <input type="checkbox" id="simMgAllowance" />
-          Simular ajuda de custo MG (R$428,30/dia)
-        </label>
-          <label class="sim-toggle">
-            <input type="checkbox" id="useHourly" />
-            Usar valores por hora (R$/h)
-          </label>
-        
+    </div>
+    <div class="campo" id="campo-modo-tabela" style="display:none;">
+      <label>Tabela</label>
+      <div class="grupo-vista">
+        <button class="btn-vista ativo" id="btn-modo-holerite" onclick="setModoTabela('holerite')">Holerite</button>
+        <button class="btn-vista" id="btn-modo-comparacao" onclick="setModoTabela('comparacao')">Comparação</button>
+      </div>
+    </div>
+    <div class="campo" id="campo-eixo-y-grafico" style="display:none;">
+      <label>Eixo Y</label>
+      <div class="grupo-vista">
+        <button class="btn-vista ativo" id="btn-eixo-remuneracao" onclick="setEixoYGrafico('remuneracao')">Remuneração</button>
+        <button class="btn-vista" id="btn-eixo-posicao" onclick="setEixoYGrafico('posicao')">Posição</button>
+      </div>
+    </div>
+    <div class="campo" id="campo-metrica-grafico">
+      <label>Métrica do gráfico</label>
+      <div class="grupo-vista">
+        <button class="btn-vista ativo" id="btn-metrica-mensal" onclick="setMetricaGrafico('mensal')">Líquido Mensal</button>
+        <button class="btn-vista" id="btn-metrica-hora" onclick="setMetricaGrafico('hora')">Líquido por hora</button>
+      </div>
+    </div>
+    <div class="campo" id="campo-teto">
+      <label>Teto</label>
+      <div class="grupo-vista">
+        <button class="btn-vista ativo" id="btn-teto-estadual" onclick="setTeto(false)">Estadual</button>
+        <button class="btn-vista" id="btn-teto-nacional" onclick="setTeto(true)">Nacional</button>
       </div>
     </div>
 
-    <div class="timeline" id="timeline"></div>
-
-    <div class="content">
-      <div class="canvas-box" id="canvasBox">
-        <canvas id="raceCanvas"></canvas>
-      </div>
-      <div class="hidden" id="lineChartBox">
-        <div id="lineChart" class="echart-box"></div>
-      </div>
-      <div class="table-wrap hidden" id="tableWrap">
-        <table>
-          <thead>
-            <tr>
-              <th>UF</th>
-              <th>Inicial</th>
-              <th>5 anos</th>
-              <th>10 anos</th>
-              <th>15 anos</th>
-              <th>Final</th>
-            </tr>
-          </thead>
-          <tbody id="detailTableBody"></tbody>
-        </table>
-      </div>
+    <div class="campo" id="campo-estado" style="display:none;">
+      <label for="estado">Estado</label>
+      <select id="estado"></select>
     </div>
 
-    <div class="foot">
-      Fonte: Pifado (@concurseiropifado). Atualizado em nov 2025. <a href="Ranking Remuneralção Fiscos estaduais.pdf" target="_blank" rel="noopener noreferrer">Ver PDF</a>
+    <div class="campo">
+      <label for="diasTrabalhados">Dias trabalhados/mês</label>
+      <input id="diasTrabalhados" type="number" min="0" max="31" step="1" value="20" />
+    </div>
+
+    <div class="campo">
+      <label for="numeroFilhos">Número de filhos</label>
+      <input id="numeroFilhos" type="number" min="0" max="5" step="1" value="0" />
+    </div>
+
+    <div class="campo" id="campo-escolaridade" style="display:none;">
+      <label for="escolaridade">Escolaridade</label>
+      <select id="escolaridade"></select>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-  <script>
-    const CSV_FILE = "ranking_remuneracao_fiscos_estaduais.csv";
-    const MG_ALLOWANCE = 5223.12;
+  <div class="grafico-wrapper" id="painel-grafico" style="display:none;">
+    <div class="grafico-loading ativo" id="grafico-loading" aria-live="polite">
+      <div class="grafico-loading-spinner" aria-hidden="true"></div>
+      <div class="grafico-loading-texto">Carregando gráfico...</div>
+    </div>
+    <canvas id="grafico"></canvas>
+    <div id="grafico-posicao" style="display:none;width:100%;height:100%;"></div>
+  </div>
 
-    const phases = [
-      { key: "Inicial", posKey: "Pos_Inicial", label: "Inicial" },
-      { key: "5_anos", posKey: "Pos_5_anos", label: "5 anos" },
-      { key: "10_anos", posKey: "Pos_10_anos", label: "10 anos" },
-      { key: "15_anos", posKey: "Pos_15_anos", label: "15 anos" },
-      { key: "Final", posKey: "Pos_Final", label: "Final" }
-    ];
+  <div class="grafico-wrapper" id="painel-barras">
+    <div class="barras-controle-anos">
+      <label for="anosBarras">Anos de serviço</label>
+      <div class="barras-slider-wrapper">
+        <div class="barras-slider-bolha" id="barras-slider-bolha">0</div>
+        <input id="anosBarras" type="range" min="0" max="40" step="1" value="0" />
+        <div class="barras-regua" id="barras-regua" aria-hidden="true"></div>
+      </div>
+      <input id="anosBarrasInput" type="number" min="0" max="40" step="1" value="0" />
+    </div>
+    <div id="barras-echart" style="width:100%;"></div>
+  </div>
 
-    const canvas = document.getElementById("raceCanvas");
-    const ctx = canvas.getContext("2d");
-    const phaseLabel = document.getElementById("phaseLabel");
-    const timeline = document.getElementById("timeline");
-    const canvasBox = document.getElementById("canvasBox");
-    const lineChartBox = document.getElementById("lineChartBox");
-    const lineChartEl = document.getElementById("lineChart");
-    const tableWrap = document.getElementById("tableWrap");
-    const detailTableBody = document.getElementById("detailTableBody");
-    const viewBarsBtn = document.getElementById("viewBars");
-    const viewLinesBtn = document.getElementById("viewLines");
-    const viewTableBtn = document.getElementById("viewTable");
-    const simMgAllowanceCheckbox = document.getElementById("simMgAllowance");
+  <div id="painel-tabela" style="display:none;">
+    <div id="conteudo">Carregando dados...</div>
+  </div>
 
-    let rawData = [];
-    let data = [];
-    let minInitialValue = 0;
-    let axisMin = 0;
-    let axisMax = 0;
-    let phaseBounds = [];
-    let currentPhaseIndex = 0;
-    let fromPhaseIndex = 0;
-    let toPhaseIndex = 0;
-    let viewMode = "bars";
-    let transitionStart = performance.now();
-    const transitionMs = 420;
-    let currentRows = [];
-    const flagImages = new Map();
-    let lineChart = null;
-    let simulateMgAllowance = false;
-    let useHourly = false;
+  <div class="instagram-callout" aria-label="Aviso sobre a origem do levantamento salarial">
+    <img class="instagram-callout-midia" src="./img/pifado.png" alt="Perfil do Instagram Concurseiropifado" />
+    <div class="instagram-callout-texto">
+      <p>
+        As postagens do <strong>@concurseiropifado</strong> no Instagram foram o ponto de partida para o levantamento da estrutura remuneratória de vários fiscos. Siga o perfil para acompanhar novidades sobre concursos da área fiscal.
+      </p>
+    </div>
+    <a class="instagram-acao" href="https://www.instagram.com/concurseiropifado/" target="_blank" rel="noopener noreferrer">
+      <svg class="instagram-acao-icone" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.012-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM12 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      Seguir no Instagram
+    </a>
+  </div>
 
-    function onResize() {
-      resizeCanvas();
-      if (lineChart) {
-        lineChart.resize();
-        if (viewMode === "lines") {
-          renderLineChartECharts();
-        }
-      }
-    }
+  <div id="holerite-modal" class="holerite-modal-backdrop" aria-hidden="true">
+    <div class="holerite-modal" role="dialog" aria-modal="true" aria-labelledby="holerite-modal-titulo">
+      <div class="holerite-modal-cabecalho">
+        <div>
+          <strong id="holerite-modal-titulo">Holerite detalhado</strong><br />
+          <span id="holerite-modal-subtitulo"></span>
+        </div>
+        <button class="holerite-modal-fechar" type="button" id="holerite-modal-fechar">Fechar</button>
+      </div>
+      <div class="holerite-modal-corpo">
+        <div class="holerite-modal-painel" id="holerite-modal-conteudo"></div>
+      </div>
+    </div>
+  </div>
+<script>
+"use strict";
 
-    function resizeCanvas() {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.floor(rect.width * dpr);
-      canvas.height = Math.floor(rect.height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+// Este frontend NÃO possui nenhuma regra de negócio/fórmula de cálculo.
+// Todos os valores já vêm prontos em "dados-grafico.json" (gerado por
+// gerar_dados_frontend.py a partir do modelo de dados interno). Este
+// arquivo apenas lê, formata e exibe (gráfico, tabela, tooltip e modal).
+// Os únicos "cálculos" feitos aqui são somas/subtrações de valores já
+// prontos (ex.: somar verbas indenizatórias, subtrair descontos), nunca
+// fórmulas de negócio (alíquotas, elegibilidade, evolução por tempo etc.).
 
-    function parseCsv(text) {
-      const lines = text.trim().split(/\r?\n/);
+const FORMATADOR_BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+function formatarMoeda(valor) {
+  return FORMATADOR_BRL.format(valor || 0);
+}
 
-      const normalizeCell = (value) => {
-        const trimmed = String(value || "").trim();
-        return trimmed.replace(/^"|"$/g, "").trim();
-      };
+/** Remove marcadores de negrito: **texto** vira texto */
+function removerNegrito(texto) {
+  if (!texto) return "";
+  return String(texto).replaceAll(/\*\*(.*?)\*\*/g, "$1");
+}
 
-      const headers = lines[0].split(";").map((h) =>
-        normalizeCell(h).replace(/^\uFEFF/, "")
+function ehTelaPequena() {
+  return window.matchMedia("(max-width: 820px)").matches;
+}
+
+function setLoadingGrafico(ativo) {
+  const el = document.getElementById("grafico-loading");
+  if (!el) return;
+  el.classList.toggle("ativo", !!ativo);
+}
+
+let __tooltipAtual = null;
+let __modalAtual = null;
+let __tooltipFixa = null;
+let __tooltipFixaViaClique = false;
+
+function chavePontoTooltip(datasetIndex, dataIndex) {
+  return `${datasetIndex}:${dataIndex}`;
+}
+
+function htmlEsc(texto) {
+  return String(texto)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function normalizarDiasTrabalhados() {
+  const input = document.getElementById("diasTrabalhados");
+  const valor = Number(input?.value);
+  const normalizado = Math.max(0, Math.min(Number.isFinite(valor) ? Math.trunc(valor) : 0, window.__dados.diasMax));
+  if (input) input.value = String(normalizado);
+  return normalizado;
+}
+
+function normalizarNumeroFilhos() {
+  const input = document.getElementById("numeroFilhos");
+  const valor = Number(input?.value);
+  const max = window.__dados.filhosMax;
+  const normalizado = Math.max(0, Math.min(Number.isFinite(valor) ? Math.trunc(valor) : 0, max));
+  if (input) input.value = String(normalizado);
+  return normalizado;
+}
+
+function posicionarTooltip(tooltipEl, cx, cy, resumo) {
+  const tw = tooltipEl.offsetWidth || (resumo ? 320 : 420);
+  const th = tooltipEl.offsetHeight || (resumo ? 280 : 420);
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let left, top;
+  if (resumo) {
+    left = cx - tw / 2;
+    top = cy + 16;
+  } else {
+    left = cx + 16;
+    if (left + tw > vw - 8) left = cx - tw - 16;
+    top = cy - th / 2;
+  }
+  left = Math.min(Math.max(8, left), Math.max(8, vw - tw - 8));
+  top = Math.min(Math.max(8, top), Math.max(8, vh - th - 8));
+  tooltipEl.style.left = left + "px";
+  tooltipEl.style.top = top + "px";
+}
+
+function renderTooltipHolerite(tooltipEl, linha, estadoTooltip, opcoes, cx, cy, resumo) {
+  __tooltipAtual = { linha, estado: estadoTooltip, opcoes };
+  tooltipEl.classList.toggle("resumo", resumo);
+  tooltipEl.style.pointerEvents = resumo ? "auto" : "none";
+  tooltipEl.innerHTML = resumo
+    ? montarResumoTooltip(linha, estadoTooltip, opcoes)
+    : renderHolerite(linha, estadoTooltip, opcoes);
+  tooltipEl.style.display = "block";
+  posicionarTooltip(tooltipEl, cx, cy, resumo);
+}
+
+function montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora) {
+  return `
+    <div class="tooltip-resumo-titulo">Média entre os estados · ${anosServico} ano${anosServico !== 1 ? "s" : ""}</div>
+    <div class="tooltip-resumo-item"><span>Remuneração Líquida Mensal</span><span class="tooltip-resumo-valor pos">${formatarMoeda(mediaLiquida)}</span></div>
+    <div class="tooltip-resumo-item"><span>Líquida por Hora</span><span class="tooltip-resumo-valor pos">${formatarMoeda(mediaPorHora)}</span></div>
+  `;
+}
+
+function renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, cx, cy) {
+  __tooltipAtual = null;
+  tooltipEl.classList.remove("resumo");
+  tooltipEl.style.pointerEvents = "none";
+  tooltipEl.innerHTML = `<div style="padding:12px 14px">${montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora)}</div>`;
+  tooltipEl.style.display = "block";
+  posicionarTooltip(tooltipEl, cx, cy, false);
+}
+
+function getTotalDescontos(linha) {
+  return (linha.abateTeto || 0) + (linha.descontoRPPS || 0) + (linha.descontoPrevcom || 0) + (linha.descontoIR || 0);
+}
+
+function montarResumoTooltip(linha, estado, opcoes = {}) {
+  if (linha.simplificado) {
+    return `
+      <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</div>
+      <div class="tooltip-resumo-nota">Não temos o detalhamento da remuneração disponível para este estado. Estamos trabalhando para disponibilizar o mais breve possível.</div>
+      <div class="tooltip-resumo-item"><span>Remuneração Líquida</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.remuneracaoLiquida)}</span></div>
+      <div class="tooltip-resumo-item"><span>Remuneração Líquida em horas</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>
+    `;
+  }
+  const itens = [
+    ["Verbas Remuneratórias", linha.remuneracaoTributavel],
+    ["Verbas Indenizatórias", linha.remuneracaoIndenizatoria],
+    ["Remuneração Bruta", linha.remuneracaoBruta],
+    ["Descontos", getTotalDescontos(linha)],
+    ["Remuneração Líquida", linha.remuneracaoLiquida],
+    ["Remuneração Líquida em horas", linha.liquidoPorHora],
+  ];
+
+  const notaSimplificada = estado.remuneracaoSimplificada
+    ? `<div class="tooltip-resumo-nota">Dados simplificados: estamos trabalhando para que o detalhamento da remuneração esteja disponível em breve.</div>`
+    : "";
+
+  return `
+    <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</div>
+    ${notaSimplificada}
+    ${itens.map(([rotulo, valor]) => {
+      const classe = valor < 0 ? "neg" : (rotulo.includes("Líquida") || rotulo.includes("Bruta") || rotulo.includes("Remuneratórias") || rotulo.includes("Indenizatórias") ? "pos" : "neg");
+      const valorFmt = rotulo === "Descontos" ? `- ${formatarMoeda(valor)}` : formatarMoeda(valor);
+      return `<div class="tooltip-resumo-item"><span>${htmlEsc(rotulo)}</span><span class="tooltip-resumo-valor ${classe}">${valorFmt}</span></div>`;
+    }).join("")}
+    <div class="tooltip-resumo-acoes">
+      <button type="button" data-acao="abrir-holerite">Ver detalhado</button>
+    </div>
+  `;
+}
+
+function fecharModalHolerite() {
+  const backdrop = document.getElementById("holerite-modal");
+  if (!backdrop) return;
+  backdrop.classList.remove("aberto");
+  backdrop.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-aberto");
+  __modalAtual = null;
+  if (__tooltipFixa) {
+    const tooltipEl = document.getElementById("tooltip-holerite");
+    if (tooltipEl) {
+      renderTooltipHolerite(
+        tooltipEl,
+        __tooltipFixa.linha,
+        __tooltipFixa.estado,
+        __tooltipFixa.opcoes,
+        __tooltipFixa.cx,
+        __tooltipFixa.cy,
+        __tooltipFixa.resumo
       );
-
-      return lines.slice(1).map((line) => {
-        const cols = line.split(";");
-        const row = {};
-        headers.forEach((h, i) => {
-          row[h] = normalizeCell(cols[i] || "");
-        });
-
-        // parse numeric phase values and carga horaria (CH)
-        phases.forEach((p) => {
-          row[p.key] = Number((row[p.key] || 0));
-        });
-        row.CH = Number(row.CH || 0);
-
-        return row;
-      });
     }
+  }
+}
 
-    function buildComputedData(baseRows, useMgAllowance) {
-      const rows = baseRows.map((row) => ({ ...row }));
+function limparTooltipFixa() {
+  __tooltipFixa = null;
+  __tooltipAtual = null;
+  if (__grafico) aplicarEstiloGrafico(__grafico, null);
+  const tooltipEl = document.getElementById("tooltip-holerite");
+  if (tooltipEl) {
+    tooltipEl.style.display = "none";
+    tooltipEl.classList.remove("resumo");
+    tooltipEl.style.pointerEvents = "none";
+  }
+}
 
-      // apply MG allowance. If converting to hourly, we'll convert the
-      // monthly allowance to an hourly increment using 168h/month.
-      let mgHourlyExtra = 0;
-      if (useMgAllowance) {
-        const mgRow = rows.find((row) => row.UF === "MG");
-        if (mgRow) {
-          if (useHourly) {
-            // do not mutate monthly values here; compute hourly extra separately
-            mgHourlyExtra = MG_ALLOWANCE / 168;
-          } else {
-            phases.forEach((p) => {
-              mgRow[p.key] = Number(mgRow[p.key] || 0) + MG_ALLOWANCE;
-            });
-          }
-        }
-      }
+function abrirModalHolerite(linha, estado, opcoes = {}) {
+  const backdrop = document.getElementById("holerite-modal");
+  if (!backdrop) return;
+  const tooltipEl = document.getElementById("tooltip-holerite");
+  if (tooltipEl) tooltipEl.style.display = "none";
+  const titulo = document.getElementById("holerite-modal-titulo");
+  const subtitulo = document.getElementById("holerite-modal-subtitulo");
+  const conteudo = document.getElementById("holerite-modal-conteudo");
 
-      // if hourly view is requested, convert all phase values to hourly rates
-      if (useHourly) {
-        rows.forEach((r) => {
-          const ch = Number(r.CH || 0);
-          if (ch > 0) {
-            phases.forEach((p) => {
-              r[p.key] = Number(r[p.key] || 0) / (ch * 4.5);
-            });
-          }
-        });
+  __modalAtual = { linha, estado, opcoes };
+  titulo.textContent = `Holerite detalhado · ${estado.nome}`;
+  const dataAtu = estado.ultimaAtualizacao
+    ? estado.ultimaAtualizacao.split("-").reverse().join("/")
+    : null;
+  const topo = [
+    linha.simplificado
+      ? `${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}`
+      : `${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""} · ${linha.posicao}`,
+    estado.cargaHorariaSemanal ? `Carga horária semanal: ${estado.cargaHorariaSemanal}h` : null,
+    dataAtu ? `Atualizado em ${dataAtu}` : null
+  ].filter(Boolean);
+  subtitulo.innerHTML = topo.map(htmlEsc).join("<br>");
+  conteudo.innerHTML = renderHolerite(linha, estado, { ...opcoes, semCabecalho: true });
+  backdrop.classList.add("aberto");
+  backdrop.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-aberto");
+}
 
-        // add MG hourly extra after conversion
-        if (mgHourlyExtra > 0) {
-          const mgRow = rows.find((row) => row.UF === "MG");
-          if (mgRow) {
-            phases.forEach((p) => {
-              mgRow[p.key] = Number(mgRow[p.key] || 0) + mgHourlyExtra;
-            });
-          }
-        }
-      }
-
-      return computeDynamicPositions(rows);
-    }
-
-    function computeDynamicPositions(rows) {
-      phases.forEach((p) => {
-        const ordered = [...rows].sort((a, b) => b[p.key] - a[p.key]);
-        ordered.forEach((row, idx) => {
-          row[p.posKey] = idx + 1;
-        });
-      });
-      return rows;
-    }
-
-    function formatCurrencyBR(value) {
-      const opts = {
-        style: "currency",
-        currency: "BRL",
-        maximumFractionDigits: useHourly ? 2 : 0
-      };
-      const str = new Intl.NumberFormat("pt-BR", opts).format(value);
-      return useHourly ? `${str} /h` : str;
-    }
-
-    function lerp(a, b, t) {
-      return a + (b - a) * t;
-    }
-
-    function easeInOutCubic(t) {
-      return t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-
-    function colorByPosition(index, total) {
-      if (total <= 1) {
-        return "hsl(120, 72%, 48%)";
-      }
-      const t = index / (total - 1);
-      const hue = 120 * (1 - t);
-      return `hsl(${hue}, 74%, 50%)`;
-    }
-
-    const REGION_COLOR = {
-      Norte: "#22c55e",
-      Nordeste: "#f59e0b",
-      "Centro-Oeste": "#a855f7",
-      Sudeste: "#ef4444",
-      Sul: "#3b82f6"
+/**
+ * Monta o objeto "linha" (equivalente a um holerite calculado) para um ano
+ * de serviço, número de dias trabalhados e regime de teto (estadual/
+ * nacional) escolhidos pelo usuário, a partir dos arrays colunares já
+ * pré-computados. Os totais (bruto, líquido, líquido por hora) são apenas
+ * somas/subtrações dos valores de verbas e dos descontos escalares — nenhum
+ * cálculo de negócio (fórmulas, alíquotas, elegibilidade) ocorre aqui.
+ */
+function montarLinha(estado, ano, dias, filhos, usarTetoNacional) {
+  if (estado.remuneracaoSimplificada) {
+    const remuneracaoLiquida = estado.remuneracaoLiquida[ano];
+    const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * (dias / 5);
+    const liquidoPorHora = horasNoPeriodo > 0 ? remuneracaoLiquida / horasNoPeriodo : 0;
+    return {
+      anosServico: ano,
+      simplificado: true,
+      remuneracaoLiquida,
+      liquidoPorHora,
     };
+  }
+  const variante = estado.porTeto[usarTetoNacional ? "nacional" : "estadual"];
+  const valoresVerbas = {};
+  const referenciasVerbas = {};
+  const legendasVerbas = {};
+  let remuneracaoIndenizatoria = 0;
+  for (const v of estado.verbas) {
+    const valor = v.valoresPorFilho ? v.valoresPorFilho[ano][filhos] : v.valoresPorDia ? v.valoresPorDia[ano][dias] : v.valores[ano];
+    valoresVerbas[v.id] = valor;
+    referenciasVerbas[v.id] = v.referencias[ano];
+    legendasVerbas[v.id] = v.legendas[ano];
+    if (v.natureza === "indenizatoria") remuneracaoIndenizatoria += valor;
+  }
+  const remuneracaoTributavel = estado.remuneracaoTributavel[ano];
+  const remuneracaoBruta = remuneracaoTributavel + remuneracaoIndenizatoria;
+  const abateTeto = variante.abateTeto[ano];
+  const descontoRPPS = variante.descontoRPPS[ano];
+  const descontoPrevcom = variante.descontoPrevcom[ano];
+  const descontoIR = variante.descontoIR[ano];
+  const remuneracaoLiquida = remuneracaoBruta - abateTeto - descontoRPPS - descontoPrevcom - descontoIR;
+  const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * (dias / 5);
+  const liquidoPorHora = horasNoPeriodo > 0 ? remuneracaoLiquida / horasNoPeriodo : 0;
+  return {
+    anosServico: ano,
+    posicao: estado.posicao[ano],
+    valoresVerbas,
+    referenciasVerbas,
+    legendasVerbas,
+    remuneracaoTributavel,
+    remuneracaoIndenizatoria,
+    remuneracaoBruta,
+    abateTeto,
+    descontoRPPS,
+    descontoPrevcom,
+    descontoIR,
+    remuneracaoLiquida,
+    liquidoPorHora,
+  };
+}
 
-    function regionByUF(uf) {
-      const north = new Set(["AC", "AP", "AM", "PA", "RO", "RR", "TO"]);
-      const northeast = new Set(["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"]);
-      const centerWest = new Set(["DF", "GO", "MT", "MS"]);
-      const southeast = new Set(["ES", "MG", "RJ", "SP"]);
-      const south = new Set(["PR", "RS", "SC"]);
+function thVerba(verba) {
+  const title = verba.observacao ? ` title="${removerNegrito(verba.observacao)}"` : "";
+  const cursor = verba.observacao ? ` style="cursor:help"` : "";
+  return `<th${title}${cursor}>${verba.nome}</th>`;
+}
 
-      if (north.has(uf)) return "Norte";
-      if (northeast.has(uf)) return "Nordeste";
-      if (centerWest.has(uf)) return "Centro-Oeste";
-      if (southeast.has(uf)) return "Sudeste";
-      if (south.has(uf)) return "Sul";
-      return "Norte";
+function montarTabela(estado, opcoes) {
+  const dias = opcoes.diasTrabalhados;
+  const filhos = opcoes.numeroFilhos;
+  const usarTetoNacional = opcoes.usarTetoNacional;
+  const anosMax = window.__dados.anosMax;
+  const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, dias, filhos, usarTetoNacional));
+
+  if (estado.remuneracaoSimplificada) {
+    const avisoHtml = `<div class="hol-wip">
+      <img class="hol-wip-imagem" src="./img/wip.png" alt="" />
+      <div class="hol-wip-titulo">Em construção</div>
+      <div class="hol-wip-texto">Ainda não temos o detalhamento completo da remuneração deste estado. Estamos trabalhando para disponibilizar o mais breve possível.</div>
+      <div class="hol-wip-barra"><div class="hol-wip-barra-preenchimento"></div></div>
+    </div>`;
+    const cabecalhoSimplificado = `
+      <table>
+        <thead>
+          <tr>
+            <th>Anos</th>
+            <th class="liquido">Líquido</th>
+            <th>Líquido por hora</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    const linhasHtmlSimplificado = linhas
+      .map((linha) => `
+        <tr>
+          <td>${linha.anosServico}</td>
+          <td class="liquido">${formatarMoeda(linha.remuneracaoLiquida)}</td>
+          <td>${formatarMoeda(linha.liquidoPorHora)}</td>
+        </tr>
+      `)
+      .join("");
+    const cargaHorariaHtmlSimplificado = estado.cargaHorariaSemanal
+      ? `<p class="tabela-meta">Carga horária semanal: ${estado.cargaHorariaSemanal} horas</p>`
+      : "";
+    const descricaoHtmlSimplificado = estado.descricao
+      ? `<p class="tabela-descricao">${estado.descricao}</p>`
+      : "";
+    return `${avisoHtml}${cargaHorariaHtmlSimplificado}<div class="tabela-wrapper">${cabecalhoSimplificado}${linhasHtmlSimplificado}</tbody></table></div>${descricaoHtmlSimplificado}`;
+  }
+
+  const colunas = estado.verbas;
+
+  const cabecalho = `
+    <table>
+      <thead>
+        <tr>
+          <th>Anos</th>
+          <th>Posicao</th>
+          ${colunas.map(v => thVerba(v)).join("")}
+          <th class="bruto">Bruto</th>
+          <th>Abate Teto</th>
+          <th>Desconto RPPS</th>
+          <th>Desconto Prevcom</th>
+          <th>Desconto IR</th>
+          <th class="liquido">Liquido</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  const linhasHtml = linhas
+    .map((linha) => {
+      return `
+        <tr>
+          <td>${linha.anosServico}</td>
+          <td>${linha.posicao}</td>
+          ${colunas.map(v => `<td>${formatarMoeda(linha.valoresVerbas[v.id])}</td>`).join("")}
+          <td class="bruto">${formatarMoeda(linha.remuneracaoBruta)}</td>
+          <td>${formatarMoeda(linha.abateTeto)}</td>
+          <td>${formatarMoeda(linha.descontoRPPS)}</td>
+          <td>${formatarMoeda(linha.descontoPrevcom)}</td>
+          <td>${formatarMoeda(linha.descontoIR)}</td>
+          <td class="liquido">${formatarMoeda(linha.remuneracaoLiquida)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const cargaHorariaHtml = estado.cargaHorariaSemanal
+    ? `<p class="tabela-meta">Carga horária semanal: ${estado.cargaHorariaSemanal} horas</p>`
+    : "";
+  const descricaoHtml = estado.descricao
+    ? `<p class="tabela-descricao">${estado.descricao}</p>`
+    : "";
+  return `${cargaHorariaHtml}<div class="tabela-wrapper">${cabecalho}${linhasHtml}</tbody></table></div>${descricaoHtml}`;
+}
+
+// ── Tabela: Comparação entre estados ────────────────────────────────────────
+
+function montarTabelaComparacao(opcoes) {
+  const anos = [0, 3, 6, 10, 20, 40];
+  const labelsAno = ["Inicial", "3 anos", "6 anos", "10 anos", "20 anos", "40 anos"];
+  const emValorHora = opcoes.metricaGrafico === "hora";
+  const listaEstados = window.__dados.listaEstados;
+
+  const dadosPorUf = {};
+  for (const { uf } of listaEstados) {
+    const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
+    const valores = anos.map(ano => {
+      const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional);
+      return emValorHora ? linha.liquidoPorHora : linha.remuneracaoLiquida;
+    });
+    dadosPorUf[uf] = { nome: estado.nome, valores };
+  }
+
+  const ranksPorAno = anos.map((_, idx) => {
+    const ordenado = listaEstados
+      .map(({ uf }) => ({ uf, valor: dadosPorUf[uf].valores[idx] }))
+      .sort((a, b) => b.valor - a.valor);
+    const ranks = {};
+    ordenado.forEach((item, i) => { ranks[item.uf] = i + 1; });
+    return ranks;
+  });
+
+  const ufsOrdenados = [...listaEstados].sort((a, b) =>
+    dadosPorUf[a.uf].nome.localeCompare(dadosPorUf[b.uf].nome, "pt-BR"));
+
+  const cabecalho = `
+    <table class="tabela-comparacao">
+      <thead>
+        <tr>
+          <th>Estado</th>
+          ${labelsAno.map(l => `<th>${l}</th>`).join("")}
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  const linhasHtml = ufsOrdenados
+    .map(({ uf }) => {
+      const { nome, valores } = dadosPorUf[uf];
+      const celulas = valores
+        .map((valor, idx) => {
+          const rank = ranksPorAno[idx][uf];
+          const rankClasse = rank <= 5 ? " cel-comparacao-rank-destaque" : "";
+          return `<td><div class="cel-comparacao"><span class="cel-comparacao-valor">${formatarMoeda(valor)}${emValorHora ? "/h" : ""}</span><span class="cel-comparacao-rank${rankClasse}">${rank}\u00ba</span></div></td>`;
+        })
+        .join("");
+      return `<tr><td>${nome} (${uf})</td>${celulas}</tr>`;
+    })
+    .join("");
+
+  return `<div class="tabela-wrapper">${cabecalho}${linhasHtml}</tbody></table></div>`;
+}
+
+function renderizarTabelaComparacao(opcoes) {
+  document.getElementById("conteudo").innerHTML = montarTabelaComparacao(opcoes);
+}
+
+function lerOpcoes() {
+  return {
+    diasTrabalhados: normalizarDiasTrabalhados(),
+    numeroFilhos: normalizarNumeroFilhos(),
+    usarTetoNacional: __usarTetoNacional,
+    metricaGrafico: __metricaGrafico,
+    escolaridade: document.getElementById("escolaridade").value || null,
+  };
+}
+
+/**
+ * Retorna a visao do estado a ser usada nos calculos: por padrao o proprio
+ * `estado`, ou, quando uma escolaridade alternativa (nao a padrao) esta
+ * selecionada e o estado possui dados pre-computados para ela, uma copia do
+ * estado com os campos posicao/verbas/porTeto/remuneracaoTributavel
+ * substituidos pelo conjunto correspondente em `estado.porEscolaridade`.
+ */
+function obterDatasetEstado(estado, escolaridade) {
+  const opcoesEsc = estado && estado.escolaridadesDisponiveis;
+  if (!estado || !opcoesEsc || !escolaridade || escolaridade === opcoesEsc[0]) return estado;
+  const alternativa = estado.porEscolaridade && estado.porEscolaridade[escolaridade];
+  return alternativa ? { ...estado, ...alternativa } : estado;
+}
+
+// ── Gráfico ────────────────────────────────────────────────────────────────
+
+const CORES_GRAFICO = ['#2563eb','#dc2626','#16a34a','#9333ea','#ea580c','#0891b2','#ca8a04','#be185d','#4f46e5','#059669','#f59e0b','#db2777','#0d9488','#7c3aed','#65a30d','#e11d48','#0284c7','#c2410c','#7e22ce','#15803d','#b91c1c','#0369a1','#a16207','#6d28d9','#047857','#d946ef','#334155'];
+const COR_MINAS_GERAIS = '#dc2626';
+const COR_MEDIA = '#6b7280';
+let __grafico = null;
+let __opcoesGrafico = {};
+let __graficoHoverAtivo = null;
+
+const COR_BARRAS_PADRAO = '#16a34a';
+const COR_BARRAS_MEDIA = COR_MEDIA;
+const COR_BARRAS_DESTAQUE = COR_MINAS_GERAIS;
+let __barrasChart = null;
+let __barrasTooltipAtual = null;
+
+function corComAlpha(cor, alpha) {
+  const limpa = cor.replace("#", "");
+  const r = parseInt(limpa.slice(0, 2), 16);
+  const g = parseInt(limpa.slice(2, 4), 16);
+  const b = parseInt(limpa.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function corDataset(corBase, destaquePermanente, index) {
+  const emDestaque = destaquePermanente || index === __graficoHoverAtivo;
+  return corComAlpha(corBase, emDestaque ? 1 : 0.35);
+}
+
+function estiloDataset(corBase, destaquePermanente, index) {
+  return {
+    borderColor: () => corDataset(corBase, destaquePermanente, index),
+    backgroundColor: "transparent",
+    fill: false,
+    borderWidth: () => (destaquePermanente || index === __graficoHoverAtivo) ? 3.75 : 1.1,
+    pointRadius: 3,
+    pointHoverRadius: 6,
+    pointBackgroundColor: () => corDataset(corBase, destaquePermanente, index),
+    pointBorderColor: () => corDataset(corBase, destaquePermanente, index),
+    pointHoverBackgroundColor: () => corDataset(corBase, destaquePermanente, index),
+    pointHoverBorderColor: () => corDataset(corBase, destaquePermanente, index),
+    hoverBorderWidth: 3
+  };
+}
+
+function aplicarEstiloGrafico(chart, ativoDatasetIndex = null) {
+  __graficoHoverAtivo = ativoDatasetIndex;
+  chart.update("none");
+}
+
+const pluginDestaqueNaFrente = {
+  id: "destaqueNaFrente",
+  afterDatasetsDraw(chart) {
+    const ctx = chart.ctx;
+    const migIndex = chart.data.datasets.findIndex(ds => ds._isMinas);
+    const mediaIndex = chart.data.datasets.findIndex(ds => ds._isMedia);
+    const desenhar = (index) => {
+      const meta = chart.getDatasetMeta(index);
+      if (meta && meta.controller && !meta.hidden) meta.controller.draw();
+    };
+    ctx.save();
+    if (__graficoHoverAtivo !== null && __graficoHoverAtivo !== migIndex && __graficoHoverAtivo !== mediaIndex) {
+      desenhar(__graficoHoverAtivo);
+    }
+    if (mediaIndex !== -1) desenhar(mediaIndex);
+    if (migIndex !== -1) desenhar(migIndex);
+    ctx.restore();
+  }
+};
+
+function renderHolerite(linha, estado, opcoes = {}) {
+  if (linha.simplificado) {
+    const header = opcoes.semCabecalho ? "" : `<div class="hol-header">
+      <strong>${estado.nome}</strong>
+      <span>${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</span>
+      ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${estado.cargaHorariaSemanal}h</span>` : ""}
+      ${estado.ultimaAtualizacao ? `<span style="font-size:0.72rem;opacity:.6">Atualizado em ${estado.ultimaAtualizacao.split("-").reverse().join("/")}</span>` : ""}
+    </div>`;
+    const html = `<div class="hol-body">
+      <div class="hol-wip">
+        <img class="hol-wip-imagem" src="./img/wip.png" alt="" />
+        <div class="hol-wip-titulo">Em construção</div>
+        <div class="hol-wip-texto">Ainda não temos o detalhamento completo da remuneração deste estado. Estamos trabalhando para disponibilizar o mais breve possível.</div>
+        <div class="hol-wip-barra"><div class="hol-wip-barra-preenchimento"></div></div>
+      </div>
+      <div class="hol-item hol-liquido"><span>Remuneração Líquida Mensal</span><span>${formatarMoeda(linha.remuneracaoLiquida)}</span></div>
+      <div class="hol-item"><span>Líquida por hora</span><span class="hol-pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>
+    </div>`;
+    return `${header}<div class="hol-layout"><div class="hol-col-principal">${html}</div></div>`;
+  }
+  const verbasPorAno = estado.verbas;
+  const remuneratorias = verbasPorAno.filter(v => v.natureza === "remuneratoria");
+  const indenizatorias = verbasPorAno.filter(v => v.natureza === "indenizatoria");
+  const notas = [];
+
+  function ref(v) {
+    if (!v.observacao) return "";
+    let i = notas.findIndex(n => n.id === v.id);
+    if (i < 0) { notas.push({ id: v.id, obs: v.observacao }); i = notas.length - 1; }
+    return `<sup class="nota-ref">${i + 1}</sup>`;
+  }
+
+  function itemVerba(v) {
+    const val = linha.valoresVerbas[v.id] || 0;
+    if (val === 0) return "";
+    const partsLabel = [linha.referenciasVerbas[v.id], linha.legendasVerbas[v.id]].filter(Boolean);
+    const refLabel = partsLabel.join(" - ");
+    const nota = ref(v);
+    const nomeComRef = refLabel
+      ? `${v.nome}${nota} <span style="opacity:.65">(${refLabel})</span>`
+      : `${v.nome}${nota}`;
+
+    let avisoRecorrencia = "";
+    if (v.recorrencia === "quadrimestral") {
+      avisoRecorrencia = `<div class="hol-verba-aviso">Verba paga quadrimestralmente. Valor mensalizado.</div>`;
+    } else if (v.recorrencia === "trimestral") {
+      avisoRecorrencia = `<div class="hol-verba-aviso">Verba paga trimestralmente. Valor mensalizado.</div>`;
+    } else if (v.recorrencia === "semestral") {
+      avisoRecorrencia = `<div class="hol-verba-aviso">Verba paga semestralmente. Valor mensalizado.</div>`;
+    } else if (v.recorrencia === "anual") {
+      avisoRecorrencia = `<div class="hol-verba-aviso">Verba paga anualmente. Valor mensalizado.</div>`;
     }
 
-    function colorForUF(uf) {
-      return REGION_COLOR[regionByUF(uf)] || "#f7d46a";
+    if (avisoRecorrencia) {
+      return `<div class="hol-verba-com-aviso"><div class="hol-verba-conteudo"><span>${nomeComRef}</span><span class="hol-pos">${formatarMoeda(val)}</span></div>${avisoRecorrencia}</div>`;
+    } else {
+      return `<div class="hol-item"><span>${nomeComRef}</span><span class="hol-pos">${formatarMoeda(val)}</span></div>`;
     }
+  }
 
-    function flagSrcForUF(uf) {
-      if (uf === "CE") {
-        return "bandeiras/CE.jpg";
-      }
-      return `bandeiras/${uf}.jpg`;
-    }
+  const totalRemuneratorias = remuneratorias.reduce((s, v) => s + (linha.valoresVerbas[v.id] || 0), 0);
+  const totalIndenizatorias = indenizatorias.reduce((s, v) => s + (linha.valoresVerbas[v.id] || 0), 0);
+  const nomeRPPS = estado.previdencia?.nomeRPPS || "RPPS";
+  const nomeComplementar = estado.previdencia?.nomeComplementar || "PREVCOM";
 
-    function preloadFlags(rows) {
-      const tasks = rows.map((row) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          img.src = flagSrcForUF(row.UF);
-          flagImages.set(row.UF, img);
-        });
-      });
+  const dataAtu = estado.ultimaAtualizacao
+    ? estado.ultimaAtualizacao.split("-").reverse().join("/")
+    : null;
+  const header = opcoes.semCabecalho ? "" : `<div class="hol-header">
+    <strong>${estado.nome}${estado.descricao ? `<sup class="nota-ref">*</sup>` : ""}</strong>
+    <span>${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""} &nbsp;·&nbsp; ${linha.posicao}</span>
+    ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${estado.cargaHorariaSemanal}h</span>` : ""}
+    ${dataAtu ? `<span style="font-size:0.72rem;opacity:.6">Atualizado em ${dataAtu}</span>` : ""}
+  </div>`;
+  let html = `<div class="hol-body">`;
 
-      return Promise.all(tasks);
-    }
+  html += `<div class="hol-secao">Verbas Remuneratórias</div>`;
+  remuneratorias.forEach(v => { html += itemVerba(v); });
+  html += `<div class="hol-item hol-subtotal"><span>Subtotal Remuneratório</span><span class="hol-pos">${formatarMoeda(totalRemuneratorias)}</span></div>`;
 
-    function getFrameData(tNorm, fromIdx, toIdx) {
-      const cur = phases[fromIdx];
-      const nxt = phases[toIdx];
-      const eased = easeInOutCubic(tNorm);
+  if (totalIndenizatorias > 0) {
+    html += `<div class="hol-secao" style="margin-top:8px">Verbas Indenizatórias</div>`;
+    indenizatorias.forEach(v => { html += itemVerba(v); });
+    html += `<div class="hol-item hol-subtotal"><span>Subtotal Indenizatório</span><span class="hol-pos">${formatarMoeda(totalIndenizatorias)}</span></div>`;
+  }
 
-      return data.map((row) => {
-        const valueA = row[cur.key];
-        const valueB = row[nxt.key];
-        const valueNow = lerp(valueA, valueB, eased);
-        return {
-          uf: row.UF,
-          value: valueNow,
-          ch: row.CH
-        };
-      }).sort((a, b) => b.value - a.value);
-    }
+  html += `<div class="hol-item hol-subtotal" style="margin-top:4px"><span>Remuneração Bruta</span><span class="hol-pos">${formatarMoeda(linha.remuneracaoBruta)}</span></div>`;
 
-    function computePhaseBounds(rows) {
-      return phases.map((p) => {
-        const values = rows.map((r) => r[p.key]);
-        return {
-          min: Math.min(...values),
-          max: Math.max(...values)
-        };
-      });
-    }
+  html += `<div class="hol-secao" style="margin-top:8px">Descontos</div>`;
 
-    function floorBelowMultiple(value, step) {
-      return Math.floor((value - Number.EPSILON) / step) * step;
-    }
+  if (linha.abateTeto > 0)
+    html += `<div class="hol-item"><span>Abate-Teto</span><span class="hol-neg">- ${formatarMoeda(linha.abateTeto)}</span></div>`;
 
-    function ceilAboveMultiple(value, step) {
-      return Math.ceil((value + Number.EPSILON) / step) * step;
-    }
+  html += `<div class="hol-item"><span>Previdência (${nomeRPPS})</span><span class="hol-neg">- ${formatarMoeda(linha.descontoRPPS)}</span></div>`;
 
-    function refreshComputedData() {
-      data = buildComputedData(rawData, simulateMgAllowance);
-      phaseBounds = computePhaseBounds(data);
-      minInitialValue = Math.min(...data.map((r) => r.Inicial));
-      const allValues = data.flatMap((r) => phases.map((p) => r[p.key]));
-      const allMin = Math.min(...allValues);
-      const allMax = Math.max(...allValues);
+  if (linha.descontoPrevcom > 0)
+    html += `<div class="hol-item"><span>Prev. complementar (${nomeComplementar})</span><span class="hol-neg">- ${formatarMoeda(linha.descontoPrevcom)}</span></div>`;
 
-      const step = useHourly ? 20 : 1000;
-      axisMin = Math.max(0, floorBelowMultiple(allMin, step));
-      axisMax = Math.max(axisMin + step, ceilAboveMultiple(allMax, step));
+  html += `<div class="hol-item"><span>Imposto de Renda (IRRF)</span><span class="hol-neg">- ${formatarMoeda(linha.descontoIR)}</span></div>`;
+  html += `<div class="hol-item hol-liquido"><span>Remuneração Líquida Mensal</span><span>${formatarMoeda(linha.remuneracaoLiquida)}</span></div>`;
+  html += `<div class="hol-item"><span>Líquida por hora</span><span class="hol-pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>`;
+  html += `</div>`; // fim hol-body
 
-      currentRows = getFrameData(1, fromPhaseIndex, toPhaseIndex);
+  // coluna lateral: notas + índices
+  let lateral = "";
+  if (notas.length > 0 || estado.descricao) {
+    const itens = [];
+    if (estado.descricao) itens.push(`<div><sup>*</sup> ${estado.descricao}</div>`);
+    notas.forEach((n, i) => itens.push(`<div><sup>${i + 1}</sup> ${removerNegrito(n.obs)}</div>`));
+    lateral += `<div class="hol-notas">${itens.join("")}</div>`;
+  }
+  if (estado.indices && estado.indices.length > 0) {
+    const linhasIdx = estado.indices.map(idx => `<span>${idx.descricao}: <strong>${idx.valor}</strong></span>`);
+    lateral += `<div class="hol-indices">${linhasIdx.join("<br>")}</div>`;
+  }
 
-      if (viewMode === "lines") {
-        renderLineChartECharts();
-      } else if (viewMode === "table") {
-        renderDetailedTable();
-      }
-    }
+  const temLateral = lateral !== "";
+  return `${header}<div class="hol-layout"><div class="hol-col-principal">${html}</div>${temLateral ? `<div class="hol-col-lateral">${lateral}</div>` : ""}</div>`;
+}
 
-    function buildTimeline() {
-      timeline.innerHTML = "";
-      phases.forEach((p, idx) => {
-        const chip = document.createElement("div");
-        chip.className = "phase-chip" + (idx === 0 ? " active" : "");
-        chip.textContent = p.label;
+function renderizarGrafico(opcoes) {
+  __opcoesGrafico = { ...opcoes };
+  const metricaGrafico = opcoes.metricaGrafico || "mensal";
+  const emValorHora = metricaGrafico === "hora";
+  const anosMax = window.__dados.anosMax;
+  const labels = Array.from({ length: anosMax + 1 }, (_, i) => i);
+  const datasets = [];
+  let ci = 0;
 
-        chip.addEventListener("mouseenter", () => {
-          if (viewMode !== "bars") {
-            return;
-          }
-          if (idx === toPhaseIndex) {
-            return;
-          }
-          fromPhaseIndex = currentPhaseIndex;
-          toPhaseIndex = idx;
-          transitionStart = performance.now();
-          setActiveChip(idx);
-        });
+  const somaLiquida = new Array(anosMax + 1).fill(0);
+  const somaPorHora = new Array(anosMax + 1).fill(0);
+  let totalEstados = 0;
 
-        timeline.appendChild(chip);
-      });
-    }
+  for (const { uf } of window.__dados.listaEstados) {
+    const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
+    const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional));
+    const ehMinas = uf === "MG";
+    datasets.push({
+      label: `${estado.nome} (${uf})`,
+      data: linhas.map(l => emValorHora ? l.liquidoPorHora : l.remuneracaoLiquida),
+      _isMinas: ehMinas,
+      tension: 0,
+      ...estiloDataset(ehMinas ? COR_MINAS_GERAIS : CORES_GRAFICO[ci % CORES_GRAFICO.length], ehMinas, ci),
+      _linhas: linhas,
+      _estado: estado
+    });
+    linhas.forEach((l, i) => {
+      somaLiquida[i] += l.remuneracaoLiquida;
+      somaPorHora[i] += l.liquidoPorHora;
+    });
+    totalEstados++;
+    ci++;
+  }
 
-    function setActiveChip(idx) {
-      const chips = timeline.querySelectorAll(".phase-chip");
-      chips.forEach((chip, chipIdx) => {
-        chip.classList.toggle("active", chipIdx === idx);
-      });
-    }
+  const mediaLiquida = somaLiquida.map(v => totalEstados > 0 ? v / totalEstados : 0);
+  const mediaPorHora = somaPorHora.map(v => totalEstados > 0 ? v / totalEstados : 0);
+  datasets.push({
+    label: "Média entre estados",
+    data: emValorHora ? mediaPorHora : mediaLiquida,
+    _isMedia: true,
+    tension: 0,
+    ...estiloDataset(COR_MEDIA, true, ci),
+    _mediaLiquida: mediaLiquida,
+    _mediaPorHora: mediaPorHora
+  });
+  ci++;
 
-    function drawBars(frameRows, fromIdx, toIdx, toLabel, tNorm) {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
+  if (__grafico) {
+    __grafico.data.datasets = datasets;
+    __grafico.options.scales.y.title.text = emValorHora
+      ? "Remuneração Líquida por Hora (R$/h)"
+      : "Remuneração Líquida (R$)";
+    __grafico.options.scales.y.ticks.callback = v => emValorHora
+      ? "R$/h " + new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v)
+      : "R$ " + new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v);
+    aplicarEstiloGrafico(__grafico, __graficoHoverAtivo);
+    setLoadingGrafico(false);
+    return;
+  }
 
-      ctx.clearRect(0, 0, w, h);
+  let tooltipEl = document.getElementById("tooltip-holerite");
+  if (!tooltipEl) {
+    tooltipEl = document.createElement("div");
+    tooltipEl.id = "tooltip-holerite";
+    tooltipEl.className = "holerite-tooltip";
+    tooltipEl.style.display = "none";
+    document.body.appendChild(tooltipEl);
+  }
+  if (!tooltipEl.dataset.resumoBound) {
+    tooltipEl.addEventListener("click", (event) => {
+      const botao = event.target.closest("[data-acao='abrir-holerite']");
+      if (!botao || !__tooltipAtual) return;
+      abrirModalHolerite(__tooltipAtual.linha, __tooltipAtual.estado, __tooltipAtual.opcoes);
+    });
+    tooltipEl.dataset.resumoBound = "1";
+  }
 
-      const isCompact = w < 640;
-      const margin = {
-        top: isCompact ? 28 : 50,
-        right: isCompact ? 24 : 70,
-        bottom: isCompact ? 22 : 28,
-        left: isCompact ? 72 : 128
-      };
-      const chartW = Math.max(1, w - margin.left - margin.right);
-      const chartH = Math.max(1, h - margin.top - margin.bottom);
+  const ctx = document.getElementById("grafico").getContext("2d");
+  __grafico = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    plugins: [pluginDestaqueNaFrente],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "nearest", intersect: true },
+      onHover(event, activeElements, chart) {
+        const ativoDatasetIndex = activeElements.length > 0
+          ? activeElements[0].datasetIndex
+          : (__tooltipFixa ? __tooltipFixa.datasetIndex : null);
+        if (ativoDatasetIndex === __graficoHoverAtivo) return;
+        aplicarEstiloGrafico(chart, ativoDatasetIndex);
+      },
+      onClick(event, elements, chart) {
+        if (!elements || elements.length === 0) return;
+        const item = elements[0];
+        const dataset = chart.data.datasets[item.datasetIndex];
+        const elemento = chart.getDatasetMeta(item.datasetIndex).data[item.index];
+        const rect = chart.canvas.getBoundingClientRect();
+        const cx = rect.left + elemento.x;
+        const cy = rect.top + elemento.y;
+        aplicarEstiloGrafico(chart, item.datasetIndex);
+        __tooltipFixaViaClique = true;
+        setTimeout(() => { __tooltipFixaViaClique = false; }, 0);
 
-      const rows = frameRows;
-      const rowGap = isCompact ? 2 : 4;
-
-      const domain = Math.max(1, axisMax - axisMin);
-
-      ctx.strokeStyle = "rgba(242,194,48,0.22)";
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= 5; i++) {
-        const tickValue = axisMin + (i / 5) * domain;
-        const x = margin.left + ((tickValue - axisMin) / domain) * chartW;
-        ctx.beginPath();
-        ctx.moveTo(x, margin.top - 10);
-        ctx.lineTo(x, margin.top + chartH + 4);
-        ctx.stroke();
-
-        ctx.fillStyle = "rgba(242,194,48,0.92)";
-        ctx.font = "600 11px Segoe UI, sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-        ctx.fillText(formatCurrencyBR(tickValue), x, margin.top - 12);
-      }
-
-      const avgValue = rows.reduce((acc, r) => acc + r.value, 0) / Math.max(1, rows.length);
-      let avgInsertIndex = rows.findIndex((r) => r.value < avgValue);
-      if (avgInsertIndex < 0) {
-        avgInsertIndex = rows.length;
-      }
-
-      const displayRows = rows.map((row, idx) => ({ type: "state", row, stateIndex: idx }));
-      displayRows.splice(avgInsertIndex, 0, { type: "avg", value: avgValue });
-
-      const barH = (chartH - (displayRows.length - 1) * rowGap) / displayRows.length;
-
-      displayRows.forEach((item, displayIdx) => {
-        const y = margin.top + displayIdx * (barH + rowGap);
-
-        ctx.fillStyle = "rgba(255,255,255,0.035)";
-        ctx.fillRect(margin.left, y, chartW, barH);
-
-        if (item.type === "avg") {
-          const avgBarW = Math.max(2, ((item.value - axisMin) / domain) * chartW);
-          const avgBarColor = "rgba(255,255,255,0.88)";
-
-          ctx.fillStyle = avgBarColor;
-          ctx.fillRect(margin.left, y, avgBarW, barH);
-
-          ctx.strokeStyle = avgBarColor;
-          ctx.lineWidth = 1;
-          ctx.strokeRect(margin.left, y, avgBarW, barH);
-
-          ctx.fillStyle = "#ffffff";
-          ctx.font = `700 ${Math.max(9, barH * 0.30)}px Segoe UI, sans-serif`;
-          ctx.textAlign = "right";
-          ctx.textBaseline = "middle";
-          ctx.fillText("MÉDIA", margin.left - 10, y + barH / 2);
-
-          ctx.textAlign = "left";
-          ctx.fillText(formatCurrencyBR(item.value), margin.left + Math.min(avgBarW + 8, chartW - 130), y + barH / 2);
+        if (dataset._isMedia) {
+          const anosServico = chart.data.labels[item.index];
+          const mediaLiquida = dataset._mediaLiquida[item.index];
+          const mediaPorHora = dataset._mediaPorHora[item.index];
+          __tooltipFixa = {
+            chave: chavePontoTooltip(item.datasetIndex, item.index),
+            datasetIndex: item.datasetIndex,
+            media: true,
+            anosServico,
+            mediaLiquida,
+            mediaPorHora,
+            cx,
+            cy
+          };
+          renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, cx, cy);
           return;
         }
 
-        const d = item.row;
-        const stateRank = item.stateIndex + 1;
-        const barW = Math.max(2, ((d.value - axisMin) / domain) * chartW);
-        const isMG = d.uf === "MG";
-        const barColor = isMG ? "#d62828" : "#6f8f6f";
-
-        ctx.fillStyle = barColor;
-        ctx.fillRect(margin.left, y, barW, barH);
-        ctx.strokeStyle = barColor;
-        ctx.lineWidth = 1.2;
-        ctx.strokeRect(margin.left, y, barW, barH);
-
-        const flag = flagImages.get(d.uf);
-        const flagH = Math.max(10, barH * 0.78);
-        const flagW = flagH * 1.45;
-        const flagX = margin.left - 76;
-        const flagY = y + (barH - flagH) / 2;
-
-        ctx.fillStyle = "#f2c230";
-        ctx.font = `600 ${Math.max(10, barH * 0.33)}px Segoe UI, sans-serif`;
-        ctx.textBaseline = "middle";
-        ctx.textAlign = "right";
-        ctx.fillText(String(stateRank), flagX - 10, y + barH / 2);
-
-        if (flag && flag.complete && flag.naturalWidth > 0) {
-          ctx.drawImage(flag, flagX, flagY, flagW, flagH);
-          ctx.strokeStyle = "rgba(242,194,48,0.5)";
-          ctx.strokeRect(flagX, flagY, flagW, flagH);
-        }
-
-
-        ctx.fillStyle = "#fff2c2";
-        ctx.font = `600 ${Math.max(11, barH * 0.38)}px Segoe UI, sans-serif`;
-        ctx.textAlign = "right";
-        const ufX = margin.left - 10;
-        ctx.fillText(d.uf, ufX, y + barH / 2);
-
-        // show carga horaria immediately to the right of the flag image
-        ctx.fillStyle = "rgba(242,194,48,0.9)";
-        ctx.font = `600 ${Math.max(9, barH * 0.28)}px Segoe UI, sans-serif`;
-        ctx.textAlign = "left";
-        const flagRightX = flagX + flagW;
-        const chText = (d.ch || d.CH) ? `${Number(d.ch || d.CH)}h` : "";
-        const chX = flagRightX + 6;
-        ctx.fillText(chText, chX, y + barH / 2);
-
-        ctx.fillStyle = "#fff2c2";
-        ctx.textAlign = "left";
-        const valueText = formatCurrencyBR(d.value);
-        const valX = margin.left + Math.min(barW + 8, chartW - 110);
-        ctx.fillText(valueText, valX, y + barH / 2);
-      });
-
-      const progressPct = Math.round(tNorm * 100);
-      //phaseLabel.textContent = `Barras: ${toLabel} (${progressPct}%)`;
-    }
-
-    function renderLineChartECharts() {
-      if (!window.echarts) {
-        phaseLabel.textContent = "Erro: Apache ECharts nao carregou";
-        return;
-      }
-
-      if (!lineChart) {
-        lineChart = window.echarts.init(lineChartEl);
-      }
-
-      const legendData = data.map((row) => row.UF);
-      const series = data.map((row) => ({
-        name: row.UF,
-        type: "line",
-        smooth: true,
-        symbol: "circle",
-        symbolSize: 6,
-        data: phases.map((p) => row[p.posKey]),
-        lineStyle: {
-          width: 1.8,
-          opacity: 0.35,
-          color: colorForUF(row.UF)
-        },
-        itemStyle: {
-          color: colorForUF(row.UF),
-          opacity: 0.8
-        },
-        emphasis: {
-          focus: "series",
-          lineStyle: { width: 4, opacity: 1 },
-          itemStyle: { opacity: 1 }
-        },
-        blur: {
-          lineStyle: { opacity: 0.04 },
-          itemStyle: { opacity: 0.04 }
-        }
-      }));
-
-      const xCategories = phases.map((p) => p.label);
-      const legendBreak = Math.ceil(legendData.length / 2);
-      const legendRow1 = legendData.slice(0, legendBreak);
-      const legendRow2 = legendData.slice(legendBreak);
-      const rowByUF = new Map(data.map((row) => [row.UF, row]));
-
-      lineChart.setOption({
-        backgroundColor: "transparent",
-        animationDuration: 500,
-        color: legendData.map((uf) => colorForUF(uf)),
-        tooltip: {
-          trigger: "item",
-          backgroundColor: "rgba(15, 10, 10, 0.95)",
-          borderColor: "#f2c230",
-          borderWidth: 1,
-          textStyle: {
-            color: "#fff2c2"
+        const linha = dataset._linhas[item.index];
+        const estadoTooltip = dataset._estado;
+        const resumo = ehTelaPequena();
+        __tooltipFixa = {
+          chave: chavePontoTooltip(item.datasetIndex, item.index),
+          datasetIndex: item.datasetIndex,
+          linha,
+          estado: estadoTooltip,
+          opcoes: { ...__opcoesGrafico },
+          resumo,
+          cx,
+          cy
+        };
+        renderTooltipHolerite(tooltipEl, linha, estadoTooltip, __tooltipFixa.opcoes, cx, cy, resumo);
+      },
+      plugins: {
+        legend: {
+          position: "top",
+          labels: {
+            font: { size: 12 },
+            usePointStyle: true,
+            pointStyle: "line",
+            generateLabels(chart) {
+              return chart.data.datasets.map((dataset, index) => {
+                const meta = chart.getDatasetMeta(index);
+                const style = meta.controller.getStyle(0, true);
+                return {
+                  text: dataset.label,
+                  fillStyle: style.backgroundColor,
+                  strokeStyle: style.borderColor,
+                  fontColor: "#334155",
+                  color: "#334155",
+                  lineWidth: style.borderWidth,
+                  lineCap: style.borderCapStyle,
+                  lineDash: style.borderDash,
+                  lineDashOffset: style.borderDashOffset,
+                  lineJoin: style.borderJoinStyle,
+                  pointStyle: "line",
+                  hidden: !meta.visible,
+                  datasetIndex: index
+                };
+              });
+            }
           },
-          formatter: (params) => {
-            const uf = params.seriesName;
-            const phaseIndex = Number(params.dataIndex || 0);
-            const phase = phases[phaseIndex];
-            const row = rowByUF.get(uf);
-
-            if (!row || !phase) {
-              return `${uf}`;
+          onHover(event, legendItem, legend) {
+            aplicarEstiloGrafico(legend.chart, legendItem.datasetIndex);
+          },
+          onLeave(event, legendItem, legend) {
+            aplicarEstiloGrafico(legend.chart, __tooltipFixa ? __tooltipFixa.datasetIndex : null);
+          }
+        },
+        tooltip: {
+          enabled: false,
+          external(context) {
+            const dp = context.tooltip.dataPoints;
+            if (context.tooltip.opacity === 0 || !dp || dp.length === 0) {
+              if (!__tooltipFixa) {
+                tooltipEl.style.display = "none";
+                tooltipEl.classList.remove("resumo");
+                tooltipEl.style.pointerEvents = "none";
+                __tooltipAtual = null;
+              }
+              return;
             }
 
-            const remuneracao = formatCurrencyBR(row[phase.key]);
-            const posicao = `#${row[phase.posKey]}`;
+            const cursorY = context.tooltip.caretY;
+            let closest = dp[0];
+            let minDist = Infinity;
+            for (const p of dp) {
+              const d = Math.abs(p.element.y - cursorY);
+              if (d < minDist) { minDist = d; closest = p; }
+            }
 
-            return `<strong>${uf}</strong><br/>${phase.label}<br/>Posicao: ${posicao}<br/>Remuneracao liquida: ${remuneracao}`;
+            const ds = context.chart.data.datasets[closest.datasetIndex];
+            const resumo = ehTelaPequena();
+            const rect = context.chart.canvas.getBoundingClientRect();
+            const cx = rect.left + context.tooltip.caretX;
+            const cy = rect.top + context.tooltip.caretY;
+
+            const chaveHovered = chavePontoTooltip(closest.datasetIndex, closest.dataIndex);
+            if (__tooltipFixa) {
+              if (__tooltipFixa.chave === chaveHovered) {
+                if (__tooltipFixa.media) {
+                  renderTooltipMedia(tooltipEl, __tooltipFixa.anosServico, __tooltipFixa.mediaLiquida, __tooltipFixa.mediaPorHora, __tooltipFixa.cx, __tooltipFixa.cy);
+                } else {
+                  renderTooltipHolerite(tooltipEl, __tooltipFixa.linha, __tooltipFixa.estado, __tooltipFixa.opcoes, __tooltipFixa.cx, __tooltipFixa.cy, __tooltipFixa.resumo);
+                }
+                return;
+              }
+              limparTooltipFixa();
+            }
+
+            if (ds._isMedia) {
+              const anosServico = context.chart.data.labels[closest.dataIndex];
+              const mediaLiquida = ds._mediaLiquida[closest.dataIndex];
+              const mediaPorHora = ds._mediaPorHora[closest.dataIndex];
+              renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, cx, cy);
+              return;
+            }
+
+            const linha = ds._linhas[closest.dataIndex];
+            const estadoTooltip = ds._estado;
+            renderTooltipHolerite(tooltipEl, linha, estadoTooltip, __opcoesGrafico, cx, cy, resumo);
           }
-        },
-        legend: [
-          {
-            type: "plain",
-            top: 6,
-            left: 12,
-            right: 12,
-            itemWidth: 10,
-            itemHeight: 8,
-            textStyle: {
-              color: "#f7d46a",
-              fontSize: 10
-            },
-            data: legendRow1
-          },
-          {
-            type: "plain",
-            top: 24,
-            left: 12,
-            right: 12,
-            itemWidth: 10,
-            itemHeight: 8,
-            textStyle: {
-              color: "#f7d46a",
-              fontSize: 10
-            },
-            data: legendRow2
-          }
-        ],
-        grid: {
-          left: 52,
-          right: 24,
-          top: 92,
-          bottom: 34,
-          containLabel: true
-        },
-        xAxis: {
-          type: "category",
-          data: xCategories,
-          axisLabel: { color: "#f7d46a" },
-          axisLine: { lineStyle: { color: "rgba(242,194,48,0.35)" } },
-          axisTick: { show: false }
-        },
-        yAxis: {
-          type: "value",
-          min: 1,
-          max: 27,
-          interval: 1,
-          inverse: true,
-          axisLabel: {
-            color: "#f2c230",
-            formatter: (v) => `#${v}`
-          },
-          axisLine: { show: false },
-          splitLine: { lineStyle: { color: "rgba(242,194,48,0.16)" } }
-        },
-        series
-      }, true);
-
-      const rightLabels = [];
-      const sortedByFinal = [...data].sort((a, b) => a.Pos_Final - b.Pos_Final);
-
-      const focusSeries = (uf) => {
-        lineChart.dispatchAction({ type: "downplay", seriesIndex: "all" });
-        lineChart.dispatchAction({ type: "highlight", seriesName: uf });
-      };
-
-      const clearFocus = () => {
-        lineChart.dispatchAction({ type: "downplay", seriesIndex: "all" });
-      };
-
-      sortedByFinal.forEach((row) => {
-        const anchor = lineChart.convertToPixel(
-          { xAxisIndex: 0, yAxisIndex: 0 },
-          [xCategories[xCategories.length - 1], row.Pos_Final]
-        );
-
-        if (!Array.isArray(anchor)) {
-          return;
         }
-
-        const baseX = anchor[0] + 8;
-        const baseY = anchor[1] - 6;
-
-        rightLabels.push({
-          type: "image",
-          z: 100,
-          silent: false,
-          onclick: () => focusSeries(row.UF),
-          onmouseover: () => focusSeries(row.UF),
-          onmouseout: () => clearFocus(),
-          style: {
-            image: flagSrcForUF(row.UF),
-            x: baseX,
-            y: baseY,
-            width: 14,
-            height: 10
+      },
+      scales: {
+        x: { title: { display: true, text: "Anos de serviço" } },
+        y: {
+          title: {
+            display: true,
+            text: emValorHora ? "Remuneração Líquida por Hora (R$/h)" : "Remuneração Líquida (R$)"
+          },
+          ticks: {
+            callback: v => emValorHora
+              ? "R$/h " + new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v)
+              : "R$ " + new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v)
           }
-        });
-
-        rightLabels.push({
-          type: "text",
-          z: 101,
-          silent: false,
-          onclick: () => focusSeries(row.UF),
-          onmouseover: () => focusSeries(row.UF),
-          onmouseout: () => clearFocus(),
-          style: {
-            x: baseX + 18,
-            y: baseY + 1,
-            text: row.UF,
-            fill: "#f7d46a",
-            font: "700 10px Segoe UI"
-          }
-        });
-      });
-
-      lineChart.setOption({ graphic: rightLabels });
-
-      //phaseLabel.textContent = "Linhas (Bump): X = phases | Y = posicao";
-    }
-
-    function renderDetailedTable() {
-      const rows = [...data].sort((a, b) => a.Pos_Final - b.Pos_Final);
-      const html = rows.map((row) => {
-        const phaseCells = phases.map((p) => {
-          return `<td><div class="cell-pos">#${row[p.posKey]} - <span class="cell-val">${formatCurrencyBR(row[p.key])}</span></div></td>`;
-        }).join("");
-        return `<tr><td><strong>${row.UF}</strong></td>${phaseCells}</tr>`;
-      }).join("");
-      detailTableBody.innerHTML = html;
-      //phaseLabel.textContent = "Tabela Detalhado";
-    }
-
-    function setViewMode(mode) {
-      viewMode = mode;
-      viewBarsBtn.classList.toggle("active", mode === "bars");
-      viewLinesBtn.classList.toggle("active", mode === "lines");
-      viewTableBtn.classList.toggle("active", mode === "table");
-
-      if (mode === "bars") {
-        timeline.classList.remove("hidden");
-        canvasBox.classList.remove("hidden");
-        lineChartBox.classList.add("hidden");
-        tableWrap.classList.add("hidden");
-        return;
-      }
-
-      timeline.classList.add("hidden");
-
-      if (mode === "lines") {
-        canvasBox.classList.add("hidden");
-        lineChartBox.classList.remove("hidden");
-        tableWrap.classList.add("hidden");
-        renderLineChartECharts();
-        return;
-      }
-
-      canvasBox.classList.add("hidden");
-      lineChartBox.classList.add("hidden");
-      tableWrap.classList.remove("hidden");
-      renderDetailedTable();
-    }
-
-    function tick(now) {
-      const elapsed = now - transitionStart;
-      const t = Math.max(0, Math.min(1, elapsed / transitionMs));
-
-      if (viewMode === "bars") {
-        currentRows = getFrameData(t, fromPhaseIndex, toPhaseIndex);
-        drawBars(currentRows, fromPhaseIndex, toPhaseIndex, phases[toPhaseIndex].label, t);
-
-        if (t >= 1) {
-          currentPhaseIndex = toPhaseIndex;
-          fromPhaseIndex = toPhaseIndex;
         }
       }
-
-      requestAnimationFrame(tick);
     }
+  });
 
-    async function init() {
-      resizeCanvas();
-      window.addEventListener("resize", onResize);
+  __grafico.canvas.addEventListener("mouseleave", () => aplicarEstiloGrafico(__grafico, __tooltipFixa ? __tooltipFixa.datasetIndex : null));
+  setLoadingGrafico(false);
+}
 
-      const res = await fetch(CSV_FILE);
-      if (!res.ok) {
-        throw new Error("Nao foi possivel carregar o arquivo CSV.");
-      }
+// ── Posição (ranking entre estados por ano de serviço, Apache ECharts,
+// estilo bump chart: https://echarts.apache.org/examples/en/editor.html?c=bump-chart) ──
 
-      rawData = parseCsv(await res.text());
+let __posicaoChart = null;
+let __posicaoTooltipAtual = null;
 
-      currentPhaseIndex = 0;
-      fromPhaseIndex = 0;
-      toPhaseIndex = 0;
-      transitionStart = performance.now();
-      buildTimeline();
+function renderizarPosicao(opcoes) {
+  __opcoesGrafico = { ...opcoes };
+  const metricaGrafico = opcoes.metricaGrafico || "mensal";
+  const emValorHora = metricaGrafico === "hora";
+  const anosMax = window.__dados.anosMax;
+  const labels = Array.from({ length: anosMax + 1 }, (_, i) => i);
+  const listaEstados = window.__dados.listaEstados;
+  const totalEstados = listaEstados.length;
 
-      viewBarsBtn.addEventListener("click", () => setViewMode("bars"));
-      viewLinesBtn.addEventListener("click", () => setViewMode("lines"));
-      viewTableBtn.addEventListener("click", () => setViewMode("table"));
+  const valoresPorUf = {};
+  const linhasPorUf = {};
+  const estadosPorUf = {};
+  const coresPorUf = {};
+  let ci = 0;
+  for (const { uf } of listaEstados) {
+    const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
+    const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional));
+    valoresPorUf[uf] = linhas.map(l => emValorHora ? l.liquidoPorHora : l.remuneracaoLiquida);
+    linhasPorUf[uf] = linhas;
+    estadosPorUf[uf] = estado;
+    coresPorUf[uf] = uf === "MG" ? COR_MINAS_GERAIS : CORES_GRAFICO[ci % CORES_GRAFICO.length];
+    ci++;
+  }
 
-      simMgAllowanceCheckbox.addEventListener("change", (event) => {
-        simulateMgAllowance = Boolean(event.target.checked);
-        refreshComputedData();
-      });
+  const rankPorUf = {};
+  listaEstados.forEach(({ uf }) => { rankPorUf[uf] = new Array(anosMax + 1).fill(0); });
+  for (let ano = 0; ano <= anosMax; ano++) {
+    const ordenado = listaEstados
+      .map(({ uf }) => ({ uf, valor: valoresPorUf[uf][ano] }))
+      .sort((a, b) => b.valor - a.valor);
+    ordenado.forEach((item, idx) => { rankPorUf[item.uf][ano] = idx + 1; });
+  }
 
-      const useHourlyCheckbox = document.getElementById("useHourly");
-      useHourlyCheckbox.addEventListener("change", (event) => {
-        useHourly = Boolean(event.target.checked);
-        refreshComputedData();
-      });
+  const series = listaEstados.map(({ uf }) => {
+    const ehMinas = uf === "MG";
+    const cor = coresPorUf[uf];
+    const estado = estadosPorUf[uf];
+    const data = rankPorUf[uf].map((rank, ano) => ({
+      value: rank,
+      _item: { linha: linhasPorUf[uf][ano], estado, ano }
+    }));
+    return {
+      id: uf,
+      name: uf,
+      type: "line",
+      data,
+      symbolSize: 6,
+      smooth: 0.3,
+      lineStyle: { width: ehMinas ? 3.5 : 1.6, color: cor },
+      itemStyle: { color: cor },
+      emphasis: { focus: "series", lineStyle: { width: 4 } },
+      endLabel: { show: true, formatter: () => uf, color: cor, fontWeight: 700, fontSize: 11 },
+      z: ehMinas ? 10 : 1
+    };
+  });
 
-      refreshComputedData();
-      await preloadFlags(rawData);
-      currentRows = getFrameData(1, 0, 0);
-      setViewMode("bars");
-      requestAnimationFrame(tick);
+  const opcoesEchart = {
+    animationDuration: 500,
+    grid: { left: 44, right: 56, top: 20, bottom: 44 },
+    xAxis: {
+      type: "category",
+      data: labels,
+      boundaryGap: false,
+      name: "Anos de serviço",
+      nameLocation: "middle",
+      nameGap: 28,
+      axisLabel: { color: "#334155" }
+    },
+    yAxis: {
+      type: "value",
+      inverse: true,
+      min: 1,
+      max: totalEstados,
+      interval: 1,
+      name: "Posição no ranking",
+      nameLocation: "middle",
+      nameGap: 36,
+      axisLabel: { formatter: v => `#${v}` },
+      splitLine: { lineStyle: { color: "#eef0f3" } }
+    },
+    series,
+    tooltip: {
+      trigger: "item",
+      enterable: true,
+      appendToBody: true,
+      backgroundColor: "#fff",
+      borderColor: "#d0d5dd",
+      borderWidth: 1,
+      padding: 0,
+      extraCssText: "box-shadow:0 6px 24px rgba(0,0,0,0.15); border-radius:10px; overflow:hidden;",
+      position(point, params, dom, rect, size) {
+        const containerRect = document.getElementById("grafico-posicao").getBoundingClientRect();
+        const [tw, th] = size.contentSize;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const pageX = containerRect.left + point[0];
+        const pageY = containerRect.top + point[1];
+        let left = pageX + 16;
+        if (left + tw > vw - 8) left = pageX - tw - 16;
+        let top = pageY - th / 2;
+        left = Math.min(Math.max(8, left), Math.max(8, vw - tw - 8));
+        top = Math.min(Math.max(8, top), Math.max(8, vh - th - 8));
+        return [left - containerRect.left, top - containerRect.top];
+      },
+      formatter(params) {
+        const item = params.data._item;
+        const estiloBase = "font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:0.78rem;line-height:normal;";
+        const resumo = ehTelaPequena();
+        if (resumo) {
+          __posicaoTooltipAtual = { linha: item.linha, estado: item.estado, opcoes: { ...opcoes } };
+          return `<div style="padding:12px 14px;width:min(340px, calc(100vw - 24px));white-space:normal;${estiloBase}">${montarResumoTooltip(item.linha, item.estado, opcoes)}</div>`;
+        }
+        __posicaoTooltipAtual = null;
+        return `<div style="width:min(680px, calc(100vw - 24px));white-space:normal;${estiloBase}">${renderHolerite(item.linha, item.estado, opcoes)}</div>`;
+      },
     }
+  };
 
-    init().catch((err) => {
-      console.error(err);
-      phaseLabel.textContent = "Erro ao carregar CSV";
+  if (!__posicaoChart) {
+    __posicaoChart = echarts.init(document.getElementById("grafico-posicao"));
+  }
+  __posicaoChart.setOption(opcoesEchart, true);
+  setLoadingGrafico(false);
+}
+
+// ── Barras (barras, Apache ECharts) ────────────────────────────────────────
+
+function formatarValorBarras(valor, emValorHora) {
+  const formatado = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(valor || 0);
+  return emValorHora ? `${formatado}/h` : formatado;
+}
+
+function anosBarrasAtual() {
+  const input = document.getElementById("anosBarras");
+  const valor = Number(input?.value);
+  return Number.isFinite(valor) ? valor : 0;
+}
+
+function maiorMultiploMenorQue(valor, passo) {
+  return passo * (Math.ceil(valor / passo) - 1);
+}
+
+function menorMultiploMaiorQue(valor, passo) {
+  return passo * (Math.floor(valor / passo) + 1);
+}
+
+/**
+ * Percorre todo o intervalo de anos de servico (0 a anosMax) e todos os
+ * estados (mais a MEDIA) para achar o menor/maior valor liquido mensal e
+ * liquido por hora que o barras pode exibir. Usado para fixar os limites
+ * do eixo X do grafico de barras, evitando que o eixo "pule" ao mover o
+ * slider de anos.
+ */
+function calcularLimitesEixoBarras(opcoes) {
+  const anosMax = window.__dados.anosMax;
+  let minLiquido = Infinity, maxLiquido = -Infinity;
+  let minPorHora = Infinity, maxPorHora = -Infinity;
+  const somaLiquidaPorAno = new Array(anosMax + 1).fill(0);
+  const somaPorHoraPorAno = new Array(anosMax + 1).fill(0);
+  let totalEstados = 0;
+
+  for (const { uf } of window.__dados.listaEstados) {
+    const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
+    for (let ano = 0; ano <= anosMax; ano++) {
+      const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional);
+      minLiquido = Math.min(minLiquido, linha.remuneracaoLiquida);
+      maxLiquido = Math.max(maxLiquido, linha.remuneracaoLiquida);
+      minPorHora = Math.min(minPorHora, linha.liquidoPorHora);
+      maxPorHora = Math.max(maxPorHora, linha.liquidoPorHora);
+      somaLiquidaPorAno[ano] += linha.remuneracaoLiquida;
+      somaPorHoraPorAno[ano] += linha.liquidoPorHora;
+    }
+    totalEstados++;
+  }
+
+  if (totalEstados > 0) {
+    for (let ano = 0; ano <= anosMax; ano++) {
+      const mediaLiquida = somaLiquidaPorAno[ano] / totalEstados;
+      const mediaPorHora = somaPorHoraPorAno[ano] / totalEstados;
+      minLiquido = Math.min(minLiquido, mediaLiquida);
+      maxLiquido = Math.max(maxLiquido, mediaLiquida);
+      minPorHora = Math.min(minPorHora, mediaPorHora);
+      maxPorHora = Math.max(maxPorHora, mediaPorHora);
+    }
+  }
+
+  return { minLiquido, maxLiquido, minPorHora, maxPorHora };
+}
+
+/**
+ * Barras (grafico de barras horizontal, Apache ECharts) comparando todos
+ * os estados em um unico ano de servico (escolhido pelo slider). Reaproveita
+ * montarLinha/obterDatasetEstado (mesmos dados/regras ja usados no grafico de
+ * linhas e na tabela) e o mesmo tooltip (montarResumoTooltip/
+ * montarConteudoTooltipMedia). O reordenamento das barras ao trocar o ano ou
+ * qualquer outro parametro e animado via `realtimeSort` do ECharts.
+ */
+function renderizarBarras(opcoes) {
+  const emValorHora = (opcoes.metricaGrafico || "mensal") === "hora";
+  const ano = anosBarrasAtual();
+
+  const itens = [];
+  let somaLiquida = 0;
+  let somaPorHora = 0;
+  let totalEstados = 0;
+
+  for (const { uf } of window.__dados.listaEstados) {
+    const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
+    const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional);
+    itens.push({
+      uf,
+      valor: emValorHora ? linha.liquidoPorHora : linha.remuneracaoLiquida,
+      cargaHoraria: estado.cargaHorariaSemanal,
+      linha,
+      estado,
     });
-  </script>
+    somaLiquida += linha.remuneracaoLiquida;
+    somaPorHora += linha.liquidoPorHora;
+    totalEstados++;
+  }
+
+  const mediaLiquida = totalEstados > 0 ? somaLiquida / totalEstados : 0;
+  const mediaPorHora = totalEstados > 0 ? somaPorHora / totalEstados : 0;
+  itens.push({
+    uf: null,
+    isMedia: true,
+    valor: emValorHora ? mediaPorHora : mediaLiquida,
+    mediaLiquida,
+    mediaPorHora,
+  });
+
+  itens.sort((a, b) => b.valor - a.valor);
+
+  const categorias = itens.map(item => item.isMedia
+    ? "MÉDIA"
+    : item.uf);
+
+  const dadosBarras = itens.map(item => ({
+    value: Math.round(item.valor * 100) / 100,
+    name: item.isMedia ? "MÉDIA" : item.uf,
+    itemStyle: {
+      color: item.isMedia ? COR_BARRAS_MEDIA : (item.uf === "MG" ? COR_BARRAS_DESTAQUE : COR_BARRAS_PADRAO)
+    },
+    _item: item,
+  }));
+
+  const limitesEixo = calcularLimitesEixoBarras(opcoes);
+  const passoEixo = emValorHora ? 20 : 2000;
+  const margemEixo = emValorHora ? 5 : 500;
+  const minEixoValor = emValorHora ? limitesEixo.minPorHora : limitesEixo.minLiquido;
+  const maxEixoValor = emValorHora ? limitesEixo.maxPorHora : limitesEixo.maxLiquido;
+  const xAxisMin = Number.isFinite(minEixoValor) ? maiorMultiploMenorQue(minEixoValor - margemEixo, passoEixo) : undefined;
+  const xAxisMax = Number.isFinite(maxEixoValor) ? menorMultiploMaiorQue(maxEixoValor + margemEixo, passoEixo) : undefined;
+
+  const opcoesEchart = {
+    animationDurationUpdate: 700,
+    animationEasingUpdate: "quinticInOut",
+    grid: { left: 120, right: 100, top: 10, bottom: 30 },
+    xAxis: {
+      type: "value",
+      min: xAxisMin,
+      max: xAxisMax,
+      axisLabel: { formatter: v => formatarValorBarras(v, emValorHora) },
+      splitLine: { lineStyle: { color: "#eef0f3" } },
+    },
+    yAxis: {
+      type: "category",
+      data: categorias,
+      inverse: true,
+      animationDuration: 300,
+      animationDurationUpdate: 300,
+      axisLabel: {
+        fontWeight: 600,
+        color: "#334155",
+        formatter: (value, index) => {
+          const item = itens[index];
+          if (!item || item.isMedia) return value;
+          if (!item.cargaHoraria) return `{uf|${value}}`;
+          if (item.cargaHoraria < 40) {
+            const estilo = item.cargaHoraria === 30 ? "pillDourado" : (item.cargaHoraria === 35 ? "pillPrateado" : "pill");
+            return `{uf|${value}} {bullet|\u00b7} {${estilo}|${item.cargaHoraria}h}`;
+          }
+          return `{uf|${value}} {bullet|\u00b7} {uf|${item.cargaHoraria}h}`;
+        },
+        rich: {
+          uf: { fontWeight: 600, color: "#334155" },
+          bullet: { color: "#334155" },
+          pill: {
+            fontWeight: 700,
+            fontSize: 10,
+            lineHeight: 10,
+            align: "center",
+            color: "#334155",
+            backgroundColor: "#dbeafe",
+            borderRadius: 8,
+            padding: [4, 6, 3, 6],
+          },
+          pillPrateado: {
+            fontWeight: 700,
+            fontSize: 10,
+            lineHeight: 10,
+            align: "center",
+            color: "#334155",
+            backgroundColor: "#d9dde3",
+            borderRadius: 8,
+            padding: [4, 6, 3, 6],
+          },
+          pillDourado: {
+            fontWeight: 700,
+            fontSize: 10,
+            lineHeight: 10,
+            align: "center",
+            color: "#334155",
+            backgroundColor: "#f2d98d",
+            borderRadius: 8,
+            padding: [4, 6, 3, 6],
+          },
+        },
+      },
+      axisLine: { show: false },
+      axisTick: { show: false },
+    },
+    series: [{
+      id: "barras",
+      type: "bar",
+      data: dadosBarras,
+      realtimeSort: true,
+      barMaxWidth: 22,
+      label: {
+        show: true,
+        position: "right",
+        valueAnimation: true,
+        color: "#1a1f2b",
+        fontWeight: 700,
+        formatter: p => formatarValorBarras(p.value, emValorHora),
+      },
+    }],
+    tooltip: {
+      trigger: "item",
+      enterable: true,
+      appendToBody: true,
+      backgroundColor: "#fff",
+      borderColor: "#d0d5dd",
+      borderWidth: 1,
+      padding: 0,
+      extraCssText: "box-shadow:0 6px 24px rgba(0,0,0,0.15); border-radius:10px; overflow:hidden;",
+      position(point, params, dom, rect, size) {
+        const containerRect = document.getElementById("barras-echart").getBoundingClientRect();
+        const [tw, th] = size.contentSize;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const pageX = containerRect.left + point[0];
+        const pageY = containerRect.top + point[1];
+        let left = pageX + 16;
+        if (left + tw > vw - 8) left = pageX - tw - 16;
+        let top = pageY - th / 2;
+        left = Math.min(Math.max(8, left), Math.max(8, vw - tw - 8));
+        top = Math.min(Math.max(8, top), Math.max(8, vh - th - 8));
+        return [left - containerRect.left, top - containerRect.top];
+      },
+      formatter(params) {
+        const item = params.data._item;
+        const estiloBase = "font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:0.78rem;line-height:normal;";
+        if (item.isMedia) {
+          return `<div style="padding:12px 14px;width:min(340px, calc(100vw - 24px));white-space:normal;${estiloBase}">${montarConteudoTooltipMedia(ano, item.mediaLiquida, item.mediaPorHora)}</div>`;
+        }
+        const resumo = ehTelaPequena();
+        if (resumo) {
+          __barrasTooltipAtual = { linha: item.linha, estado: item.estado, opcoes: { ...opcoes } };
+          return `<div style="padding:12px 14px;width:min(340px, calc(100vw - 24px));white-space:normal;${estiloBase}">${montarResumoTooltip(item.linha, item.estado, opcoes)}</div>`;
+        }
+        __barrasTooltipAtual = null;
+        return `<div style="width:min(680px, calc(100vw - 24px));white-space:normal;${estiloBase}">${renderHolerite(item.linha, item.estado, opcoes)}</div>`;
+      },
+    },
+  };
+
+  if (!__barrasChart) {
+    __barrasChart = echarts.init(document.getElementById("barras-echart"));
+  }
+  __barrasChart.setOption(opcoesEchart);
+}
+
+// ── Vista (grafico / barras / tabela) ──────────────────────────────────────
+
+let __vista = "barras";
+let __metricaGrafico = "mensal";
+let __usarTetoNacional = false;
+let __eixoYGrafico = "remuneracao";
+let __modoTabela = "holerite";
+
+function setMetricaGrafico(valor) {
+  __metricaGrafico = valor;
+  document.getElementById("btn-metrica-mensal").classList.toggle("ativo", valor === "mensal");
+  document.getElementById("btn-metrica-hora").classList.toggle("ativo", valor === "hora");
+  renderizar();
+}
+
+function setTeto(usarNacional) {
+  __usarTetoNacional = usarNacional;
+  document.getElementById("btn-teto-nacional").classList.toggle("ativo", usarNacional);
+  document.getElementById("btn-teto-estadual").classList.toggle("ativo", !usarNacional);
+  renderizar();
+}
+
+function setModoTabela(valor) {
+  __modoTabela = valor;
+  document.getElementById("btn-modo-holerite").classList.toggle("ativo", valor === "holerite");
+  document.getElementById("btn-modo-comparacao").classList.toggle("ativo", valor === "comparacao");
+  document.getElementById("campo-estado").style.display = valor === "holerite" ? "" : "none";
+  document.getElementById("campo-metrica-grafico").style.display = valor === "comparacao" ? "" : "none";
+  atualizarControleEscolaridade();
+  atualizarLinkComposicao();
+  renderizar();
+}
+
+function setEixoYGrafico(valor) {
+  __eixoYGrafico = valor;
+  document.getElementById("btn-eixo-remuneracao").classList.toggle("ativo", valor === "remuneracao");
+  document.getElementById("btn-eixo-posicao").classList.toggle("ativo", valor === "posicao");
+  document.getElementById("grafico").style.display = valor === "posicao" ? "none" : "";
+  document.getElementById("grafico-posicao").style.display = valor === "posicao" ? "" : "none";
+  renderizar();
+  if (valor === "remuneracao" && __grafico) __grafico.resize();
+  if (valor === "posicao" && __posicaoChart) __posicaoChart.resize();
+}
+
+function atualizarLinkComposicao() {
+  const link = document.querySelector(".btn-link-composicao");
+  if (!link) return;
+  const uf = document.getElementById("estado").value;
+  const estado = uf ? window.__dados.estados[uf] : null;
+  const podeDirecionarParaEstado = __vista === "tabela" && __modoTabela === "holerite" && uf && estado && !estado.remuneracaoSimplificada;
+  link.href = podeDirecionarParaEstado
+    ? `./composicao.html?estado=${uf}`
+    : "./composicao.html";
+}
+
+function atualizarControleEscolaridade() {
+  const campo = document.getElementById("campo-escolaridade");
+  const sel = document.getElementById("escolaridade");
+  const uf = document.getElementById("estado").value;
+  const estado = window.__dados.estados[uf];
+  const escolaridades = estado && estado.escolaridadesDisponiveis;
+  if (escolaridades && escolaridades.length > 1) {
+    const padrao = "Pós-Graduação/Especialização";
+    sel.innerHTML = escolaridades.map(esc =>
+      `<option value="${htmlEsc(esc)}"${esc === padrao ? " selected" : ""}>${htmlEsc(esc)}</option>`).join("");
+    campo.style.display = "";
+  } else {
+    sel.innerHTML = "";
+    campo.style.display = "none";
+  }
+}
+
+function setVista(v) {
+  __vista = v;
+  document.getElementById("painel-grafico").style.display = v === "grafico" ? "" : "none";
+  document.getElementById("painel-barras").style.display = v === "barras" ? "" : "none";
+  document.getElementById("painel-tabela").style.display  = v === "tabela"  ? "" : "none";
+  document.getElementById("btn-grafico").classList.toggle("ativo", v === "grafico");
+  document.getElementById("btn-barras").classList.toggle("ativo", v === "barras");
+  document.getElementById("btn-tabela").classList.toggle("ativo", v === "tabela");
+  document.getElementById("campo-estado").style.display = v === "tabela" ? "" : "none";
+  document.getElementById("campo-metrica-grafico").style.display = (v === "grafico" || v === "barras" || (v === "tabela" && __modoTabela === "comparacao")) ? "" : "none";
+  document.getElementById("campo-eixo-y-grafico").style.display = v === "grafico" ? "" : "none";
+  document.getElementById("campo-modo-tabela").style.display = v === "tabela" ? "" : "none";
+  if (v === "tabela") document.getElementById("campo-estado").style.display = __modoTabela === "holerite" ? "" : "none";
+  atualizarControleEscolaridade();
+  if (v === "grafico" && __eixoYGrafico === "remuneracao" && __grafico) __grafico.resize();
+  if (v === "grafico" && __eixoYGrafico === "posicao" && __posicaoChart) __posicaoChart.resize();
+  if (v === "barras" && __barrasChart) __barrasChart.resize();
+  atualizarLinkComposicao();
+  renderizar();
+}
+
+// ── Tabela ──────────────────────────────────────────────────────────────────
+
+function renderizar() {
+  try {
+    const opcoes = lerOpcoes();
+    if (__vista === "grafico") {
+      if (__eixoYGrafico === "posicao") {
+        renderizarPosicao(opcoes);
+      } else {
+        renderizarGrafico(opcoes);
+      }
+    } else if (__vista === "barras") {
+      renderizarBarras(opcoes);
+    } else if (__modoTabela === "comparacao") {
+      renderizarTabelaComparacao(opcoes);
+    } else {
+      const uf = document.getElementById("estado").value;
+      const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
+      if (!estado) throw new Error(`Estado "${uf}" nao encontrado nos dados.`);
+      document.getElementById("conteudo").innerHTML = montarTabela(estado, opcoes);
+    }
+  } catch (erro) {
+    document.getElementById("conteudo").innerHTML = `<div class="erro">Erro ao exibir os dados: ${erro.message}</div>`;
+    console.error(erro);
+  }
+}
+
+async function carregarDados() {
+  setLoadingGrafico(true);
+  try {
+    const resposta = await fetch("./dados-grafico.json", { cache: "no-store" });
+    if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+    window.__dados = await resposta.json();
+  } catch (erro) {
+    setLoadingGrafico(false);
+    document.getElementById("conteudo").innerHTML =
+      `<div class="erro">Não foi possível carregar os dados.<br>
+      Abra este arquivo a partir de um servidor local (ex.: <code>npx serve .</code> ou a extensão Live Server do VS Code).<br>
+      Detalhe: ${erro.message}</div>`;
+    return;
+  }
+
+  const sel = document.getElementById("estado");
+  sel.innerHTML = "";
+  for (const { uf, nome } of window.__dados.listaEstados) {
+    const opt = document.createElement("option");
+    opt.value = uf;
+    opt.textContent = `${nome} (${uf})`;
+    sel.appendChild(opt);
+  }
+  const ufNaUrl = (new URLSearchParams(window.location.search).get("estado") || "").toUpperCase();
+  if (ufNaUrl && window.__dados.estados[ufNaUrl]) {
+    sel.value = ufNaUrl;
+  }
+  sel.addEventListener("change", () => {
+    atualizarControleEscolaridade();
+    atualizarLinkComposicao();
+    renderizar();
+  });
+
+  const inputDias = document.getElementById("diasTrabalhados");
+  inputDias.max = String(window.__dados.diasMax);
+  inputDias.min = String(window.__dados.diasMin);
+
+  const inputFilhos = document.getElementById("numeroFilhos");
+  inputFilhos.max = String(window.__dados.filhosMax);
+  inputFilhos.min = String(window.__dados.filhosMin);
+
+  const inputAnosBarras = document.getElementById("anosBarras");
+  inputAnosBarras.max = String(window.__dados.anosMax);
+  const inputAnosBarrasTexto = document.getElementById("anosBarrasInput");
+  inputAnosBarrasTexto.max = String(window.__dados.anosMax);
+  inputAnosBarrasTexto.value = inputAnosBarras.value;
+  montarReguaBarras(window.__dados.anosMax);
+  atualizarBolhaAnosBarras();
+
+  atualizarControleEscolaridade();
+  atualizarLinkComposicao();
+  renderizar();
+}
+
+["diasTrabalhados", "numeroFilhos", "escolaridade", "anosBarras", "anosBarrasInput"].forEach((id) => {
+  document.getElementById(id).addEventListener("input", renderizar);
+  document.getElementById(id).addEventListener("change", renderizar);
+});
+
+function montarReguaBarras(anosMax) {
+  const passo = anosMax % 5 === 0 ? 5 : Math.max(1, Math.round(anosMax / 8));
+  const marcas = [];
+  for (let a = 0; a <= anosMax; a += passo) marcas.push(a);
+  if (marcas[marcas.length - 1] !== anosMax) marcas.push(anosMax);
+  const thumbWidth = 8;
+  document.getElementById("barras-regua").innerHTML = marcas.map(a => {
+    const pct = anosMax > 0 ? a / anosMax : 0;
+    const left = `calc(${pct * 100}% + ${(0.5 - pct) * thumbWidth}px)`;
+    return `<span style="left:${left}">${a}</span>`;
+  }).join("");
+}
+
+function atualizarBolhaAnosBarras() {
+  const input = document.getElementById("anosBarras");
+  const bolha = document.getElementById("barras-slider-bolha");
+  if (!input || !bolha) return;
+  const min = Number(input.min) || 0;
+  const max = Number(input.max) || 40;
+  const val = Number(input.value);
+  const pct = max > min ? (val - min) / (max - min) : 0;
+  bolha.style.left = `calc(${pct * 100}% + ${(0.5 - pct) * 8}px)`;
+  bolha.textContent = val;
+}
+
+document.getElementById("anosBarras").addEventListener("input", () => {
+  document.getElementById("anosBarrasInput").value = document.getElementById("anosBarras").value;
+  atualizarBolhaAnosBarras();
+});
+document.getElementById("anosBarrasInput").addEventListener("input", () => {
+  const el = document.getElementById("anosBarrasInput");
+  const anosMax = Number(document.getElementById("anosBarras").max) || 40;
+  let valor = Number(el.value);
+  if (!Number.isFinite(valor)) return;
+  valor = Math.min(anosMax, Math.max(0, valor));
+  document.getElementById("anosBarras").value = valor;
+  atualizarBolhaAnosBarras();
+});
+
+const __anosBarrasSlider = document.getElementById("anosBarras");
+const __anosBarrasBolha = document.getElementById("barras-slider-bolha");
+["pointerdown", "mousedown", "touchstart"].forEach(evento => {
+  __anosBarrasSlider.addEventListener(evento, () => __anosBarrasBolha.classList.add("visivel"));
+});
+["pointerup", "mouseup", "touchend"].forEach(evento => {
+  window.addEventListener(evento, () => __anosBarrasBolha.classList.remove("visivel"));
+});
+
+window.addEventListener("resize", () => {
+  if (__barrasChart && __vista === "barras") __barrasChart.resize();
+  if (__posicaoChart && __vista === "grafico" && __eixoYGrafico === "posicao") __posicaoChart.resize();
+});
+
+const modalBackdrop = document.getElementById("holerite-modal");
+const modalFechar = document.getElementById("holerite-modal-fechar");
+if (modalBackdrop && modalFechar) {
+  modalFechar.addEventListener("click", fecharModalHolerite);
+  modalBackdrop.addEventListener("click", (event) => {
+    if (event.target === modalBackdrop) fecharModalHolerite();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") fecharModalHolerite();
+  });
+}
+
+document.addEventListener("click", (event) => {
+  const botao = event.target.closest("[data-acao='abrir-holerite']");
+  if (!botao || botao.closest("#tooltip-holerite")) return;
+  const contexto = __barrasTooltipAtual || __posicaoTooltipAtual;
+  if (!contexto) return;
+  abrirModalHolerite(contexto.linha, contexto.estado, contexto.opcoes);
+});
+
+document.addEventListener("click", (event) => {
+  const alvo = event.target;
+  if (alvo.closest("#tooltip-holerite") || alvo.closest("#holerite-modal")) {
+    return;
+  }
+  if (alvo.closest("#grafico") && __tooltipFixaViaClique) {
+    return;
+  }
+  if (__tooltipFixa) limparTooltipFixa();
+});
+
+carregarDados();
+</script>
+
 </body>
 </html>

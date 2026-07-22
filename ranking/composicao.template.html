@@ -27,6 +27,65 @@
     color: #555;
     font-size: 0.9rem;
   }
+  .instagram-callout {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    border: 1px solid rgba(31, 42, 68, 0.14);
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fff7e8 0%, #ffffff 52%, #eef4ff 100%);
+    box-shadow: 0 6px 18px rgba(31, 42, 68, 0.07);
+    align-items: center;
+  }
+  .instagram-callout-texto {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .instagram-callout-midia {
+    flex: 0 0 auto;
+    width: 72px;
+    height: 72px;
+    border-radius: 0;
+    overflow: visible;
+    background: none;
+    box-shadow: none;
+  }
+  .instagram-callout-midia img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .instagram-callout p {
+    margin: 0;
+    color: #465061;
+    line-height: 1.45;
+    font-size: 0.88rem;
+    text-align: justify;
+  }
+  .instagram-acao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    background: var(--cor-destaque);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .instagram-acao:hover { text-decoration: none; filter: brightness(1.05); }
+  .instagram-acao-icone {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+  }
   a.link-voltar {
     display: inline-flex;
     align-items: center;
@@ -130,6 +189,8 @@
 
   @media (max-width: 700px) {
     .pagina { padding: 24px 18px; }
+    .instagram-callout { flex-direction: column; }
+    .instagram-callout-midia { width: 64px; height: 64px; }
     .layout-principal { display: block; }
     .botao-menu-mobile { display: flex; }
     .menu-lateral {
@@ -175,8 +236,9 @@
   }
   .secao:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
   .secao-cabecalho { margin-bottom: 22px; }
-  .descricao-estado { font-size: 0.86rem; color: #555; margin: 6px 0 0; max-width: 780px; }
-  .secao-nota { font-size: 0.82rem; color: #6b7280; margin: 0 0 12px; }
+  .descricao-estado { font-size: 0.86rem; color: #555; margin: 6px 0 0; max-width: 780px; text-align: justify; }
+  .cargo-estado { font-size: 1rem; font-weight: 600; color: #334155; margin: 2px 0 0; }
+  .secao-nota { font-size: 0.82rem; color: #6b7280; margin: 0 0 12px; text-align: justify; }
 
   .dados-gerais-grid { display: flex; flex-direction: column; }
   .dado-item {
@@ -188,8 +250,8 @@
     border-bottom: 1px solid var(--cor-linha-alt);
   }
   .dado-item:last-child { border-bottom: none; }
-  .dado-item span { font-size: 0.78rem; color: #6b7280; }
-  .dado-item strong { font-size: 0.88rem; color: #111827; text-align: right; }
+  .dado-item span { font-size: 0.78rem; color: #6b7280; flex-shrink: 0; }
+  .dado-item strong { font-size: 0.88rem; color: #111827; text-align: right; max-width: 60%; word-wrap: break-word; }
 
   table.tabela-explicacao {
     border-collapse: collapse;
@@ -213,6 +275,34 @@
   table.tabela-explicacao tbody tr:nth-child(even) { background: var(--cor-linha-alt); }
 
   .tabelas-lado-a-lado { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 28px; }
+
+  .tabela-cruzada-wrapper { max-width: 100%; overflow-x: auto; }
+  table.tabela-cruzada .tabela-cruzada-titulo-coluna {
+    border-bottom: none;
+  }
+  table.tabela-cruzada thead .tabela-cruzada-rotulo-linha,
+  table.tabela-cruzada thead .tabela-cruzada-canto {
+    border: none;
+    background: #fff;
+  }
+  table.tabela-cruzada tbody .tabela-cruzada-titulo-linha {
+    border: none;
+    background: #fff;
+  }
+  table.tabela-cruzada tbody .tabela-cruzada-rotulo-linha {
+    border-top: none;
+    border-bottom: none;
+    border-left: none;
+    border-right: 2px solid var(--cor-destaque);
+    background: #fff;
+  }
+  table.tabela-cruzada .tabela-cruzada-titulo-linha {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
 
   .verbas-grid { display: flex; flex-direction: column; }
 
@@ -266,13 +356,19 @@
     white-space: nowrap;
   }
   .badge-recorrencia { background: #f1f2f4; color: #475569; }
-  .verba-obs { font-size: 0.8rem; color: #1f2937; margin: 6px 0; line-height: 1.5; }
-  .verba-indices { font-size: 0.8rem; color: #6b7280; margin: 6px 0; line-height: 1.5; }
-  .verba-regra { font-size: 0.84rem; color: #1f2937; margin: 6px 0; line-height: 1.55; }
+  .verba-obs { font-size: 0.8rem; color: #1f2937; margin: 6px 0; line-height: 1.5; text-align: justify; }
+  .verba-referencias { font-size: 0.76rem; color: #6b7280; margin: 4px 0 6px; line-height: 1.5; }
+  .verba-referencias a { color: #2563eb; text-decoration: none; }
+  .verba-referencias a:hover { text-decoration: underline; }
+  .verba-indices { font-size: 0.8rem; color: #6b7280; margin: 6px 0; line-height: 1.5; text-align: justify; }
+  .verba-regra { font-size: 0.84rem; color: #1f2937; margin: 6px 0; line-height: 1.55; text-align: justify; }
+  .verba-variacoes-escolaridade { margin: 10px 0 0; padding-top: 8px; border-top: 1px dashed var(--cor-linha-alt); }
+  .verba-variacao-escolaridade { margin: 8px 0; }
+  .verba-variacao-titulo { font-size: 0.8rem; font-weight: 700; color: #334155; margin: 0 0 2px; }
 
   .prev-bloco { padding: 12px 0; border-bottom: 1px solid var(--cor-linha-alt); }
   .prev-bloco:last-child { border-bottom: none; padding-bottom: 0; }
-  .prev-bloco p { font-size: 0.83rem; margin: 6px 0 0; color: #374151; }
+  .prev-bloco p { font-size: 0.83rem; margin: 6px 0 0; color: #374151; text-align: justify; }
   .tag-ok, .tag-neutro, .tag-alerta {
     font-size: 0.66rem;
     font-weight: 700;
@@ -290,6 +386,8 @@
     border-bottom: 1px solid #f2b8b8;
     font-size: 0.9rem;
   }
+
+  .composicao-estado[hidden] { display: none; }
 
   @media print {
     body {
@@ -321,16 +419,28 @@
     <p class="subtitulo">
       Explicação detalhada de como cada verba é calculada em cada estado: valores, índices, regras de evolução, recorrência e previdência.
     </p>
+    <div class="instagram-callout" aria-label="Aviso sobre a origem do levantamento salarial">
+      <img class="instagram-callout-midia" src="./img/pifado.png" alt="Perfil do Instagram Concurseiropifado" />
+      <div class="instagram-callout-texto">
+        <p>
+          As postagens do <strong>@concurseiropifado</strong> no Instagram foram o ponto de partida para o levantamento da estrutura remuneratória de vários fiscos. Siga o perfil para acompanhar novidades sobre concursos da área fiscal.
+        </p>
+      </div>
+      <a class="instagram-acao" href="https://www.instagram.com/concurseiropifado/" target="_blank" rel="noopener noreferrer">
+        <svg class="instagram-acao-icone" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.012-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM12 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        Seguir no Instagram
+      </a>
+    </div>
 
     <div class="layout-principal">
       <div class="menu-backdrop" id="menu-backdrop"></div>
       <nav class="menu-lateral" id="nav-menu-lateral">
         <div class="menu-lateral-alca" id="menu-lateral-alca"></div>
         <button type="button" class="menu-lateral-fechar" id="botao-fechar-menu-mobile">Fechar &#10005;</button>
-        <div class="menu-lateral-lista" id="menu-lateral"></div>
+        <div class="menu-lateral-lista" id="menu-lateral">{{MENU_LATERAL}}</div>
         <a class="link-voltar" id="link-voltar-calculadora" href="./index.html">Ir para calculadora</a>
       </nav>
-      <div class="conteudo-principal" id="conteudo-principal">Carregando dados...</div>
+      <div class="conteudo-principal" id="conteudo-principal">{{CONTEUDO_ESTADOS}}</div>
     </div>
     <button type="button" class="botao-menu-mobile" id="botao-menu-mobile">&#9776; Escolher estado</button>
   </div>
@@ -338,170 +448,12 @@
 <script>
 "use strict";
 
-// Este frontend NÃO possui nenhuma regra de negócio/fórmula de cálculo.
-// Todas as explicações, resumos e tabelas já vêm prontos em
-// "dados-composicao.json" (gerado por gerar_dados_frontend.py). Este
-// arquivo apenas lê e exibe (menu lateral, cards de verba, tabelas).
-
-function htmlEsc(texto) {
-  return String(texto ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-/** Converte marcadores de negrito (**texto**) e quebras de linha (\n) em HTML. */
-function processarTexto(texto, escapar) {
-  if (!texto) return "";
-  let t = escapar ? htmlEsc(texto) : String(texto);
-  t = t.replaceAll(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-  return t.replaceAll("\n", "<br>");
-}
-
-// ── Tabelas genéricas (colunas/linhas já formatadas pelo gerador) ──────────
-
-function agruparEmBlocos(itens, tamanhoMax = 10) {
-  const totalBlocos = Math.ceil(itens.length / tamanhoMax);
-  const tamanhoBloco = Math.ceil(itens.length / totalBlocos);
-  const blocos = [];
-  for (let i = 0; i < itens.length; i += tamanhoBloco) {
-    blocos.push(itens.slice(i, i + tamanhoBloco));
-  }
-  return blocos;
-}
-
-function renderTabela(tabela) {
-  if (!tabela) return "";
-  const { colunas, linhas } = tabela;
-  const theadHtml = colunas.map(c => `<th>${htmlEsc(c)}</th>`).join("");
-  const blocos = agruparEmBlocos(linhas);
-  const tabelas = blocos.map(bloco => `
-    <table class="tabela-explicacao">
-      <thead><tr>${theadHtml}</tr></thead>
-      <tbody>${bloco.map(linha => `<tr>${linha.map(v => `<td>${htmlEsc(v)}</td>`).join("")}</tr>`).join("")}</tbody>
-    </table>`).join("");
-  return `<div class="tabelas-lado-a-lado">${tabelas}</div>`;
-}
-
-// ── Blocos de seção ──────────────────────────────────────────────────────────
-
-function renderVerbaCard(verba) {
-  let html = `<div class="verba-card">
-    <div class="verba-card-header">
-      <h3>${htmlEsc(verba.nome)}</h3>
-      <div class="verba-badges">
-        ${verba.recorrenciaLabel ? `<span class="badge badge-recorrencia">${htmlEsc(verba.recorrenciaLabel)}</span>` : ""}
-      </div>
-    </div>`;
-  if (verba.observacoes) html += `<p class="verba-obs">${processarTexto(verba.observacoes, true)}</p>`;
-  if (verba.indices && verba.indices.length) {
-    html += `<p class="verba-indices">${verba.indices.map(i => `• ${htmlEsc(i.descricao)}: ${htmlEsc(i.valor)}`).join("<br>")}</p>`;
-  }
-  if (verba.resumo) html += `<p class="verba-regra">${processarTexto(verba.resumo, false)}</p>`;
-  if (verba.tabela) html += renderTabela(verba.tabela);
-  html += `</div>`;
-  return html;
-}
-
-function renderDescontos(descontos) {
-  let html = `<details class="secao secao-colapsavel" open>
-    <summary class="secao-titulo">Descontos</summary>
-    <p class="secao-nota">Contribuições previdenciárias e imposto de renda descontados diretamente da remuneração bruta.</p>`;
-
-  const rpps = descontos.rpps;
-  if (rpps) {
-    html += `<div class="prev-bloco"><strong>${htmlEsc(rpps.nome)}</strong> (${htmlEsc(rpps.tipoLabel)})`;
-    if (rpps.naoDeduzIR) html += `<span class="tag-alerta">não deduz IR em folha</span>`;
-    html += `<p>${htmlEsc(rpps.texto)}</p>`;
-    if (rpps.tabelaFaixas) html += renderTabela(rpps.tabelaFaixas);
-    html += `</div>`;
-  }
-
-  const compl = descontos.complementar;
-  if (compl) {
-    if (compl.disponivel) {
-      html += `<div class="prev-bloco"><strong>${htmlEsc(compl.nome)}</strong> (${htmlEsc(compl.tipoLabel)})`;
-      if (compl.naoDeduzIR) html += `<span class="tag-alerta">não deduz IR em folha</span>`;
-      html += `<p>${htmlEsc(compl.texto)}</p></div>`;
-    } else {
-      html += `<div class="prev-bloco"><strong>${htmlEsc(compl.nome)}</strong><span class="tag-neutro">não disponível para esta carreira</span></div>`;
-    }
-  }
-
-  const ir = descontos.ir;
-  html += `<div class="prev-bloco"><strong>Imposto de Renda (IRRF)</strong>
-    <p>${htmlEsc(ir.texto)}</p>
-    ${renderTabela(ir.tabelaFaixas)}
-  </div>`;
-
-  html += `</details>`;
-  return html;
-}
-
-function formatarAnosServico(valor) {
-  if (valor == null) return "-";
-  return `${new Intl.NumberFormat("pt-BR").format(valor)} ${valor === 1 ? "ano" : "anos"}`;
-}
-
-function renderProgressaoCarreira(niveis) {
-  if (!niveis || !niveis.length) return "";
-  const tabela = {
-    colunas: ["Nível", "Tempo estimado"],
-    linhas: niveis.map(n => [n.referencia, formatarAnosServico(n.anosNoServico)]),
-  };
-  return `<details class="secao secao-colapsavel" open>
-    <summary class="secao-titulo">Progressão na carreira</summary>
-    <p class="secao-nota">Tempo de serviço esperado para alcançar cada referência da carreira. O tempo real de progressão pode variar de servidor para servidor, de acordo com os critérios específicos de cada estado (avaliações de desempenho, interstícios mínimos, entre outros).</p>
-    ${renderTabela(tabela)}
-  </details>`;
-}
-
-function renderDadosGerais(dadosGerais) {
-  const FORMATADOR_BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-  return `<details class="secao secao-colapsavel" open>
-    <summary class="secao-titulo">Dados gerais</summary>
-    <div class="dados-gerais-grid">
-      <div class="dado-item"><span>Teto salarial</span><strong>${FORMATADOR_BRL.format(dadosGerais.tetoSalarial || 0)}</strong></div>
-      ${dadosGerais.cargaHorariaSemanal ? `<div class="dado-item"><span>Carga horária semanal</span><strong>${dadosGerais.cargaHorariaSemanal}h</strong></div>` : ""}
-      ${(dadosGerais.indices || []).map(i => `<div class="dado-item"><span>${htmlEsc(i.descricao)}</span><strong>${htmlEsc(i.valor)}</strong></div>`).join("")}
-      ${dadosGerais.ultimaAtualizacao ? `<div class="dado-item"><span>Atualizado em</span><strong>${dadosGerais.ultimaAtualizacao.split("-").reverse().join("/")}</strong></div>` : ""}
-    </div>
-  </details>`;
-}
-
-function renderComposicao(composicao) {
-  let html = `<div class="secao secao-cabecalho">
-    <h2>${htmlEsc(composicao.nome)}</h2>
-    ${composicao.descricao ? `<p class="descricao-estado">${htmlEsc(composicao.descricao)}</p>` : ""}
-  </div>`;
-
-  html += renderDadosGerais(composicao.dadosGerais);
-  html += renderProgressaoCarreira(composicao.progressaoCarreira);
-
-  html += `<details class="secao secao-colapsavel" open>
-    <summary class="secao-titulo">Verbas remuneratórias</summary>
-    <p class="secao-nota">Entram na base de cálculo do Imposto de Renda e do teto constitucional.</p>
-    <div class="verbas-grid">${composicao.verbasRemuneratorias.map(renderVerbaCard).join("")}</div>
-  </details>`;
-
-  if (composicao.verbasIndenizatorias.length) {
-    html += `<details class="secao secao-colapsavel" open>
-      <summary class="secao-titulo">Verbas indenizatórias</summary>
-      <p class="secao-nota">Não entram na base de cálculo do Imposto de Renda nem do teto constitucional.</p>
-      <div class="verbas-grid">${composicao.verbasIndenizatorias.map(renderVerbaCard).join("")}</div>
-    </details>`;
-  }
-
-  html += renderDescontos(composicao.descontos);
-
-  return html;
-}
-
-// ── Orquestração ──────────────────────────────────────────────────────────────
-
-let __ufAtiva = null;
+// Este arquivo é gerado por gerar_dados_frontend.py — NÃO EDITAR MANUALMENTE.
+// Todo o HTML de cada estado (tabelas, cards de verba, textos explicativos)
+// já vem pré-renderizado no build (um <div class="composicao-estado"> por
+// estado, dentro de #conteudo-principal). Este script não tem nenhuma regra
+// de negócio/fórmula de cálculo: cuida só do menu lateral, da navegação
+// entre estados (mostrar/esconder os blocos já prontos) e do menu mobile.
 
 const __navMenuLateral = document.getElementById("nav-menu-lateral");
 const __menuBackdrop = document.getElementById("menu-backdrop");
@@ -542,57 +494,36 @@ __menuBackdrop.addEventListener("click", fecharMenuMobile);
   });
 })();
 
-function montarMenuLateral(dados) {
-  const menu = document.getElementById("menu-lateral");
-  if (!menu.dataset.montado) {
-    const ufsOrdenadas = [...dados.listaEstados].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
-    menu.innerHTML = ufsOrdenadas.map(({ uf, nome }) =>
-      `<button type="button" data-uf="${uf}">${htmlEsc(nome)}</button>`).join("");
-    menu.addEventListener("click", (ev) => {
-      const botao = ev.target.closest("button[data-uf]");
-      if (!botao) return;
-      __ufAtiva = botao.dataset.uf;
-      renderizarTudo(dados);
-      fecharMenuMobile();
-      window.scrollTo({ top: 0, behavior: "instant" });
-    });
-    menu.dataset.montado = "1";
-  }
-  menu.querySelectorAll("button[data-uf]").forEach(botao => {
-    botao.classList.toggle("ativo", botao.dataset.uf === __ufAtiva);
+function mostrarEstado(uf) {
+  document.querySelectorAll(".composicao-estado").forEach(el => {
+    el.hidden = el.dataset.uf !== uf;
   });
-}
-
-function renderizarTudo(dados) {
-  montarMenuLateral(dados);
-  const composicao = dados.composicao[__ufAtiva];
-  if (!composicao) return;
+  document.querySelectorAll("#menu-lateral button[data-uf]").forEach(botao => {
+    botao.classList.toggle("ativo", botao.dataset.uf === uf);
+  });
   const linkVoltar = document.getElementById("link-voltar-calculadora");
-  if (linkVoltar) {
-    linkVoltar.href = `./index.html?estado=${encodeURIComponent(__ufAtiva)}`;
-  }
-  document.getElementById("conteudo-principal").innerHTML = renderComposicao(composicao);
+  if (linkVoltar) linkVoltar.href = `./index.html?estado=${encodeURIComponent(uf)}`;
 }
 
-async function carregarDados() {
-  try {
-    const resposta = await fetch("./dados-composicao.json", { cache: "no-store" });
-    if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
-    window.__dados = await resposta.json();
-  } catch (erro) {
-    document.getElementById("conteudo-principal").innerHTML =
-      `<div class="erro">Não foi possível carregar os dados.<br>
-      Abra este arquivo a partir de um servidor local (ex.: <code>python servidor.py</code>).<br>
-      Detalhe: ${erro.message}</div>`;
-    return;
-  }
-  const ufsDisponiveis = window.__dados.listaEstados.map(e => e.uf);
+document.getElementById("menu-lateral").addEventListener("click", (ev) => {
+  const botao = ev.target.closest("button[data-uf]");
+  if (!botao) return;
+  const uf = botao.dataset.uf;
+  const url = new URL(window.location.href);
+  url.searchParams.set("estado", uf);
+  history.replaceState(null, "", url);
+  mostrarEstado(uf);
+  fecharMenuMobile();
+  window.scrollTo({ top: 0, behavior: "instant" });
+});
+
+(function iniciar() {
+  const ufsDisponiveis = Array.from(document.querySelectorAll(".composicao-estado")).map(el => el.dataset.uf);
+  if (!ufsDisponiveis.length) return;
   const ufNaUrl = (new URLSearchParams(window.location.search).get("estado") || "").toUpperCase();
-  __ufAtiva = ufsDisponiveis.includes(ufNaUrl) ? ufNaUrl : ufsDisponiveis[0];
-  renderizarTudo(window.__dados);
-}
-
-carregarDados();
+  const ufAtiva = ufsDisponiveis.includes(ufNaUrl) ? ufNaUrl : (ufsDisponiveis.includes("MG") ? "MG" : ufsDisponiveis[0]);
+  mostrarEstado(ufAtiva);
+})();
 </script>
 
 </body>
