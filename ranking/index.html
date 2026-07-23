@@ -522,6 +522,23 @@
     margin-bottom: 8px;
     line-height: 1.3;
   }
+  .tooltip-resumo-em-construcao .hol-wip {
+    margin-bottom: 10px;
+    padding: 14px 12px 12px;
+  }
+  .tooltip-resumo-em-construcao .hol-wip-imagem {
+    width: 200px;
+    margin-bottom: 6px;
+  }
+  .tooltip-resumo-em-construcao .hol-wip-titulo {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+  .tooltip-resumo-em-construcao .hol-wip-texto {
+    font-size: 0.7rem;
+    margin-bottom: 10px;
+    max-width: 300px;
+  }
   .tooltip-resumo-item {
     display: flex;
     justify-content: space-between;
@@ -827,6 +844,17 @@
     flex: 0 0 auto;
   }
   @media (max-width: 700px) {
+    body {
+      padding: 12px;
+    }
+    .painel-controles {
+      padding: 12px;
+      gap: 12px;
+    }
+    .grafico-wrapper {
+      padding: 8px;
+      height: 690px;
+    }
     .instagram-callout { flex-direction: column; }
     .instagram-callout-midia { width: 80px; height: 80px; }
   }
@@ -982,6 +1010,10 @@ function ehTelaPequena() {
   return window.matchMedia("(max-width: 820px)").matches;
 }
 
+function ehTelaPequenaBarras() {
+  return window.matchMedia("(max-width: 700px)").matches;
+}
+
 function setLoadingGrafico(ativo) {
   const el = document.getElementById("grafico-loading");
   if (!el) return;
@@ -1078,10 +1110,17 @@ function getTotalDescontos(linha) {
 function montarResumoTooltip(linha, estado, opcoes = {}) {
   if (linha.simplificado) {
     return `
+      <div class="tooltip-resumo-em-construcao">
+        <div class="hol-wip">
+          <img class="hol-wip-imagem" src="./img/wip.png" alt="" />
+          <div class="hol-wip-titulo">Em construção</div>
+          <div class="hol-wip-texto">Ainda não temos o detalhamento completo da remuneração deste estado. Estamos trabalhando para disponibilizar o mais breve possível.</div>
+          <div class="hol-wip-barra"><div class="hol-wip-barra-preenchimento"></div></div>
+        </div>
+      </div>
       <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</div>
-      <div class="tooltip-resumo-nota">Não temos o detalhamento da remuneração disponível para este estado. Estamos trabalhando para disponibilizar o mais breve possível.</div>
       <div class="tooltip-resumo-item"><span>Remuneração Líquida</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.remuneracaoLiquida)}</span></div>
-      <div class="tooltip-resumo-item"><span>Remuneração Líquida em horas</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>
+      <div class="tooltip-resumo-item"><span>Remuneração Líquida por Hora</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>
     `;
   }
   const itens = [
@@ -1101,14 +1140,34 @@ function montarResumoTooltip(linha, estado, opcoes = {}) {
     <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</div>
     ${notaSimplificada}
     ${itens.map(([rotulo, valor]) => {
-      const classe = valor < 0 ? "neg" : (rotulo.includes("Líquida") || rotulo.includes("Bruta") || rotulo.includes("Remuneratórias") || rotulo.includes("Indenizatórias") ? "pos" : "neg");
-      const valorFmt = rotulo === "Descontos" ? `- ${formatarMoeda(valor)}` : formatarMoeda(valor);
+      const valorNumerico = Number(valor);
+      const possuiValor = Number.isFinite(valorNumerico);
+      const classe = !possuiValor
+        ? ""
+        : (valorNumerico < 0 ? "neg" : (rotulo.includes("Líquida") || rotulo.includes("Bruta") || rotulo.includes("Remuneratórias") || rotulo.includes("Indenizatórias") ? "pos" : "neg"));
+      const valorFmt = !possuiValor
+        ? "Não disponível"
+        : (rotulo === "Descontos" ? `- ${formatarMoeda(valorNumerico)}` : formatarMoeda(valorNumerico));
       return `<div class="tooltip-resumo-item"><span>${htmlEsc(rotulo)}</span><span class="tooltip-resumo-valor ${classe}">${valorFmt}</span></div>`;
     }).join("")}
     <div class="tooltip-resumo-acoes">
       <button type="button" data-acao="abrir-holerite">Ver detalhado</button>
     </div>
   `;
+}
+
+function ocultarTooltipsInterativos() {
+  if (__tooltipFixa) limparTooltipFixa();
+  const tooltipEl = document.getElementById("tooltip-holerite");
+  if (tooltipEl) {
+    tooltipEl.style.display = "none";
+    tooltipEl.classList.remove("resumo");
+    tooltipEl.style.pointerEvents = "none";
+  }
+  if (__barrasChart) __barrasChart.dispatchAction({ type: "hideTip" });
+  if (__posicaoChart) __posicaoChart.dispatchAction({ type: "hideTip" });
+  __barrasTooltipAtual = null;
+  __posicaoTooltipAtual = null;
 }
 
 function fecharModalHolerite() {
@@ -1149,8 +1208,7 @@ function limparTooltipFixa() {
 function abrirModalHolerite(linha, estado, opcoes = {}) {
   const backdrop = document.getElementById("holerite-modal");
   if (!backdrop) return;
-  const tooltipEl = document.getElementById("tooltip-holerite");
-  if (tooltipEl) tooltipEl.style.display = "none";
+  ocultarTooltipsInterativos();
   const titulo = document.getElementById("holerite-modal-titulo");
   const subtitulo = document.getElementById("holerite-modal-subtitulo");
   const conteudo = document.getElementById("holerite-modal-conteudo");
@@ -1676,7 +1734,11 @@ function renderizarGrafico(opcoes) {
     tooltipEl.addEventListener("click", (event) => {
       const botao = event.target.closest("[data-acao='abrir-holerite']");
       if (!botao || !__tooltipAtual) return;
-      abrirModalHolerite(__tooltipAtual.linha, __tooltipAtual.estado, __tooltipAtual.opcoes);
+      event.preventDefault();
+      event.stopPropagation();
+      const contexto = __tooltipAtual;
+      ocultarTooltipsInterativos();
+      abrirModalHolerite(contexto.linha, contexto.estado, contexto.opcoes);
     });
     tooltipEl.dataset.resumoBound = "1";
   }
@@ -1992,6 +2054,16 @@ function formatarValorBarras(valor, emValorHora) {
   return emValorHora ? `${formatado}/h` : formatado;
 }
 
+function formatarValorBarrasCompacto(valor, emValorHora) {
+  const formatado = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(valor || 0);
+  return emValorHora ? `${formatado}/h` : formatado;
+}
+
 function anosBarrasAtual() {
   const input = document.getElementById("anosBarras");
   const valor = Number(input?.value);
@@ -2060,6 +2132,7 @@ function calcularLimitesEixoBarras(opcoes) {
 function renderizarBarras(opcoes) {
   const emValorHora = (opcoes.metricaGrafico || "mensal") === "hora";
   const ano = anosBarrasAtual();
+  const telaPequena = ehTelaPequenaBarras();
 
   const itens = [];
   let somaLiquida = 0;
@@ -2101,7 +2174,12 @@ function renderizarBarras(opcoes) {
     value: Math.round(item.valor * 100) / 100,
     name: item.isMedia ? "MÉDIA" : item.uf,
     itemStyle: {
-      color: item.isMedia ? COR_BARRAS_MEDIA : (item.uf === "MG" ? COR_BARRAS_DESTAQUE : COR_BARRAS_PADRAO)
+      color: (() => {
+        if (item.isMedia) return COR_BARRAS_MEDIA;
+        const corBase = item.uf === "MG" ? COR_BARRAS_DESTAQUE : COR_BARRAS_PADRAO;
+        const semDetalhamento = !!item.estado?.remuneracaoSimplificada;
+        return semDetalhamento ? corComAlpha(corBase, 0.5) : corBase;
+      })()
     },
     _item: item,
   }));
@@ -2117,12 +2195,18 @@ function renderizarBarras(opcoes) {
   const opcoesEchart = {
     animationDurationUpdate: 700,
     animationEasingUpdate: "quinticInOut",
-    grid: { left: 120, right: 100, top: 10, bottom: 30 },
+    grid: telaPequena
+      ? { left: 44, right: 66, top: 8, bottom: 40, containLabel: true }
+      : { left: 96, right: 100, top: 10, bottom: 30, containLabel: true },
     xAxis: {
       type: "value",
       min: xAxisMin,
       max: xAxisMax,
-      axisLabel: { formatter: v => formatarValorBarras(v, emValorHora) },
+      axisLabel: {
+        formatter: v => telaPequena ? formatarValorBarrasCompacto(v, emValorHora) : formatarValorBarras(v, emValorHora),
+        fontSize: telaPequena ? 10 : 12,
+        hideOverlap: true,
+      },
       splitLine: { lineStyle: { color: "#eef0f3" } },
     },
     yAxis: {
@@ -2194,7 +2278,8 @@ function renderizarBarras(opcoes) {
         valueAnimation: true,
         color: "#1a1f2b",
         fontWeight: 700,
-        formatter: p => formatarValorBarras(p.value, emValorHora),
+        fontSize: telaPequena ? 10 : 12,
+        formatter: p => telaPequena ? formatarValorBarrasCompacto(p.value, emValorHora) : formatarValorBarras(p.value, emValorHora),
       },
     }],
     tooltip: {
@@ -2240,7 +2325,11 @@ function renderizarBarras(opcoes) {
   if (!__barrasChart) {
     __barrasChart = echarts.init(document.getElementById("barras-echart"));
   }
-  __barrasChart.setOption(opcoesEchart);
+  __barrasChart.setOption(opcoesEchart, true);
+  __barrasChart.resize();
+  requestAnimationFrame(() => {
+    if (__barrasChart && __vista === "barras") __barrasChart.resize();
+  });
 }
 
 // ── Vista (grafico / barras / tabela) ──────────────────────────────────────
@@ -2250,6 +2339,8 @@ let __metricaGrafico = "mensal";
 let __usarTetoNacional = false;
 let __eixoYGrafico = "remuneracao";
 let __modoTabela = "holerite";
+let __ultimoModoTelaPequenaBarras = ehTelaPequenaBarras();
+let __resizeRenderTimer = null;
 
 function setMetricaGrafico(valor) {
   __metricaGrafico = valor;
@@ -2301,18 +2392,12 @@ function atualizarLinkComposicao() {
 function atualizarControleEscolaridade() {
   const campo = document.getElementById("campo-escolaridade");
   const sel = document.getElementById("escolaridade");
-  const uf = document.getElementById("estado").value;
-  const estado = window.__dados.estados[uf];
-  const escolaridades = estado && estado.escolaridadesDisponiveis;
-  if (escolaridades && escolaridades.length > 1) {
-    const padrao = "Pós-Graduação/Especialização";
-    sel.innerHTML = escolaridades.map(esc =>
-      `<option value="${htmlEsc(esc)}"${esc === padrao ? " selected" : ""}>${htmlEsc(esc)}</option>`).join("");
-    campo.style.display = "";
-  } else {
-    sel.innerHTML = "";
-    campo.style.display = "none";
-  }
+  const escolaridades = ["Nenhuma", "Pós-Graduação/Especialização", "Mestrado", "Doutorado"];
+  const valorAtual = sel.value;
+  const padrao = escolaridades.includes(valorAtual) ? valorAtual : "Pós-Graduação/Especialização";
+  sel.innerHTML = escolaridades.map(esc =>
+    `<option value="${htmlEsc(esc)}"${esc === padrao ? " selected" : ""}>${htmlEsc(esc)}</option>`).join("");
+  campo.style.display = "";
 }
 
 function setVista(v) {
@@ -2389,6 +2474,12 @@ async function carregarDados() {
   const ufNaUrl = (new URLSearchParams(window.location.search).get("estado") || "").toUpperCase();
   if (ufNaUrl && window.__dados.estados[ufNaUrl]) {
     sel.value = ufNaUrl;
+  } else {
+    const ufComEscolaridade = window.__dados.listaEstados.find(({ uf }) => {
+      const estado = window.__dados.estados[uf];
+      return estado && estado.escolaridadesDisponiveis && estado.escolaridadesDisponiveis.length > 1;
+    });
+    if (ufComEscolaridade) sel.value = ufComEscolaridade.uf;
   }
   sel.addEventListener("change", () => {
     atualizarControleEscolaridade();
@@ -2471,8 +2562,38 @@ const __anosBarrasBolha = document.getElementById("barras-slider-bolha");
 });
 
 window.addEventListener("resize", () => {
-  if (__barrasChart && __vista === "barras") __barrasChart.resize();
-  if (__posicaoChart && __vista === "grafico" && __eixoYGrafico === "posicao") __posicaoChart.resize();
+  const telaPequenaAtual = ehTelaPequenaBarras();
+  const mudouBreakpoint = telaPequenaAtual !== __ultimoModoTelaPequenaBarras;
+  __ultimoModoTelaPequenaBarras = telaPequenaAtual;
+
+  if (__resizeRenderTimer) {
+    clearTimeout(__resizeRenderTimer);
+    __resizeRenderTimer = null;
+  }
+
+  if (__vista === "barras" && mudouBreakpoint) {
+    renderizar();
+  } else if (__barrasChart && __vista === "barras") {
+    // Primeiro ajuste imediato para acompanhar o resize em tempo real.
+    __barrasChart.resize();
+    // Segundo ajuste no próximo frame, após recálculo de layout do navegador.
+    requestAnimationFrame(() => {
+      if (__barrasChart && __vista === "barras") __barrasChart.resize();
+    });
+  } else if (__posicaoChart && __vista === "grafico" && __eixoYGrafico === "posicao") {
+    __posicaoChart.resize();
+  }
+
+  // Em maximização/restauração instantânea, garante re-render ao fim do layout.
+  __resizeRenderTimer = setTimeout(() => {
+    if (__vista === "barras") {
+      renderizar();
+      return;
+    }
+    if (__posicaoChart && __vista === "grafico" && __eixoYGrafico === "posicao") {
+      __posicaoChart.resize();
+    }
+  }, 140);
 });
 
 const modalBackdrop = document.getElementById("holerite-modal");
@@ -2492,6 +2613,9 @@ document.addEventListener("click", (event) => {
   if (!botao || botao.closest("#tooltip-holerite")) return;
   const contexto = __barrasTooltipAtual || __posicaoTooltipAtual;
   if (!contexto) return;
+  event.preventDefault();
+  event.stopPropagation();
+  ocultarTooltipsInterativos();
   abrirModalHolerite(contexto.linha, contexto.estado, contexto.opcoes);
 });
 
