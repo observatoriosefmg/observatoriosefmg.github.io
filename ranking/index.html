@@ -1130,9 +1130,18 @@ function renderTooltipHolerite(tooltipEl, linha, estadoTooltip, opcoes, cx, cy, 
   posicionarTooltip(tooltipEl, cx, cy, resumo);
 }
 
+/**
+ * Regra de singular/plural em pt-BR: quando o numeral decimal e menor
+ * que 2 (e maior que zero), a unidade fica no singular: "1,5 ano",
+ * "0,5 ano", "1,8 milhao". Zero e valores >= 2 usam a forma plural.
+ */
+function ehSingular(valor) {
+  return valor != null && Math.abs(valor) > 0 && Math.abs(valor) < 2;
+}
+
 function montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora) {
   return `
-    <div class="tooltip-resumo-titulo">Média entre os estados · ${anosServico} ano${anosServico !== 1 ? "s" : ""}</div>
+    <div class="tooltip-resumo-titulo">Média entre os estados · ${anosServico} ano${ehSingular(anosServico) ? "" : "s"}</div>
     <div class="tooltip-resumo-item"><span>Remuneração Líquida Mensal</span><span class="tooltip-resumo-valor pos">${formatarMoeda(mediaLiquida)}</span></div>
     <div class="tooltip-resumo-item"><span>Líquida por Hora</span><span class="tooltip-resumo-valor pos">${formatarMoeda(mediaPorHora)}</span></div>
   `;
@@ -1169,7 +1178,7 @@ function montarResumoTooltip(linha, estado, opcoes = {}) {
           <div class="hol-wip-barra"><div class="hol-wip-barra-preenchimento"></div></div>
         </div>
       </div>
-      <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</div>
+      <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}</div>
       <div class="tooltip-resumo-item"><span>Remuneração Líquida</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.remuneracaoLiquida)}</span></div>
       <div class="tooltip-resumo-item"><span>Remuneração Líquida por Hora</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>
     `;
@@ -1188,7 +1197,7 @@ function montarResumoTooltip(linha, estado, opcoes = {}) {
     : "";
 
   return `
-    <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</div>
+    <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}</div>
     ${notaSimplificada}
     ${itens.map(([rotulo, valor]) => {
       const valorNumerico = Number(valor);
@@ -1290,8 +1299,8 @@ function abrirModalHolerite(linha, estado, opcoes = {}) {
     : null;
   const topo = [
     linha.simplificado
-      ? `${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}`
-      : `${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""} · ${linha.posicao}`,
+      ? `${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}`
+      : `${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"} · ${linha.posicao}`,
     estado.cargaHorariaSemanal ? `Carga horária semanal: ${estado.cargaHorariaSemanal}h` : null,
     dataAtu ? `Atualizado em ${dataAtu}` : null
   ].filter(Boolean);
@@ -1617,7 +1626,7 @@ function renderHolerite(linha, estado, opcoes = {}) {
     const liquidoPorHora = horasNoPeriodo > 0 ? linha.remuneracaoLiquida / horasNoPeriodo : linha.liquidoPorHora;
     const header = opcoes.semCabecalho ? "" : `<div class="hol-header">
       <strong>${estado.nome}</strong>
-      <span>${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</span>
+      <span>${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}</span>
       ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${estado.cargaHorariaSemanal}h</span>` : ""}
       ${estado.ultimaAtualizacao ? `<span style="font-size:0.72rem;opacity:.6">Atualizado em ${estado.ultimaAtualizacao.split("-").reverse().join("/")}</span>` : ""}
     </div>`;
@@ -1688,7 +1697,7 @@ function renderHolerite(linha, estado, opcoes = {}) {
     : null;
   const header = opcoes.semCabecalho ? "" : `<div class="hol-header">
     <strong>${estado.nome}${estado.descricao ? `<sup class="nota-ref">*</sup>` : ""}</strong>
-    <span>${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""} &nbsp;·&nbsp; ${linha.posicao}</span>
+    <span>${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"} &nbsp;·&nbsp; ${linha.posicao}</span>
     ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${estado.cargaHorariaSemanal}h</span>` : ""}
     ${dataAtu ? `<span style="font-size:0.72rem;opacity:.6">Atualizado em ${dataAtu}</span>` : ""}
   </div>`;
