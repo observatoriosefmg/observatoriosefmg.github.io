@@ -496,9 +496,26 @@
     max-width: 680px;
     box-shadow: 0 6px 24px rgba(0,0,0,0.15);
     pointer-events: none;
-    z-index: 9999;
+    z-index: 9000;
     font-size: 0.78rem;
     overflow: hidden;
+  }
+  body.modal-aberto #tooltip-holerite {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  body.modal-aberto #grafico,
+  body.modal-aberto #barras-echart,
+  body.modal-aberto #grafico-posicao {
+    pointer-events: none !important;
+  }
+  body.modal-aberto .echarts-tooltip {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: 9001 !important;
   }
   .holerite-tooltip.resumo {
     min-width: 260px;
@@ -584,10 +601,12 @@
     align-items: center;
     justify-content: center;
     padding: 18px;
-    z-index: 10000;
+    z-index: 2147483647;
   }
   .holerite-modal-backdrop.aberto { display: flex; }
   .holerite-modal {
+    position: relative;
+    z-index: 2147483647;
     width: min(1120px, 100%);
     max-height: min(92vh, 980px);
     display: flex;
@@ -1024,6 +1043,24 @@ let __tooltipAtual = null;
 let __modalAtual = null;
 let __tooltipFixa = null;
 let __tooltipFixaViaClique = false;
+let __tooltipBloqueadoNoModal = false;
+
+function tooltipBloqueadoNoModal() {
+  return __tooltipBloqueadoNoModal || document.body.classList.contains("modal-aberto");
+}
+
+function atualizarBloqueioTooltipNoModal(ativo) {
+  __tooltipBloqueadoNoModal = !!ativo;
+  const habilitarInteracao = !ativo;
+  const idsGraficos = ["grafico", "barras-echart", "grafico-posicao"];
+  idsGraficos.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.pointerEvents = habilitarInteracao ? "" : "none";
+  });
+  if (__barrasChart) __barrasChart.setOption({ tooltip: { show: habilitarInteracao } }, false);
+  if (__posicaoChart) __posicaoChart.setOption({ tooltip: { show: habilitarInteracao } }, false);
+}
 
 function chavePontoTooltip(datasetIndex, dataIndex) {
   return `${datasetIndex}:${dataIndex}`;
@@ -1076,6 +1113,13 @@ function posicionarTooltip(tooltipEl, cx, cy, resumo) {
 }
 
 function renderTooltipHolerite(tooltipEl, linha, estadoTooltip, opcoes, cx, cy, resumo) {
+  if (tooltipBloqueadoNoModal()) {
+    tooltipEl.style.display = "none";
+    tooltipEl.classList.remove("resumo");
+    tooltipEl.style.pointerEvents = "none";
+    __tooltipAtual = null;
+    return;
+  }
   __tooltipAtual = { linha, estado: estadoTooltip, opcoes };
   tooltipEl.classList.toggle("resumo", resumo);
   tooltipEl.style.pointerEvents = resumo ? "auto" : "none";
@@ -1095,6 +1139,13 @@ function montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora) {
 }
 
 function renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, cx, cy) {
+  if (tooltipBloqueadoNoModal()) {
+    tooltipEl.style.display = "none";
+    tooltipEl.classList.remove("resumo");
+    tooltipEl.style.pointerEvents = "none";
+    __tooltipAtual = null;
+    return;
+  }
   __tooltipAtual = null;
   tooltipEl.classList.remove("resumo");
   tooltipEl.style.pointerEvents = "none";
@@ -1164,8 +1215,16 @@ function ocultarTooltipsInterativos() {
     tooltipEl.classList.remove("resumo");
     tooltipEl.style.pointerEvents = "none";
   }
+  __tooltipAtual = null;
+  __tooltipFixa = null;
   if (__barrasChart) __barrasChart.dispatchAction({ type: "hideTip" });
   if (__posicaoChart) __posicaoChart.dispatchAction({ type: "hideTip" });
+  document.querySelectorAll(".echarts-tooltip").forEach((el) => {
+    el.style.display = "none";
+    el.style.opacity = "0";
+    el.style.visibility = "hidden";
+    el.style.pointerEvents = "none";
+  });
   __barrasTooltipAtual = null;
   __posicaoTooltipAtual = null;
 }
@@ -1176,6 +1235,13 @@ function fecharModalHolerite() {
   backdrop.classList.remove("aberto");
   backdrop.setAttribute("aria-hidden", "true");
   document.body.classList.remove("modal-aberto");
+  atualizarBloqueioTooltipNoModal(false);
+  document.querySelectorAll(".echarts-tooltip").forEach((el) => {
+    el.style.removeProperty("display");
+    el.style.removeProperty("opacity");
+    el.style.removeProperty("visibility");
+    el.style.removeProperty("pointer-events");
+  });
   __modalAtual = null;
   if (__tooltipFixa) {
     const tooltipEl = document.getElementById("tooltip-holerite");
@@ -1208,6 +1274,10 @@ function limparTooltipFixa() {
 function abrirModalHolerite(linha, estado, opcoes = {}) {
   const backdrop = document.getElementById("holerite-modal");
   if (!backdrop) return;
+  // Marca o estado de modal aberto antes de qualquer render para bloquear
+  // reexibicao de tooltip por eventos de hover concorrentes.
+  atualizarBloqueioTooltipNoModal(true);
+  document.body.classList.add("modal-aberto");
   ocultarTooltipsInterativos();
   const titulo = document.getElementById("holerite-modal-titulo");
   const subtitulo = document.getElementById("holerite-modal-subtitulo");
@@ -1229,7 +1299,6 @@ function abrirModalHolerite(linha, estado, opcoes = {}) {
   conteudo.innerHTML = renderHolerite(linha, estado, { ...opcoes, semCabecalho: true });
   backdrop.classList.add("aberto");
   backdrop.setAttribute("aria-hidden", "false");
-  document.body.classList.add("modal-aberto");
 }
 
 /**
@@ -1544,6 +1613,8 @@ const pluginDestaqueNaFrente = {
 
 function renderHolerite(linha, estado, opcoes = {}) {
   if (linha.simplificado) {
+    const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * ((opcoes.diasTrabalhados || 0) / 5);
+    const liquidoPorHora = horasNoPeriodo > 0 ? linha.remuneracaoLiquida / horasNoPeriodo : linha.liquidoPorHora;
     const header = opcoes.semCabecalho ? "" : `<div class="hol-header">
       <strong>${estado.nome}</strong>
       <span>${linha.anosServico} ano${linha.anosServico !== 1 ? "s" : ""}</span>
@@ -1558,19 +1629,20 @@ function renderHolerite(linha, estado, opcoes = {}) {
         <div class="hol-wip-barra"><div class="hol-wip-barra-preenchimento"></div></div>
       </div>
       <div class="hol-item hol-liquido"><span>Remuneração Líquida Mensal</span><span>${formatarMoeda(linha.remuneracaoLiquida)}</span></div>
-      <div class="hol-item"><span>Líquida por hora</span><span class="hol-pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>
+        <div class="hol-item"><span>Líquida por hora</span><span class="hol-pos">${formatarMoeda(liquidoPorHora)}</span></div>
     </div>`;
     return `${header}<div class="hol-layout"><div class="hol-col-principal">${html}</div></div>`;
   }
-  const verbasPorAno = estado.verbas;
-  const remuneratorias = verbasPorAno.filter(v => v.natureza === "remuneratoria");
-  const indenizatorias = verbasPorAno.filter(v => v.natureza === "indenizatoria");
+    const verbas = estado.verbas.filter(v => v.recorrencia !== "eventual");
+    const remuneratorias = verbas.filter(v => v.natureza === "remuneratoria");
+    const indenizatorias = verbas.filter(v => v.natureza === "indenizatoria");
   const notas = [];
 
   function ref(v) {
-    if (!v.observacao) return "";
+      const obs = v.observacoes || v.observacao;
+      if (!obs) return "";
     let i = notas.findIndex(n => n.id === v.id);
-    if (i < 0) { notas.push({ id: v.id, obs: v.observacao }); i = notas.length - 1; }
+      if (i < 0) { notas.push({ id: v.id, obs }); i = notas.length - 1; }
     return `<sup class="nota-ref">${i + 1}</sup>`;
   }
 
@@ -1604,8 +1676,12 @@ function renderHolerite(linha, estado, opcoes = {}) {
 
   const totalRemuneratorias = remuneratorias.reduce((s, v) => s + (linha.valoresVerbas[v.id] || 0), 0);
   const totalIndenizatorias = indenizatorias.reduce((s, v) => s + (linha.valoresVerbas[v.id] || 0), 0);
-  const nomeRPPS = estado.previdencia?.nomeRPPS || "RPPS";
-  const nomeComplementar = estado.previdencia?.nomeComplementar || "PREVCOM";
+  const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * ((opcoes.diasTrabalhados || 0) / 5);
+  const liquidoPorHora = horasNoPeriodo > 0 ? linha.remuneracaoLiquida / horasNoPeriodo : linha.liquidoPorHora;
+  const blocoRPPS = estado.previdencia?.rpps || {};
+  const blocoComplementar = estado.previdencia?.prevcom || estado.previdencia?.rpc || {};
+  const nomeRPPS = blocoRPPS.nomePrevidencia || "RPPS";
+  const nomeComplementar = blocoComplementar.nomePrevidencia || "PREVCOM";
 
   const dataAtu = estado.ultimaAtualizacao
     ? estado.ultimaAtualizacao.split("-").reverse().join("/")
@@ -1642,7 +1718,7 @@ function renderHolerite(linha, estado, opcoes = {}) {
 
   html += `<div class="hol-item"><span>Imposto de Renda (IRRF)</span><span class="hol-neg">- ${formatarMoeda(linha.descontoIR)}</span></div>`;
   html += `<div class="hol-item hol-liquido"><span>Remuneração Líquida Mensal</span><span>${formatarMoeda(linha.remuneracaoLiquida)}</span></div>`;
-  html += `<div class="hol-item"><span>Líquida por hora</span><span class="hol-pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>`;
+  html += `<div class="hol-item"><span>Líquida por hora</span><span class="hol-pos">${formatarMoeda(liquidoPorHora)}</span></div>`;
   html += `</div>`; // fim hol-body
 
   // coluna lateral: notas + índices
@@ -1653,8 +1729,15 @@ function renderHolerite(linha, estado, opcoes = {}) {
     notas.forEach((n, i) => itens.push(`<div><sup>${i + 1}</sup> ${removerNegrito(n.obs)}</div>`));
     lateral += `<div class="hol-notas">${itens.join("")}</div>`;
   }
-  if (estado.indices && estado.indices.length > 0) {
-    const linhasIdx = estado.indices.map(idx => `<span>${idx.descricao}: <strong>${idx.valor}</strong></span>`);
+  const indices = estado.parametrosGlobais?.indices;
+  if (indices && Object.keys(indices).length > 0) {
+    const linhasIdx = Object.entries(indices).map(([key, idx]) => {
+      const val = resolverPath(estado, `parametrosGlobais.indices.${key}`);
+      const valFmt = idx.unidade === "%"
+        ? new Intl.NumberFormat("pt-BR", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(val)
+        : new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(val);
+      return `<span>${idx.descricao}: <strong>${valFmt}</strong></span>`;
+    });
     lateral += `<div class="hol-indices">${linhasIdx.join("<br>")}</div>`;
   }
 
@@ -1753,6 +1836,7 @@ function renderizarGrafico(opcoes) {
       maintainAspectRatio: false,
       interaction: { mode: "nearest", intersect: true },
       onHover(event, activeElements, chart) {
+        if (tooltipBloqueadoNoModal()) return;
         const ativoDatasetIndex = activeElements.length > 0
           ? activeElements[0].datasetIndex
           : (__tooltipFixa ? __tooltipFixa.datasetIndex : null);
@@ -1760,6 +1844,7 @@ function renderizarGrafico(opcoes) {
         aplicarEstiloGrafico(chart, ativoDatasetIndex);
       },
       onClick(event, elements, chart) {
+        if (tooltipBloqueadoNoModal()) return;
         if (!elements || elements.length === 0) return;
         const item = elements[0];
         const dataset = chart.data.datasets[item.datasetIndex];
@@ -1843,6 +1928,13 @@ function renderizarGrafico(opcoes) {
         tooltip: {
           enabled: false,
           external(context) {
+            if (tooltipBloqueadoNoModal()) {
+              tooltipEl.style.display = "none";
+              tooltipEl.classList.remove("resumo");
+              tooltipEl.style.pointerEvents = "none";
+              __tooltipAtual = null;
+              return;
+            }
             const dp = context.tooltip.dataPoints;
             if (context.tooltip.opacity === 0 || !dp || dp.length === 0) {
               if (!__tooltipFixa) {
@@ -1980,7 +2072,7 @@ function renderizarPosicao(opcoes) {
 
   const opcoesEchart = {
     animationDuration: 500,
-    grid: { left: 44, right: 56, top: 20, bottom: 44 },
+    grid: { left: 50, right: 56, top: 20, bottom: 44, containLabel: true },
     xAxis: {
       type: "category",
       data: labels,
@@ -1998,7 +2090,7 @@ function renderizarPosicao(opcoes) {
       interval: 1,
       name: "Posição no ranking",
       nameLocation: "middle",
-      nameGap: 36,
+      nameGap: 40,
       axisLabel: { formatter: v => `#${v}` },
       splitLine: { lineStyle: { color: "#eef0f3" } }
     },
@@ -2027,6 +2119,10 @@ function renderizarPosicao(opcoes) {
         return [left - containerRect.left, top - containerRect.top];
       },
       formatter(params) {
+        if (tooltipBloqueadoNoModal()) {
+          __posicaoTooltipAtual = null;
+          return "";
+        }
         const item = params.data._item;
         const estiloBase = "font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:0.78rem;line-height:normal;";
         const resumo = ehTelaPequena();
@@ -2306,6 +2402,10 @@ function renderizarBarras(opcoes) {
         return [left - containerRect.left, top - containerRect.top];
       },
       formatter(params) {
+        if (tooltipBloqueadoNoModal()) {
+          __barrasTooltipAtual = null;
+          return "";
+        }
         const item = params.data._item;
         const estiloBase = "font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:0.78rem;line-height:normal;";
         if (item.isMedia) {
@@ -2609,6 +2709,7 @@ if (modalBackdrop && modalFechar) {
 }
 
 document.addEventListener("click", (event) => {
+  if (tooltipBloqueadoNoModal()) return;
   const botao = event.target.closest("[data-acao='abrir-holerite']");
   if (!botao || botao.closest("#tooltip-holerite")) return;
   const contexto = __barrasTooltipAtual || __posicaoTooltipAtual;
@@ -2620,6 +2721,7 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("click", (event) => {
+  if (tooltipBloqueadoNoModal()) return;
   const alvo = event.target;
   if (alvo.closest("#tooltip-holerite") || alvo.closest("#holerite-modal")) {
     return;
