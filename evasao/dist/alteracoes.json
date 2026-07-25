@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-23T18:43:33.037Z",
-  "commitCount": 162,
+  "generatedAt": "2026-07-25T17:24:37.160Z",
+  "commitCount": 163,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -974,6 +974,12 @@
       "date": "2026-07-20T14:29:25Z",
       "author": "observatoriosefmg",
       "message": "VINICIUS AMADEU"
+    },
+    {
+      "hash": "f04b9a1739e93fb049d5a129ff7d555db2d684da",
+      "date": "2026-07-25T17:24:19Z",
+      "author": "observatoriosefmg",
+      "message": "ATUALIZAÇÃO DE DADOS"
     }
   ]
 }
