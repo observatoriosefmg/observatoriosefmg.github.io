@@ -115,6 +115,19 @@
     width: 120px;
     min-width: 120px;
   }
+  #campo-escolaridade {
+    min-width: 260px;
+  }
+  #campo-escolaridade select {
+    width: 260px;
+    min-width: 260px;
+  }
+  #campo-prevcom .grupo-vista {
+    flex-wrap: nowrap;
+  }
+  #campo-prevcom .btn-vista {
+    white-space: nowrap;
+  }
   .campo input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
@@ -870,6 +883,11 @@
       padding: 12px;
       gap: 12px;
     }
+    #campo-escolaridade,
+    #campo-escolaridade select {
+      width: 100%;
+      min-width: 140px;
+    }
     .grafico-wrapper {
       padding: 8px;
       height: 690px;
@@ -877,6 +895,7 @@
     .instagram-callout { flex-direction: column; }
     .instagram-callout-midia { width: 80px; height: 80px; }
   }
+
 </style>
 </head>
 <body>
@@ -892,7 +911,7 @@
   </div>
 
   <div class="painel-controles">
-    <div class="campo">
+    <div class="campo" id="campo-visualizacao">
       <label>Visualização</label>
       <div class="grupo-vista">
         <button class="btn-vista ativo" id="btn-barras" onclick="setVista('barras')">Gráfico de barras</button>
@@ -921,6 +940,14 @@
         <button class="btn-vista" id="btn-metrica-hora" onclick="setMetricaGrafico('hora')">Líquido por hora</button>
       </div>
     </div>
+    <div class="campo" id="campo-prevcom">
+      <label>Regime de previdência</label>
+      <div class="grupo-vista">
+        <button class="btn-vista" id="btn-prev-rpps-integral" onclick="setRegimePrevidencia('rpps_integral')">RPPS Integral</button>
+        <button class="btn-vista" id="btn-prev-sem-complementar" onclick="setRegimePrevidencia('sem_complementar')">Sem Complementar</button>
+        <button class="btn-vista ativo" id="btn-prev-com-complementar" onclick="setRegimePrevidencia('com_complementar')">Com Complementar</button>
+      </div>
+    </div>
     <div class="campo" id="campo-teto">
       <label>Teto</label>
       <div class="grupo-vista">
@@ -934,12 +961,12 @@
       <select id="estado"></select>
     </div>
 
-    <div class="campo">
+    <div class="campo" id="campo-dias-trabalhados">
       <label for="diasTrabalhados">Dias trabalhados/mês</label>
       <input id="diasTrabalhados" type="number" min="0" max="31" step="1" value="20" />
     </div>
 
-    <div class="campo">
+    <div class="campo" id="campo-numero-filhos">
       <label for="numeroFilhos">Número de filhos</label>
       <input id="numeroFilhos" type="number" min="0" max="5" step="1" value="0" />
     </div>
@@ -1318,7 +1345,7 @@ function abrirModalHolerite(linha, estado, opcoes = {}) {
  * somas/subtrações dos valores de verbas e dos descontos escalares — nenhum
  * cálculo de negócio (fórmulas, alíquotas, elegibilidade) ocorre aqui.
  */
-function montarLinha(estado, ano, dias, filhos, usarTetoNacional) {
+function montarLinha(estado, ano, dias, filhos, usarTetoNacional, regimePrevidencia = "com_complementar") {
   if (estado.remuneracaoSimplificada) {
     const remuneracaoLiquida = estado.remuneracaoLiquida[ano];
     const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * (dias / 5);
@@ -1330,7 +1357,16 @@ function montarLinha(estado, ano, dias, filhos, usarTetoNacional) {
       liquidoPorHora,
     };
   }
-  const variante = estado.porTeto[usarTetoNacional ? "nacional" : "estadual"];
+  const chaveTeto = usarTetoNacional ? "nacional" : "estadual";
+  const varianteComComplementar = estado.porTeto[chaveTeto];
+  const varianteSemComplementar = estado.porTetoSemPrevcom ? estado.porTetoSemPrevcom[chaveTeto] : null;
+  const varianteRppsIntegral = estado.porTetoRppsIntegral ? estado.porTetoRppsIntegral[chaveTeto] : null;
+  let variante = varianteComComplementar;
+  if (regimePrevidencia === "rpps_integral") {
+    variante = varianteRppsIntegral || varianteComComplementar;
+  } else if (regimePrevidencia === "sem_complementar") {
+    variante = varianteSemComplementar || varianteComComplementar;
+  }
   const valoresVerbas = {};
   const referenciasVerbas = {};
   const legendasVerbas = {};
@@ -1379,8 +1415,9 @@ function montarTabela(estado, opcoes) {
   const dias = opcoes.diasTrabalhados;
   const filhos = opcoes.numeroFilhos;
   const usarTetoNacional = opcoes.usarTetoNacional;
+  const regimePrevidencia = opcoes.regimePrevidencia || "com_complementar";
   const anosMax = window.__dados.anosMax;
-  const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, dias, filhos, usarTetoNacional));
+  const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, dias, filhos, usarTetoNacional, regimePrevidencia));
 
   if (estado.remuneracaoSimplificada) {
     const avisoHtml = `<div class="hol-wip">
@@ -1477,7 +1514,7 @@ function montarTabelaComparacao(opcoes) {
   for (const { uf } of listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
     const valores = anos.map(ano => {
-      const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional);
+      const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
       return emValorHora ? linha.liquidoPorHora : linha.remuneracaoLiquida;
     });
     dadosPorUf[uf] = { nome: estado.nome, valores };
@@ -1532,6 +1569,7 @@ function lerOpcoes() {
     diasTrabalhados: normalizarDiasTrabalhados(),
     numeroFilhos: normalizarNumeroFilhos(),
     usarTetoNacional: __usarTetoNacional,
+    regimePrevidencia: __regimePrevidencia,
     metricaGrafico: __metricaGrafico,
     escolaridade: document.getElementById("escolaridade").value || null,
   };
@@ -1560,6 +1598,10 @@ let __grafico = null;
 let __opcoesGrafico = {};
 let __graficoHoverAtivo = null;
 
+const ESTADO_LINHA_DESTAQUE = "destaque";
+const ESTADO_LINHA_OFUSCADO = "ofuscado";
+const ESTADO_LINHA_DESATIVADO = "desativado";
+
 const COR_BARRAS_PADRAO = '#16a34a';
 const COR_BARRAS_MEDIA = COR_MEDIA;
 const COR_BARRAS_DESTAQUE = COR_MINAS_GERAIS;
@@ -1574,23 +1616,54 @@ function corComAlpha(cor, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function corDataset(corBase, destaquePermanente, index) {
-  const emDestaque = destaquePermanente || index === __graficoHoverAtivo;
+function normalizarEstadoLinha(estado, ehDestaquePadrao = false) {
+  if (estado === ESTADO_LINHA_DESTAQUE || estado === ESTADO_LINHA_OFUSCADO || estado === ESTADO_LINHA_DESATIVADO) {
+    return estado;
+  }
+  return ehDestaquePadrao ? ESTADO_LINHA_DESTAQUE : ESTADO_LINHA_OFUSCADO;
+}
+
+function proximoEstadoLinha(estadoAtual) {
+  if (estadoAtual === ESTADO_LINHA_OFUSCADO) return ESTADO_LINHA_DESTAQUE;
+  if (estadoAtual === ESTADO_LINHA_DESTAQUE) return ESTADO_LINHA_DESATIVADO;
+  return ESTADO_LINHA_OFUSCADO;
+}
+
+function obterIndiceHoverPadrao(chart) {
+  if (!__tooltipFixa) return null;
+  const idx = __tooltipFixa.datasetIndex;
+  const meta = chart.getDatasetMeta(idx);
+  return meta && meta.visible ? idx : null;
+}
+
+function sincronizarEstadoLegendaDatasets(chart) {
+  chart.data.datasets.forEach((dataset, index) => {
+    const destaquePadrao = Boolean(dataset._isMinas || dataset._isMedia);
+    dataset._estadoLegenda = normalizarEstadoLinha(dataset._estadoLegenda, destaquePadrao);
+    const meta = chart.getDatasetMeta(index);
+    if (meta) {
+      meta.hidden = dataset._estadoLegenda === ESTADO_LINHA_DESATIVADO;
+    }
+  });
+}
+
+function corDataset(corBase, estadoLinha, index) {
+  const emDestaque = estadoLinha === ESTADO_LINHA_DESTAQUE || index === __graficoHoverAtivo;
   return corComAlpha(corBase, emDestaque ? 1 : 0.35);
 }
 
-function estiloDataset(corBase, destaquePermanente, index) {
+function estiloDataset(corBase, obterEstadoLinha, index) {
   return {
-    borderColor: () => corDataset(corBase, destaquePermanente, index),
+    borderColor: () => corDataset(corBase, obterEstadoLinha(), index),
     backgroundColor: "transparent",
     fill: false,
-    borderWidth: () => (destaquePermanente || index === __graficoHoverAtivo) ? 3.75 : 1.1,
+    borderWidth: () => (obterEstadoLinha() === ESTADO_LINHA_DESTAQUE || index === __graficoHoverAtivo) ? 3.75 : 1.1,
     pointRadius: 3,
     pointHoverRadius: 6,
-    pointBackgroundColor: () => corDataset(corBase, destaquePermanente, index),
-    pointBorderColor: () => corDataset(corBase, destaquePermanente, index),
-    pointHoverBackgroundColor: () => corDataset(corBase, destaquePermanente, index),
-    pointHoverBorderColor: () => corDataset(corBase, destaquePermanente, index),
+    pointBackgroundColor: () => corDataset(corBase, obterEstadoLinha(), index),
+    pointBorderColor: () => corDataset(corBase, obterEstadoLinha(), index),
+    pointHoverBackgroundColor: () => corDataset(corBase, obterEstadoLinha(), index),
+    pointHoverBorderColor: () => corDataset(corBase, obterEstadoLinha(), index),
     hoverBorderWidth: 3
   };
 }
@@ -1616,6 +1689,40 @@ const pluginDestaqueNaFrente = {
     }
     if (mediaIndex !== -1) desenhar(mediaIndex);
     if (migIndex !== -1) desenhar(migIndex);
+    ctx.restore();
+  }
+};
+
+const pluginLegendaNegritoDestaque = {
+  id: "legendaNegritoDestaque",
+  afterDraw(chart) {
+    const legend = chart.legend;
+    if (!legend || !Array.isArray(legend.legendItems) || !Array.isArray(legend.legendHitBoxes)) return;
+
+    const ctx = chart.ctx;
+    const fontPadrao = Chart.defaults.font || {};
+    const familia = fontPadrao.family || "sans-serif";
+    const tamanho = fontPadrao.size || 12;
+    const altura = legend.options?.labels?.usePointStyle ? Math.min(tamanho, 12) : 40;
+    const deslocamentoTexto = altura + 6;
+
+    ctx.save();
+    ctx.font = `600 ${tamanho}px ${familia}`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    legend.legendItems.forEach((item, i) => {
+      const dataset = chart.data.datasets[item.datasetIndex];
+      if (!dataset) return;
+      const estado = item.estadoLegenda || normalizarEstadoLinha(dataset._estadoLegenda, Boolean(dataset._isMinas || dataset._isMedia));
+      if (estado !== ESTADO_LINHA_DESTAQUE) return;
+
+      const hit = legend.legendHitBoxes[i];
+      if (!hit) return;
+      ctx.fillStyle = "#1f2937";
+      ctx.fillText(item.text, hit.left + deslocamentoTexto, hit.top + hit.height / 2);
+    });
+
     ctx.restore();
   }
 };
@@ -1738,16 +1845,25 @@ function renderHolerite(linha, estado, opcoes = {}) {
     notas.forEach((n, i) => itens.push(`<div><sup>${i + 1}</sup> ${removerNegrito(n.obs)}</div>`));
     lateral += `<div class="hol-notas">${itens.join("")}</div>`;
   }
-  const indices = estado.parametrosGlobais?.indices;
-  if (indices && Object.keys(indices).length > 0) {
-    const linhasIdx = Object.entries(indices).map(([key, idx]) => {
-      const val = resolverPath(estado, `parametrosGlobais.indices.${key}`);
-      const valFmt = idx.unidade === "%"
-        ? new Intl.NumberFormat("pt-BR", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(val)
-        : new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(val);
-      return `<span>${idx.descricao}: <strong>${valFmt}</strong></span>`;
-    });
+  // Formato atual do app: estado.indices = [{ descricao, valor }].
+  // Mantem fallback para formato legado (parametrosGlobais.indices).
+  if (Array.isArray(estado.indices) && estado.indices.length > 0) {
+    const linhasIdx = estado.indices.map((idx) =>
+      `<span>${idx.descricao}: <strong>${idx.valor}</strong></span>`
+    );
     lateral += `<div class="hol-indices">${linhasIdx.join("<br>")}</div>`;
+  } else {
+    const indicesLegado = estado.parametrosGlobais?.indices;
+    if (indicesLegado && Object.keys(indicesLegado).length > 0) {
+      const linhasIdx = Object.entries(indicesLegado).map(([key, idx]) => {
+        const val = resolverPath(estado, `parametrosGlobais.indices.${key}`);
+        const valFmt = idx.unidade === "%"
+          ? new Intl.NumberFormat("pt-BR", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(val)
+          : new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(val);
+        return `<span>${idx.descricao}: <strong>${valFmt}</strong></span>`;
+      });
+      lateral += `<div class="hol-indices">${linhasIdx.join("<br>")}</div>`;
+    }
   }
 
   const temLateral = lateral !== "";
@@ -1761,6 +1877,9 @@ function renderizarGrafico(opcoes) {
   const anosMax = window.__dados.anosMax;
   const labels = Array.from({ length: anosMax + 1 }, (_, i) => i);
   const datasets = [];
+  const estadosLegendaAnteriores = (__grafico && __grafico.data && Array.isArray(__grafico.data.datasets))
+    ? new Map(__grafico.data.datasets.map(ds => [ds.label, ds._estadoLegenda]))
+    : new Map();
   let ci = 0;
 
   const somaLiquida = new Array(anosMax + 1).fill(0);
@@ -1769,17 +1888,27 @@ function renderizarGrafico(opcoes) {
 
   for (const { uf } of window.__dados.listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
-    const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional));
+    const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
     const ehMinas = uf === "MG";
-    datasets.push({
-      label: `${estado.nome} (${uf})`,
+    const label = `${estado.nome} (${uf})`;
+    const datasetEstado = {
+      label,
       data: linhas.map(l => emValorHora ? l.liquidoPorHora : l.remuneracaoLiquida),
       _isMinas: ehMinas,
       tension: 0,
-      ...estiloDataset(ehMinas ? COR_MINAS_GERAIS : CORES_GRAFICO[ci % CORES_GRAFICO.length], ehMinas, ci),
       _linhas: linhas,
-      _estado: estado
-    });
+      _estado: estado,
+      _estadoLegenda: normalizarEstadoLinha(estadosLegendaAnteriores.get(label), ehMinas)
+    };
+    Object.assign(
+      datasetEstado,
+      estiloDataset(
+        ehMinas ? COR_MINAS_GERAIS : CORES_GRAFICO[ci % CORES_GRAFICO.length],
+        () => datasetEstado._estadoLegenda,
+        ci
+      )
+    );
+    datasets.push(datasetEstado);
     linhas.forEach((l, i) => {
       somaLiquida[i] += l.remuneracaoLiquida;
       somaPorHora[i] += l.liquidoPorHora;
@@ -1790,26 +1919,36 @@ function renderizarGrafico(opcoes) {
 
   const mediaLiquida = somaLiquida.map(v => totalEstados > 0 ? v / totalEstados : 0);
   const mediaPorHora = somaPorHora.map(v => totalEstados > 0 ? v / totalEstados : 0);
-  datasets.push({
-    label: "Média entre estados",
+  const labelMedia = "Média entre estados";
+  const datasetMedia = {
+    label: labelMedia,
     data: emValorHora ? mediaPorHora : mediaLiquida,
     _isMedia: true,
     tension: 0,
-    ...estiloDataset(COR_MEDIA, true, ci),
     _mediaLiquida: mediaLiquida,
-    _mediaPorHora: mediaPorHora
-  });
+    _mediaPorHora: mediaPorHora,
+    _estadoLegenda: normalizarEstadoLinha(estadosLegendaAnteriores.get(labelMedia), true)
+  };
+  Object.assign(datasetMedia, estiloDataset(COR_MEDIA, () => datasetMedia._estadoLegenda, ci));
+  datasets.push(datasetMedia);
   ci++;
 
   if (__grafico) {
     __grafico.data.datasets = datasets;
+    sincronizarEstadoLegendaDatasets(__grafico);
     __grafico.options.scales.y.title.text = emValorHora
       ? "Remuneração Líquida por Hora (R$/h)"
       : "Remuneração Líquida (R$)";
     __grafico.options.scales.y.ticks.callback = v => emValorHora
       ? "R$/h " + new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v)
       : "R$ " + new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v);
-    aplicarEstiloGrafico(__grafico, __graficoHoverAtivo);
+    if (__tooltipFixa) {
+      const metaTooltip = __grafico.getDatasetMeta(__tooltipFixa.datasetIndex);
+      if (!metaTooltip || !metaTooltip.visible) {
+        limparTooltipFixa();
+      }
+    }
+    aplicarEstiloGrafico(__grafico, obterIndiceHoverPadrao(__grafico));
     setLoadingGrafico(false);
     return;
   }
@@ -1839,7 +1978,7 @@ function renderizarGrafico(opcoes) {
   __grafico = new Chart(ctx, {
     type: "line",
     data: { labels, datasets },
-    plugins: [pluginDestaqueNaFrente],
+    plugins: [pluginDestaqueNaFrente, pluginLegendaNegritoDestaque],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -1848,7 +1987,7 @@ function renderizarGrafico(opcoes) {
         if (tooltipBloqueadoNoModal()) return;
         const ativoDatasetIndex = activeElements.length > 0
           ? activeElements[0].datasetIndex
-          : (__tooltipFixa ? __tooltipFixa.datasetIndex : null);
+          : obterIndiceHoverPadrao(chart);
         if (ativoDatasetIndex === __graficoHoverAtivo) return;
         aplicarEstiloGrafico(chart, ativoDatasetIndex);
       },
@@ -1909,12 +2048,14 @@ function renderizarGrafico(opcoes) {
               return chart.data.datasets.map((dataset, index) => {
                 const meta = chart.getDatasetMeta(index);
                 const style = meta.controller.getStyle(0, true);
+                const estadoLegenda = normalizarEstadoLinha(dataset._estadoLegenda, Boolean(dataset._isMinas || dataset._isMedia));
+                const corTexto = estadoLegenda === ESTADO_LINHA_DESTAQUE ? "rgba(0,0,0,0)" : "#334155";
                 return {
                   text: dataset.label,
                   fillStyle: style.backgroundColor,
                   strokeStyle: style.borderColor,
-                  fontColor: "#334155",
-                  color: "#334155",
+                  fontColor: corTexto,
+                  color: corTexto,
                   lineWidth: style.borderWidth,
                   lineCap: style.borderCapStyle,
                   lineDash: style.borderDash,
@@ -1922,16 +2063,38 @@ function renderizarGrafico(opcoes) {
                   lineJoin: style.borderJoinStyle,
                   pointStyle: "line",
                   hidden: !meta.visible,
+                  estadoLegenda,
                   datasetIndex: index
                 };
               });
             }
           },
+          onClick(event, legendItem, legend) {
+            const chart = legend.chart;
+            const idx = legendItem.datasetIndex;
+            const dataset = chart.data.datasets[idx];
+            const atual = normalizarEstadoLinha(dataset._estadoLegenda, Boolean(dataset._isMinas || dataset._isMedia));
+            dataset._estadoLegenda = proximoEstadoLinha(atual);
+            sincronizarEstadoLegendaDatasets(chart);
+            if (dataset._estadoLegenda === ESTADO_LINHA_DESATIVADO && __tooltipFixa && __tooltipFixa.datasetIndex === idx) {
+              limparTooltipFixa();
+              return;
+            }
+            aplicarEstiloGrafico(chart, obterIndiceHoverPadrao(chart));
+          },
           onHover(event, legendItem, legend) {
+            if (legend && legend.chart && legend.chart.canvas) {
+              legend.chart.canvas.style.cursor = "pointer";
+            }
+            const meta = legend.chart.getDatasetMeta(legendItem.datasetIndex);
+            if (!meta || !meta.visible) return;
             aplicarEstiloGrafico(legend.chart, legendItem.datasetIndex);
           },
           onLeave(event, legendItem, legend) {
-            aplicarEstiloGrafico(legend.chart, __tooltipFixa ? __tooltipFixa.datasetIndex : null);
+            if (legend && legend.chart && legend.chart.canvas) {
+              legend.chart.canvas.style.cursor = "default";
+            }
+            aplicarEstiloGrafico(legend.chart, obterIndiceHoverPadrao(legend.chart));
           }
         },
         tooltip: {
@@ -2013,7 +2176,9 @@ function renderizarGrafico(opcoes) {
     }
   });
 
-  __grafico.canvas.addEventListener("mouseleave", () => aplicarEstiloGrafico(__grafico, __tooltipFixa ? __tooltipFixa.datasetIndex : null));
+  sincronizarEstadoLegendaDatasets(__grafico);
+  aplicarEstiloGrafico(__grafico, obterIndiceHoverPadrao(__grafico));
+  __grafico.canvas.addEventListener("mouseleave", () => aplicarEstiloGrafico(__grafico, obterIndiceHoverPadrao(__grafico)));
   setLoadingGrafico(false);
 }
 
@@ -2039,7 +2204,7 @@ function renderizarPosicao(opcoes) {
   let ci = 0;
   for (const { uf } of listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
-    const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional));
+    const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
     valoresPorUf[uf] = linhas.map(l => emValorHora ? l.liquidoPorHora : l.remuneracaoLiquida);
     linhasPorUf[uf] = linhas;
     estadosPorUf[uf] = estado;
@@ -2201,7 +2366,7 @@ function calcularLimitesEixoBarras(opcoes) {
   for (const { uf } of window.__dados.listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
     for (let ano = 0; ano <= anosMax; ano++) {
-      const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional);
+      const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
       minLiquido = Math.min(minLiquido, linha.remuneracaoLiquida);
       maxLiquido = Math.max(maxLiquido, linha.remuneracaoLiquida);
       minPorHora = Math.min(minPorHora, linha.liquidoPorHora);
@@ -2246,7 +2411,7 @@ function renderizarBarras(opcoes) {
 
   for (const { uf } of window.__dados.listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
-    const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional);
+    const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
     itens.push({
       uf,
       valor: emValorHora ? linha.liquidoPorHora : linha.remuneracaoLiquida,
@@ -2446,6 +2611,7 @@ function renderizarBarras(opcoes) {
 let __vista = "barras";
 let __metricaGrafico = "mensal";
 let __usarTetoNacional = false;
+let __regimePrevidencia = "com_complementar";
 let __eixoYGrafico = "remuneracao";
 let __modoTabela = "holerite";
 let __ultimoModoTelaPequenaBarras = ehTelaPequenaBarras();
@@ -2462,6 +2628,14 @@ function setTeto(usarNacional) {
   __usarTetoNacional = usarNacional;
   document.getElementById("btn-teto-nacional").classList.toggle("ativo", usarNacional);
   document.getElementById("btn-teto-estadual").classList.toggle("ativo", !usarNacional);
+  renderizar();
+}
+
+function setRegimePrevidencia(regime) {
+  __regimePrevidencia = regime;
+  document.getElementById("btn-prev-rpps-integral").classList.toggle("ativo", regime === "rpps_integral");
+  document.getElementById("btn-prev-sem-complementar").classList.toggle("ativo", regime === "sem_complementar");
+  document.getElementById("btn-prev-com-complementar").classList.toggle("ativo", regime === "com_complementar");
   renderizar();
 }
 
