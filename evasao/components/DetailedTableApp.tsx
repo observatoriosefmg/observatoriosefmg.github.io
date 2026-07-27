@@ -47,11 +47,24 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
     const construirChaveTripla = (concurso: string, cargo: string, modalidade: string) =>
         `${String(concurso ?? '').trim().toLowerCase()}|${String(cargo ?? '').trim().toLowerCase()}|${String(modalidade ?? '').trim().toLowerCase()}`;
 
-    // Verificar quais órgãos/locais o auditor está aguardando nomeação em outros concursos
-    const getAguardandoNomeacaoPorOrgao = (nome?: string): string[] => {
-        if (!nome || dadosAprovacoesOutrosConcursos.length === 0 || dadosOutrosConcursos.length === 0) return [];
+    type OrgaoNomeacao = {
+        orgao: string;
+        nomeado: boolean;
+    };
 
-        const nomeNormalizado = normalizarNomeChave(nome);
+    const normalizarSituacao = (valor: string | null | undefined) =>
+        String(valor ?? '')
+            .trim()
+            .toUpperCase()
+            .normalize('NFD')
+            .replace(/\p{Diacritic}/gu, '');
+
+    const isSituacaoEmExercicio = (situacao?: string) => {
+        const normalized = normalizarSituacao(situacao);
+        return normalized === 'EM EXERCICIO';
+    };
+
+    const aguardandoNomeacaoPorNome = useMemo(() => {
         const mapaConcursosInfo = new Map<string, any>();
         for (const concursoRaw of dadosOutrosConcursos) {
             const chave = construirChaveTripla(
@@ -64,11 +77,11 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
             }
         }
 
-        const orgaos = new Set<string>();
+        const resultado = new Map<string, OrgaoNomeacao[]>();
 
         for (const aprovacao of dadosAprovacoesOutrosConcursos) {
             const nomeAprovacao = normalizarNomeChave(aprovacao['NOME'] || aprovacao['Nome'] || '');
-            if (nomeAprovacao !== nomeNormalizado) continue;
+            if (!nomeAprovacao) continue;
 
             const ignorar = String(aprovacao['IGNORAR'] || aprovacao['Ignorar'] || '').toLowerCase() === 'true';
             const renunciou = String(aprovacao['RENUNCIOU'] || aprovacao['RENUNCIOU?'] || '').toLowerCase() === 'true';
@@ -78,14 +91,14 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
             const cargo = String(aprovacao['CARGO'] || aprovacao['Cargo'] || '').trim();
             const modalidade = String(aprovacao['MODALIDADE'] || aprovacao['Modalidade'] || '').trim();
             const concursoRelacionado = mapaConcursosInfo.get(construirChaveTripla(concurso, cargo, modalidade));
-            if (!concursoRelacionado) continue;
+            if (!concursoRelacionado || !concurso) continue;
 
             const posicaoNumero = parseNumber(aprovacao['POSICAO'] || aprovacao['Posicao'] || '');
             const numeroVagas = parseNumber(concursoRelacionado['NUMERO_VAGAS'] || concursoRelacionado['NUMERO VAGAS'] || '');
             const ultimaVagaNomeada = parseNumber(concursoRelacionado['ULTIMA_VAGA_NOMEADA'] || concursoRelacionado['ULTIMA VAGA NOMEADA'] || '');
             const fimDeFila = String(aprovacao['FIM_DE_FILA'] || aprovacao['FIM DE FILA'] || '').toLowerCase() === 'true';
             const tipoAprovacao = fimDeFila
-                ? 'Fim de Fila'
+                ? 'Cadastro de Reservas'
                 : (
                     posicaoNumero != null &&
                     ultimaVagaNomeada != null &&
@@ -106,15 +119,64 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                 continue;
             }
 
-            if (concurso) {
-                orgaos.add(concurso);
+            const orgaos = resultado.get(nomeAprovacao) ?? [];
+            const existente = orgaos.find((item) => item.orgao === concurso);
+            if (existente) {
+                if (tipoAprovacao === 'Nomeado') {
+                    existente.nomeado = true;
+                }
+            } else {
+                orgaos.push({ orgao: concurso, nomeado: tipoAprovacao === 'Nomeado' });
             }
+            resultado.set(nomeAprovacao, orgaos);
         }
 
-        return Array.from(orgaos).sort((a, b) => a.localeCompare(b));
+        for (const [nome, orgaos] of resultado.entries()) {
+            resultado.set(nome, orgaos.sort((a, b) => {
+                if (a.nomeado === b.nomeado) {
+                    return a.orgao.localeCompare(b.orgao);
+                }
+                return a.nomeado ? -1 : 1;
+            }));
+        }
+
+        return resultado;
+    }, [dadosAprovacoesOutrosConcursos, dadosOutrosConcursos]);
+
+    const getAguardandoNomeacaoPorOrgao = (nome?: string): OrgaoNomeacao[] => {
+        if (!nome) return [];
+        return aguardandoNomeacaoPorNome.get(normalizarNomeChave(nome)) ?? [];
     };
 
     const estaAguardandoNomeacao = (nome?: string): boolean => getAguardandoNomeacaoPorOrgao(nome).length > 0;
+
+    const estaNomeadoEmOutroConcurso = (nome?: string): boolean =>
+        getAguardandoNomeacaoPorOrgao(nome).some(item => item.nomeado);
+
+    const obterAguardandoNomeacaoTexto = (nome?: string) =>
+        getAguardandoNomeacaoPorOrgao(nome).map(item => item.nomeado ? `${item.orgao} (NOMEADO)` : item.orgao);
+
+    const obterSituacaoExibida = (item: any) => {
+        if (isSituacaoEmExercicio(item['SITUACAO']) && estaNomeadoEmOutroConcurso(item['NOME'])) {
+            return 'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO';
+        }
+        return (item['SITUACAO'] || '???').toString();
+    };
+
+    const statusMatchesFilter = (status: string, filter: string) => {
+        const statusNorm = status.toUpperCase();
+        const filterNorm = filter.toUpperCase();
+
+        if (filterNorm === 'EM EXERCÍCIO') {
+            return statusNorm === 'EM EXERCÍCIO' || statusNorm === 'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO';
+        }
+
+        if (filterNorm === 'NOMEADO EM OUTRO CONCURSO') {
+            return statusNorm === 'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO';
+        }
+
+        return statusNorm === filterNorm;
+    };
 
     // Carregar dados CSV principais (dados.csv)
     useEffect(() => {
@@ -397,8 +459,8 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
         // Filtrar por status se selecionado
         if (selectedStatus) {
             filtered = filtered.filter(item => {
-                const status = (item['SITUACAO'] || '???').toUpperCase();
-                return status === selectedStatus.toUpperCase();
+                const status = obterSituacaoExibida(item);
+                return statusMatchesFilter(status, selectedStatus);
             });
         }
 
@@ -472,6 +534,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
         // Cores base por status
         const statusColors = {
             'EM EXERCÍCIO': isEven ? 'bg-green-200' : 'bg-green-200/75',
+            'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO': isEven ? 'bg-lime-200' : 'bg-lime-200/75',
             'NOMEADO': isEven ? 'bg-blue-200' : 'bg-blue-200/75',
             'EXONERADO': isEven ? 'bg-red-200' : 'bg-red-200/85',
             'DESISTENTE': isEven ? 'bg-orange-200' : 'bg-orange-200/85',
@@ -488,6 +551,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
     const getStatusTextColor = (situacao: string) => {
         const colors = {
             'EM EXERCÍCIO': 'text-green-700',
+            'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO': 'text-green-700',
             'NOMEADO': 'text-blue-700',
             'EXONERADO': 'text-red-700',
             'DESISTENTE': 'text-yellow-700',
@@ -568,8 +632,13 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                             {/* Status individuais */}
                             {Object.entries(
                                 filteredData.reduce((acc, item) => {
-                                    const status = item['SITUACAO'] || '???';
-                                    acc[status] = (acc[status] || 0) + 1;
+                                    const situacaoExibida = obterSituacaoExibida(item);
+                                    const statuses = situacaoExibida === 'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO'
+                                        ? ['EM EXERCÍCIO', 'NOMEADO EM OUTRO CONCURSO']
+                                        : [situacaoExibida];
+                                    for (const status of statuses) {
+                                        acc[status] = (acc[status] || 0) + 1;
+                                    }
                                     return acc;
                                 }, {} as Record<string, number>)
                             ).map(([status, count]) => (
@@ -659,94 +728,97 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredData.map((item, index) => (
-                                        <tr
-                                            key={`${item['INSCRICAO'] || index}`}
-                                            className={`${getRowColor(item['SITUACAO'], index)} hover:brightness-95 hover:shadow-md transition-all duration-150`}
-                                        >
-                                            {areaSelecionada === 'VETERANO' ? (
-                                                // Layout para área VETERANO
-                                                <>
-                                                    <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
-                                                        {item['NOME'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['SITUACAO'] || '???'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['ORGAO_DESTINO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_EXONERACAO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_PUBLICACAO_EXONERACAO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_INATIVIDADE'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_PUBLICACAO_INATIVIDADE'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
-                                                        {item['OBSERVACAO'] || '-'}
-                                                    </td>
-                                                    <td className={`px-1 py-0.5 whitespace-normal text-[10px] border border-black text-center ${(() => {
-                                                        const orgaos = item['SITUACAO'] === 'EM EXERCÍCIO' ? getAguardandoNomeacaoPorOrgao(item['NOME']) : [];
-                                                        return orgaos.length > 0 ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
-                                                    })()}`}>
-                                                        {(() => {
-                                                            const orgaos = item['SITUACAO'] === 'EM EXERCÍCIO' ? getAguardandoNomeacaoPorOrgao(item['NOME']) : [];
-                                                            return orgaos.length > 0 ? orgaos.join(', ') : '-';
-                                                        })()}
-                                                    </td>
-                                                </>
-                                            ) : (
-                                                // Layout padrão para outras áreas
-                                                <>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap font-medium text-gray-800 text-[10px] border border-black text-center">
-                                                        {item['POSICAO_CONCURSO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
-                                                        {item['NOME'] || '-'}
-                                                    </td>
-                                                    <td className="px-0.5 py-0.5 whitespace-nowrap text-center text-[10px] border border-black text-gray-700">
-                                                        {(item['PCD'] || '').toUpperCase() === 'SIM' ? 'SIM' : 'NÃO'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['SITUACAO'] || '???'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['ORGAO_DESTINO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_NOMEACAO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_EXONERACAO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_PUBLICACAO_EXONERACAO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
-                                                        {item['DATA_NOMEACAO_SEM_EFEITO'] || '-'}
-                                                    </td>
-                                                    <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
-                                                        {item['OBSERVACAO'] || '-'}
-                                                    </td>
-                                                    <td className={`px-1 py-0.5 whitespace-normal text-[10px] border border-black text-center ${(() => {
-                                                        const orgaos = item['SITUACAO'] === 'EM EXERCÍCIO' ? getAguardandoNomeacaoPorOrgao(item['NOME']) : [];
-                                                        return orgaos.length > 0 ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
-                                                    })()}`}>
-                                                        {(() => {
-                                                            const orgaos = item['SITUACAO'] === 'EM EXERCÍCIO' ? getAguardandoNomeacaoPorOrgao(item['NOME']) : [];
-                                                            return orgaos.length > 0 ? orgaos.join(', ') : '-';
-                                                        })()}
-                                                    </td>
-                                                </>
-                                            )}
-                                        </tr>
-                                    ))
+                                    filteredData.map((item, index) => {
+                                        const situacaoExibida = obterSituacaoExibida(item);
+                                        return (
+                                            <tr
+                                                key={`${item['INSCRICAO'] || index}`}
+                                                className={`${getRowColor(situacaoExibida, index)} hover:brightness-95 hover:shadow-md transition-all duration-150`}
+                                            >
+                                                {areaSelecionada === 'VETERANO' ? (
+                                                    // Layout para área VETERANO
+                                                    <>
+                                                        <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
+                                                            {item['NOME'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {situacaoExibida}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['ORGAO_DESTINO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['DATA_EXONERACAO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['DATA_PUBLICACAO_EXONERACAO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['DATA_INATIVIDADE'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['DATA_PUBLICACAO_INATIVIDADE'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
+                                                            {item['OBSERVACAO'] || '-'}
+                                                        </td>
+                                                        <td className={`px-1 py-0.5 whitespace-normal text-[10px] border border-black text-center ${(() => {
+                                                            const orgaos = isSituacaoEmExercicio(item['SITUACAO']) ? obterAguardandoNomeacaoTexto(item['NOME']) : [];
+                                                            return orgaos.length > 0 ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
+                                                        })()}`}>
+                                                            {(() => {
+                                                                const orgaos = isSituacaoEmExercicio(item['SITUACAO']) ? obterAguardandoNomeacaoTexto(item['NOME']) : [];
+                                                                return orgaos.length > 0 ? orgaos.join(', ') : '-';
+                                                            })()}
+                                                        </td>
+                                                    </>
+                                                ) : (
+                                                    // Layout padrão para outras áreas
+                                                    <>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap font-medium text-gray-800 text-[10px] border border-black text-center">
+                                                            {item['POSICAO_CONCURSO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 font-medium text-gray-900 text-[10px] border border-black text-left">
+                                                            {item['NOME'] || '-'}
+                                                        </td>
+                                                        <td className="px-0.5 py-0.5 whitespace-nowrap text-center text-[10px] border border-black text-gray-700">
+                                                            {(item['PCD'] || '').toUpperCase() === 'SIM' ? 'SIM' : 'NÃO'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {situacaoExibida}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['ORGAO_DESTINO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['DATA_NOMEACAO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['DATA_EXONERACAO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['DATA_PUBLICACAO_EXONERACAO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 whitespace-nowrap text-gray-700 text-[10px] border border-black text-center">
+                                                            {item['DATA_NOMEACAO_SEM_EFEITO'] || '-'}
+                                                        </td>
+                                                        <td className="px-1 py-0.5 text-gray-600 text-[10px] border border-black text-center whitespace-normal">
+                                                            {item['OBSERVACAO'] || '-'}
+                                                        </td>
+                                                        <td className={`px-1 py-0.5 whitespace-normal text-[10px] border border-black text-center ${(() => {
+                                                            const orgaos = isSituacaoEmExercicio(item['SITUACAO']) ? obterAguardandoNomeacaoTexto(item['NOME']) : [];
+                                                            return orgaos.length > 0 ? 'bg-yellow-500 text-black font-medium' : 'text-gray-700';
+                                                        })()}`}>
+                                                            {(() => {
+                                                                const orgaos = isSituacaoEmExercicio(item['SITUACAO']) ? obterAguardandoNomeacaoTexto(item['NOME']) : [];
+                                                                return orgaos.length > 0 ? orgaos.join(', ') : '-';
+                                                            })()}
+                                                        </td>
+                                                    </>
+                                                )}
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>
