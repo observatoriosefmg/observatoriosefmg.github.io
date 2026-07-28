@@ -127,7 +127,7 @@
     flex-wrap: nowrap;
   }
   #campo-prevcom .btn-vista {
-    white-space: nowrap;
+    white-space: normal;
   }
   .campo input[type="range"] {
     -webkit-appearance: none;
@@ -468,6 +468,9 @@
     font-weight: 600;
     color: rgba(255, 255, 255, 0.72);
     transition: background 0.15s, color 0.15s;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
   }
   .btn-link-composicao {
     display: inline-flex;
@@ -971,6 +974,17 @@
   @media (max-width: 700px) {
     body {
       padding: 12px;
+    }
+    .cabecalho-pagina-acoes {
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-colabora-calculadora,
+    .btn-link-composicao {
+      width: 100%;
+      max-width: 320px;
     }
     .painel-controles {
       padding: 12px;
