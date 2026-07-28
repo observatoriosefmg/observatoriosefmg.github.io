@@ -8,6 +8,7 @@
 <!-- Favicons -->
 <link rel="icon" href="../evasao/observatorio-logo-mini-2.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="../evasao/observatorio-logo-mini.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NZ84J0PJBF"></script>
 <script>
@@ -472,6 +473,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     height: 48px;
     padding: 0 24px;
     flex: 0 0 auto;
@@ -485,6 +487,97 @@
     transition: opacity 0.15s;
   }
   .btn-link-composicao:hover { opacity: 0.85; }
+  .cabecalho-pagina-acoes { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn-colabora-calculadora {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 48px;
+    padding: 0 20px;
+    flex: 0 0 auto;
+    border: 1px solid #1e3a5f;
+    border-radius: 8px;
+    background: #dbeafe;
+    color: #1e3a5f;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .btn-colabora-calculadora i { font-size: 1.2rem; line-height: 1; }
+  .btn-colabora-calculadora:hover { background: var(--cor-fundo-cabecalho); color: #fff; border-color: var(--cor-fundo-cabecalho); }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+  }
+  .modal-overlay.aberto { display: flex; }
+  .modal-caixa {
+    background: #fff;
+    border-radius: 14px;
+    max-width: 440px;
+    width: 100%;
+    padding: 26px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+    position: relative;
+    color-scheme: light;
+  }
+  .modal-fechar {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: none;
+    font-size: 1.1rem;
+    color: #64748b;
+    cursor: pointer;
+    line-height: 1;
+    padding: 6px;
+  }
+  .modal-fechar:hover { color: var(--cor-fundo-cabecalho); }
+  .modal-titulo { margin: 0 0 6px; font-size: 1.15rem; color: var(--cor-fundo-cabecalho); }
+  .modal-subtitulo { margin: 0 0 18px; font-size: 0.85rem; color: #555; }
+  .modal-campo { margin-bottom: 14px; }
+  .modal-campo label { display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 4px; }
+  .modal-campo input,
+  .modal-campo textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    font-size: 0.86rem;
+    font-family: inherit;
+    background: #fff;
+    color: #1a1f2b;
+    color-scheme: light;
+    resize: vertical;
+  }
+  .modal-campo input::placeholder,
+  .modal-campo textarea::placeholder { color: #94a3b8; }
+  .modal-campo input:focus,
+  .modal-campo textarea:focus { outline: none; border-color: var(--cor-fundo-cabecalho); box-shadow: 0 0 0 3px rgba(31, 42, 68, 0.12); }
+  .modal-acoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+  .modal-botao-enviar {
+    background: var(--cor-fundo-cabecalho);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .modal-botao-enviar:hover { filter: brightness(1.1); }
+  .modal-nota { margin: 12px 0 0; font-size: 0.72rem; color: #94a3b8; }
+  .modal-honeypot { display: none !important; }
   .btn-vista:hover:not(.ativo) {
     color: #fff;
   }
@@ -907,7 +1000,12 @@
         Simulação de 0 a 40 anos de carreira, com base no modelo de dados.
       </p>
     </div>
-    <a class="btn-link-composicao" href="./composicao.html">Ver composições detalhadas</a>
+    <div class="cabecalho-pagina-acoes">
+      <button type="button" class="btn-colabora-calculadora" id="btn-colabora-calculadora">
+        <i class="fa-solid fa-envelope" aria-hidden="true"></i> Colabore com informações
+      </button>
+      <a class="btn-link-composicao" href="./composicao.html"><i class="fa-solid fa-eye" aria-hidden="true"></i> Ver composições detalhadas</a>
+    </div>
   </div>
 
   <div class="painel-controles">
@@ -1028,6 +1126,27 @@
       <div class="holerite-modal-corpo">
         <div class="holerite-modal-painel" id="holerite-modal-conteudo"></div>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-colabora">
+    <div class="modal-caixa">
+      <button type="button" class="modal-fechar" id="modal-colabora-fechar" aria-label="Fechar">&#10005;</button>
+      <h3 class="modal-titulo">Informações - Ranking dos Fiscos Estaduais</h3>
+      <p class="modal-subtitulo">Encontrou uma informação desatualizada ou tem dados sobre o ranking? Envie para a gente.</p>
+      <form id="form-colabora" action="https://formsubmit.co/observatoriosefmg@gmail.com" method="POST" target="_blank">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="text" name="_honey" class="modal-honeypot" tabindex="-1" autocomplete="off">
+        <input type="hidden" name="_subject" value="INFORMAÇÕES - RANKING DOS FISCOS ESTADUAIS">
+        <div class="modal-campo">
+          <label for="modal-colabora-mensagem">Mensagem</label>
+          <textarea id="modal-colabora-mensagem" name="message" rows="4" required placeholder="Envie informações relevantes para manter os dados do ranking atualizados."></textarea>
+        </div>
+        <div class="modal-acoes">
+          <button type="submit" class="modal-botao-enviar">Enviar</button>
+        </div>
+        <p class="modal-nota">Suas informações serão usadas apenas para manter os dados da calculadora atualizados.</p>
+      </form>
     </div>
   </div>
 <script>
@@ -1406,8 +1525,8 @@ function montarLinha(estado, ano, dias, filhos, usarTetoNacional, regimePreviden
 }
 
 function thVerba(verba) {
-  const title = verba.observacao ? ` title="${removerNegrito(verba.observacao)}"` : "";
-  const cursor = verba.observacao ? ` style="cursor:help"` : "";
+  const title = verba.descricao ? ` title="${removerNegrito(verba.descricao)}"` : "";
+  const cursor = verba.descricao ? ` style="cursor:help"` : "";
   return `<th${title}${cursor}>${verba.nome}</th>`;
 }
 
@@ -1755,7 +1874,7 @@ function renderHolerite(linha, estado, opcoes = {}) {
   const notas = [];
 
   function ref(v) {
-      const obs = v.observacoes || v.observacao;
+      const obs = v.descricao;
       if (!obs) return "";
     let i = notas.findIndex(n => n.id === v.id);
       if (i < 0) { notas.push({ id: v.id, obs }); i = notas.length - 1; }
@@ -1803,7 +1922,7 @@ function renderHolerite(linha, estado, opcoes = {}) {
     ? estado.ultimaAtualizacao.split("-").reverse().join("/")
     : null;
   const header = opcoes.semCabecalho ? "" : `<div class="hol-header">
-    <strong>${estado.nome}${estado.descricao ? `<sup class="nota-ref">*</sup>` : ""}</strong>
+    <strong>${estado.nome}</strong>
     <span>${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"} &nbsp;·&nbsp; ${linha.posicao}</span>
     ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${estado.cargaHorariaSemanal}h</span>` : ""}
     ${dataAtu ? `<span style="font-size:0.72rem;opacity:.6">Atualizado em ${dataAtu}</span>` : ""}
@@ -1839,9 +1958,8 @@ function renderHolerite(linha, estado, opcoes = {}) {
 
   // coluna lateral: notas + índices
   let lateral = "";
-  if (notas.length > 0 || estado.descricao) {
+  if (notas.length > 0) {
     const itens = [];
-    if (estado.descricao) itens.push(`<div><sup>*</sup> ${estado.descricao}</div>`);
     notas.forEach((n, i) => itens.push(`<div><sup>${i + 1}</sup> ${removerNegrito(n.obs)}</div>`));
     lateral += `<div class="hol-notas">${itens.join("")}</div>`;
   }
@@ -2913,6 +3031,24 @@ document.addEventListener("click", (event) => {
     return;
   }
   if (__tooltipFixa) limparTooltipFixa();
+});
+
+const __modalColabora = document.getElementById("modal-colabora");
+const __modalColaboraMensagem = document.getElementById("modal-colabora-mensagem");
+function abrirModalColabora() {
+  __modalColaboraMensagem.value = "";
+  __modalColabora.classList.add("aberto");
+}
+function fecharModalColabora() {
+  __modalColabora.classList.remove("aberto");
+}
+document.getElementById("btn-colabora-calculadora").addEventListener("click", abrirModalColabora);
+document.getElementById("modal-colabora-fechar").addEventListener("click", fecharModalColabora);
+__modalColabora.addEventListener("click", (ev) => {
+  if (ev.target === __modalColabora) fecharModalColabora();
+});
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape") fecharModalColabora();
 });
 
 carregarDados();
