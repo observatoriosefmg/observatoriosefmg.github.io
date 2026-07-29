@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-28T11:00:22.283Z",
-  "commitCount": 165,
-  "totalChangeCount": 55,
+  "generatedAt": "2026-07-29T13:49:06.503Z",
+  "commitCount": 166,
+  "totalChangeCount": 56,
   "history": [
     {
       "commit": {
@@ -1584,6 +1584,39 @@
             "NOME": "VINICIUS AMADEU SANTANA",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "ae3f513e00cd1ef96e5566e79312dc6453489b6e",
+        "date": "2026-07-29T13:48:29Z",
+        "author": "observatoriosefmg",
+        "message": "EXONERAÇÕES SEFAZ RN"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556566",
+          "inscricao": "266007615",
+          "nome": "ANTONIO THALES ROCHA CIDADE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ RN",
+          "before": {
+            "MASP": "7556566",
+            "INSCRICAO": "266007615",
+            "NOME": "ANTONIO THALES ROCHA CIDADE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556566",
+            "INSCRICAO": "266007615",
+            "NOME": "ANTONIO THALES ROCHA CIDADE",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ RN"
           }
         }
       ]
