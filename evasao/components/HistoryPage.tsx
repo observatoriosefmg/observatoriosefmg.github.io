@@ -154,8 +154,14 @@ const buildCurrentRecordMap = (currentRecords: CurrentRecord[]) => {
   return map;
 };
 
+const normalizeSituacao = (valor: string | null | undefined) => {
+  const situacao = String(valor ?? '').trim().toUpperCase();
+  if (situacao === 'EXONERAÇÃO' || situacao === 'EXONERACAO') return 'EXONERADO';
+  return situacao;
+};
+
 const formatDescription = (change: Change, currentOrgaoDestino?: string): React.ReactNode => {
-  const situacao = (change.toSituacao ?? '').trim().toUpperCase();
+  const situacao = normalizeSituacao(change.toSituacao);
   const destino = currentOrgaoDestino?.trim() || change.orgaoDestino?.trim();
   const pessoa = <strong className="text-amber-400">{change.nome}</strong>;
   let description: React.ReactNode;

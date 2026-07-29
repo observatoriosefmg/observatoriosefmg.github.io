@@ -91,6 +91,13 @@ const normalizeValue = (value) => {
 
 const normalizeKey = (value) => normalizeValue(value).toUpperCase();
 
+const normalizeSituacao = (value) => {
+  const situacao = normalizeValue(value).toUpperCase();
+  if (situacao === 'EXONERAÇÃO' || situacao === 'EXONERACAO') return 'EXONERADO';
+  if (situacao === 'EM EXERCICIO') return 'EM EXERCÍCIO';
+  return situacao;
+};
+
 const keyForRecord = (record) => {
   const key = normalizeValue(record['MASP'] ?? record['HGV-0']) ||
               normalizeValue(record['INSCRICAO']) ||
@@ -99,8 +106,8 @@ const keyForRecord = (record) => {
 };
 
 const isRelevantSituationChange = (beforeSituation, afterSituation) => {
-  const from = normalizeValue(beforeSituation).toUpperCase();
-  const to = normalizeValue(afterSituation).toUpperCase();
+  const from = normalizeSituacao(beforeSituation);
+  const to = normalizeSituacao(afterSituation);
 
   const fromExercise = ['EM EXERCÍCIO', 'EM EXERCICIO'];
   const toSecondGroup = ['EXONERADO', 'APOSENTADO', 'AFASTAMENTO PRELIMINAR À APOSENTADORIA'];
@@ -134,8 +141,8 @@ const compareRecords = (previous, current) => {
     const before = previousByMasp.get(masp);
     if (!before) continue;
 
-    const beforeSituacao = normalizeValue(before['SITUACAO']);
-    const afterSituacao = normalizeValue(after['SITUACAO']);
+    const beforeSituacao = normalizeSituacao(before['SITUACAO']);
+    const afterSituacao = normalizeSituacao(after['SITUACAO']);
     if (!isRelevantSituationChange(beforeSituacao, afterSituacao)) continue;
 
     changes.push({
