@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-27T00:37:13.660Z",
-  "commitCount": 163,
-  "totalChangeCount": 55,
+  "generatedAt": "2026-07-29T14:27:23.464Z",
+  "commitCount": 167,
+  "totalChangeCount": 57,
   "history": [
     {
       "commit": {
@@ -1582,6 +1582,61 @@
             "MASP": "7556913",
             "INSCRICAO": "266025540",
             "NOME": "VINICIUS AMADEU SANTANA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "6554fcb1ae617f40c74c50db23e00459b8b026e1",
+        "date": "2026-07-29T13:48:29Z",
+        "author": "observatoriosefmg",
+        "message": "EXONERAÇÕES SEFAZ RN"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "7556566",
+          "inscricao": "266007615",
+          "nome": "ANTONIO THALES ROCHA CIDADE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ RN",
+          "before": {
+            "MASP": "7556566",
+            "INSCRICAO": "266007615",
+            "NOME": "ANTONIO THALES ROCHA CIDADE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556566",
+            "INSCRICAO": "266007615",
+            "NOME": "ANTONIO THALES ROCHA CIDADE",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ RN"
+          }
+        },
+        {
+          "masp": "7555246",
+          "inscricao": "266012718",
+          "nome": "ANDRE FEIJO QUINTELA FILHO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "7555246",
+            "INSCRICAO": "266012718",
+            "NOME": "ANDRE FEIJO QUINTELA FILHO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555246",
+            "INSCRICAO": "266012718",
+            "NOME": "ANDRE FEIJO QUINTELA FILHO",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": ""
           }

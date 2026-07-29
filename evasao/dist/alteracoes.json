@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-27T00:37:13.831Z",
-  "commitCount": 163,
+  "generatedAt": "2026-07-29T14:27:23.465Z",
+  "commitCount": 167,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -980,6 +980,30 @@
       "date": "2026-07-25T17:24:19Z",
       "author": "observatoriosefmg",
       "message": "ATUALIZAÇÃO DE DADOS"
+    },
+    {
+      "hash": "b63d984c627bc92d235f29851043a3487ac462ce",
+      "date": "2026-07-28T10:39:00Z",
+      "author": "observatoriosefmg",
+      "message": "David Daniel"
+    },
+    {
+      "hash": "2e586f0e7292091ebf3541b017a2e2809c2b42b5",
+      "date": "2026-07-28T10:44:07Z",
+      "author": "observatoriosefmg",
+      "message": "LILIAN SILVEIRA DE PAULA MILAGRES"
+    },
+    {
+      "hash": "6554fcb1ae617f40c74c50db23e00459b8b026e1",
+      "date": "2026-07-29T13:48:29Z",
+      "author": "observatoriosefmg",
+      "message": "EXONERAÇÕES SEFAZ RN"
+    },
+    {
+      "hash": "526e6aa59106330af649852c655aadbae6314365",
+      "date": "2026-07-29T14:10:33Z",
+      "author": "observatoriosefmg",
+      "message": "generate changes"
     }
   ]
 }
