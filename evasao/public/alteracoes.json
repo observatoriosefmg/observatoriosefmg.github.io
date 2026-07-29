@@ -1,6 +1,6 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-29T14:10:09.476Z",
+  "generatedAt": "2026-07-29T14:27:23.465Z",
   "commitCount": 167,
   "commits": [
     {
@@ -994,16 +994,16 @@
       "message": "LILIAN SILVEIRA DE PAULA MILAGRES"
     },
     {
-      "hash": "ae3f513e00cd1ef96e5566e79312dc6453489b6e",
+      "hash": "6554fcb1ae617f40c74c50db23e00459b8b026e1",
       "date": "2026-07-29T13:48:29Z",
       "author": "observatoriosefmg",
       "message": "EXONERAÇÕES SEFAZ RN"
     },
     {
-      "hash": "0784f5e437c8498c89ddbc158d981d750d6c1396",
-      "date": "2026-07-29T13:50:47Z",
+      "hash": "526e6aa59106330af649852c655aadbae6314365",
+      "date": "2026-07-29T14:10:33Z",
       "author": "observatoriosefmg",
-      "message": "sefaz rn"
+      "message": "generate changes"
     }
   ]
 }
