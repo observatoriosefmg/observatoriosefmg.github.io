@@ -256,8 +256,14 @@ const App: React.FC = () => {
     return dateString;
   };
 
+  const normalizeSituacao = (valor: string | null | undefined) => {
+    const situacao = String(valor ?? '').trim().toUpperCase();
+    if (situacao === 'EXONERAÇÃO' || situacao === 'EXONERACAO') return 'EXONERADO';
+    return situacao;
+  };
+
   const formatRecentChangeDescription = (change: RecentChange): React.ReactNode => {
-    const situacao = (change.toSituacao ?? '').trim().toUpperCase();
+    const situacao = normalizeSituacao(change.toSituacao);
     const pessoa = <strong>{change.nome}</strong>;
     let description: React.ReactNode;
 
