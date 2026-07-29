@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-29T13:49:06.504Z",
-  "commitCount": 166,
+  "generatedAt": "2026-07-29T13:51:11.998Z",
+  "commitCount": 167,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -998,6 +998,12 @@
       "date": "2026-07-29T13:48:29Z",
       "author": "observatoriosefmg",
       "message": "EXONERAÇÕES SEFAZ RN"
+    },
+    {
+      "hash": "0784f5e437c8498c89ddbc158d981d750d6c1396",
+      "date": "2026-07-29T13:50:47Z",
+      "author": "observatoriosefmg",
+      "message": "sefaz rn"
     }
   ]
 }
