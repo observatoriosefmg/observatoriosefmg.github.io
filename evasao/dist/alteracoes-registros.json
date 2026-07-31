@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-29T14:27:23.464Z",
-  "commitCount": 167,
-  "totalChangeCount": 57,
+  "generatedAt": "2026-07-31T11:40:00.180Z",
+  "commitCount": 169,
+  "totalChangeCount": 59,
   "history": [
     {
       "commit": {
@@ -1639,6 +1639,61 @@
             "NOME": "ANDRE FEIJO QUINTELA FILHO",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "92dda54ff6c8622f7d466604df699153de407fa5",
+        "date": "2026-07-31T11:38:06Z",
+        "author": "observatoriosefmg",
+        "message": "exonerações sefaz rn"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "7556178",
+          "inscricao": "266010881",
+          "nome": "GIRLIAN ANTONIO DOS SANTOS",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ RN",
+          "before": {
+            "MASP": "7556178",
+            "INSCRICAO": "266010881",
+            "NOME": "GIRLIAN ANTONIO DOS SANTOS",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556178",
+            "INSCRICAO": "266010881",
+            "NOME": "GIRLIAN ANTONIO DOS SANTOS",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ RN"
+          }
+        },
+        {
+          "masp": "7554934",
+          "inscricao": "266007685",
+          "nome": "MARILA SOARES MELO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ RN",
+          "before": {
+            "MASP": "7554934",
+            "INSCRICAO": "266007685",
+            "NOME": "MARILA SOARES MELO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7554934",
+            "INSCRICAO": "266007685",
+            "NOME": "MARILA SOARES MELO",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ RN"
           }
         }
       ]
