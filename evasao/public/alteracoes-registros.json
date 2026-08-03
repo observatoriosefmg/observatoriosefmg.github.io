@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-07-31T11:40:00.180Z",
-  "commitCount": 169,
-  "totalChangeCount": 59,
+  "generatedAt": "2026-08-03T01:28:10.831Z",
+  "commitCount": 170,
+  "totalChangeCount": 61,
   "history": [
     {
       "commit": {
@@ -1694,6 +1694,61 @@
             "NOME": "MARILA SOARES MELO",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "SEFAZ RN"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "247a06e3d88b6cfed1f0457cb607432985887d6d",
+        "date": "2026-08-03T01:27:53Z",
+        "author": "observatoriosefmg",
+        "message": "afastamentos"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "3724135",
+          "inscricao": "",
+          "nome": "CARLOS HENRIQUE PEIXOTO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3724135",
+            "INSCRICAO": "",
+            "NOME": "CARLOS HENRIQUE PEIXOTO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3724135",
+            "INSCRICAO": "",
+            "NOME": "CARLOS HENRIQUE PEIXOTO",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "3867447",
+          "inscricao": "",
+          "nome": "MARIA ELIZA FREIRE E SILVA COELHO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3867447",
+            "INSCRICAO": "",
+            "NOME": "MARIA ELIZA FREIRE E SILVA COELHO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3867447",
+            "INSCRICAO": "",
+            "NOME": "MARIA ELIZA FREIRE E SILVA COELHO",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
           }
         }
       ]
