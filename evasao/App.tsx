@@ -572,7 +572,6 @@ const App: React.FC = () => {
       'alteracoes-registros.json',
       '/alteracoes-registros.json',
       '/evasao/alteracoes-registros.json',
-      '/evasao/dist/alteracoes-registros.json',
     ];
 
     const criarUrlSemCache = (baseUrl: string) => baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'v=' + Date.now();

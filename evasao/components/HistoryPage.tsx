@@ -320,7 +320,6 @@ const HistoryPage: React.FC = () => {
           'alteracoes-registros.json',
           '/alteracoes-registros.json',
           '/evasao/alteracoes-registros.json',
-          '/evasao/dist/alteracoes-registros.json',
         ];
         console.log('[HistoryPage] loadHistory: baseUrl=', baseUrl, 'caminhosHistorico=', caminhosHistorico);
 
