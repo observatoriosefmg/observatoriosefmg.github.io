@@ -179,14 +179,25 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
 
             return (
               <React.Fragment key={dest + index}>
-                <tr className="hover:bg-gray-800/60 transition-colors duration-200">
+                <tr
+                  onClick={() => toggle(dest)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggle(dest);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  className="hover:bg-gray-800/60 transition-colors duration-200 cursor-pointer"
+                >
                   <td className="px-6 py-4 max-w-[180px] md:max-w-none align-middle">
-                    <button onClick={() => toggle(dest)} className="text-left w-full flex items-center gap-2 text-gray-200">
+                    <div className="text-left w-full flex items-center gap-2 text-gray-200">
                       <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 text-red-400 transform ${isOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                       <span className="break-words whitespace-normal block">{dest}</span>
-                    </button>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right font-bold text-red-400">{item.count}</td>
                 </tr>

@@ -222,9 +222,20 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
 
             return (
               <React.Fragment key={concurso + index}>
-                <tr className="hover:bg-gray-800/60 transition-colors duration-200">
+                <tr
+                  onClick={() => toggle(concurso)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggle(concurso);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  className="hover:bg-gray-800/60 transition-colors duration-200 cursor-pointer"
+                >
                   <td className="px-6 py-4 max-w-[180px] md:max-w-none align-middle">
-                    <button onClick={() => toggle(concurso)} className="text-left w-full flex items-center gap-2 text-gray-200">
+                    <div className="text-left w-full flex items-center gap-2 text-gray-200">
                       <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 text-amber-400 transform ${isOpen ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
@@ -232,7 +243,7 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
                         <span className="block">{concurso}</span>
                         <span className="block text-xs text-amber-300/90 mt-1">{item.statusConcurso}</span>
                       </span>
-                    </button>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right font-bold text-amber-400">{count}</td>
                 </tr>
