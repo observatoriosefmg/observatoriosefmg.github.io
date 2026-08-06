@@ -320,6 +320,25 @@
     flex-direction: column;
     gap: 12px;
   }
+  #painel-grafico {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #painel-grafico canvas,
+  #painel-grafico #grafico-posicao {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .barras-acumulado-nota {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
   #painel-barras #barras-echart {
     flex: 1 1 auto;
     min-height: 0;
@@ -473,6 +492,12 @@
     border: 1px solid #dbe2ec;
     border-radius: 8px;
     padding: 8px 10px;
+  }
+  .acoes-legenda-textos {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 360px;
   }
   .acoes-legenda-texto {
     color: #334155;
@@ -1169,8 +1194,11 @@
       <div class="grafico-loading-texto">Carregando gráfico...</div>
     </div>
     <div class="acoes-legenda-grafico" id="campo-visibilidade-estados" style="display:none;">
-      <span class="acoes-legenda-texto">Clique no nome de um estado na legenda para destacar, ocultar ou reexibir a linha.</span>
-      <div class="acoes-legenda-botoes">
+      <div class="acoes-legenda-textos">
+        <span class="acoes-legenda-texto" id="texto-aviso-acumulado-grafico" style="display:none;">Cálculo simplificado: o valor acumulado é estimado como o líquido mensal × 12, acumulado ao longo dos anos de serviço selecionados.</span>
+        <span class="acoes-legenda-texto" id="texto-aviso-legenda-grafico">Clique no nome de um estado na legenda para destacar, ocultar ou reexibir a linha.</span>
+      </div>
+      <div class="acoes-legenda-botoes" id="acoes-legenda-botoes">
         <button class="acao-legenda-btn" id="btn-estados-habilitar" onclick="setVisibilidadeEstados(true)">Habilitar todos</button>
         <button class="acao-legenda-btn" id="btn-estados-desabilitar" onclick="setVisibilidadeEstados(false)">Desabilitar todos</button>
       </div>
@@ -1189,6 +1217,7 @@
       </div>
       <input id="anosBarrasInput" type="number" min="0" max="40" step="1" value="0" />
     </div>
+    <div id="barras-acumulado-nota" class="barras-acumulado-nota" style="display:none;">Cálculo simplificado: o valor acumulado é estimado como o líquido mensal × 12, acumulado ao longo dos anos de serviço selecionados.</div>
     <div id="barras-echart" style="width:100%;"></div>
   </div>
 
@@ -1786,21 +1815,24 @@ function montarTabelaComparacao(opcoes) {
   const labelsAno = ["Inicial", "3 anos", "6 anos", "10 anos", "20 anos", "40 anos"];
   const emValorHora = opcoes.metricaGrafico === "hora";
   const emAcumulado = opcoes.metricaGrafico === "acumulado";
+  const anoMaxComparacao = Math.max(...anos);
   const listaEstados = window.__dados.listaEstados;
 
   const dadosPorUf = {};
   for (const { uf } of listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
-    const valoresLinha = anos.map(ano => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
-    const acumulado = [];
+    const linhasPorAno = Array.from({ length: anoMaxComparacao + 1 }, (_, ano) =>
+      montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar")
+    );
+    const acumuladoPorAno = [];
     let acumuladoTotal = 0;
-    valoresLinha.forEach((linha, idx) => {
-      const anosPassados = idx === 0 ? 1 : anos[idx] - anos[idx - 1];
-      acumuladoTotal += linha.remuneracaoLiquida * 12 * anosPassados;
-      acumulado[idx] = acumuladoTotal;
-    });
-    const valores = valoresLinha.map((linha, idx) => {
-      return emValorHora ? linha.liquidoPorHora : emAcumulado ? acumulado[idx] : linha.remuneracaoLiquida;
+    for (let ano = 0; ano <= anoMaxComparacao; ano++) {
+      acumuladoTotal += linhasPorAno[ano].remuneracaoLiquida * 12;
+      acumuladoPorAno[ano] = acumuladoTotal;
+    }
+    const valores = anos.map((ano) => {
+      const linha = linhasPorAno[ano];
+      return emValorHora ? linha.liquidoPorHora : emAcumulado ? acumuladoPorAno[ano] : linha.remuneracaoLiquida;
     });
     dadosPorUf[uf] = { nome: estado.nome, valores };
   }
@@ -1842,7 +1874,10 @@ function montarTabelaComparacao(opcoes) {
     })
     .join("");
 
-  return `<div class="tabela-wrapper">${cabecalho}${linhasHtml}</tbody></table></div>`;
+  const notaAcumulado = emAcumulado
+    ? `<div class="barras-acumulado-nota" style="margin-bottom:10px;">Cálculo simplificado: o valor acumulado é estimado como o líquido mensal × 12, acumulado ao longo dos anos de serviço selecionados.</div>`
+    : "";
+  return `${notaAcumulado}<div class="tabela-wrapper">${cabecalho}${linhasHtml}</tbody></table></div>`;
 }
 
 function renderizarTabelaComparacao(opcoes) {
@@ -2006,7 +2041,18 @@ function sincronizarEstadoLegendaDatasets(chart) {
 function atualizarCampoVisibilidadeEstados() {
   const campo = document.getElementById("campo-visibilidade-estados");
   if (!campo) return;
-  campo.style.display = (__vista === "grafico" && __eixoYGrafico === "remuneracao") ? "" : "none";
+  const textoAcumulado = document.getElementById("texto-aviso-acumulado-grafico");
+  const textoLegenda = document.getElementById("texto-aviso-legenda-grafico");
+  const botoesLegenda = document.getElementById("acoes-legenda-botoes");
+  const emGrafico = __vista === "grafico";
+  const emRemuneracao = __eixoYGrafico === "remuneracao";
+  const emAcumulado = __metricaGrafico === "acumulado";
+
+  if (textoAcumulado) textoAcumulado.style.display = emAcumulado ? "" : "none";
+  if (textoLegenda) textoLegenda.style.display = emRemuneracao ? "" : "none";
+  if (botoesLegenda) botoesLegenda.style.display = emRemuneracao ? "inline-flex" : "none";
+  campo.style.display = (emGrafico && (emRemuneracao || emAcumulado)) ? "" : "none";
+
   if (__grafico && __vista === "grafico") {
     requestAnimationFrame(() => {
       if (__grafico) __grafico.resize();
@@ -2883,6 +2929,15 @@ function menorMultiploMaiorQue(valor, passo) {
   return passo * (Math.floor(valor / passo) + 1);
 }
 
+function calcularIntervaloEixoBarras(min, max, divisoes = 6) {
+  const range = Math.max(1, max - min);
+  const rawStep = range / divisoes;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const normalized = rawStep / magnitude;
+  const nice = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+  return nice * magnitude;
+}
+
 /**
  * Percorre todo o intervalo de anos de servico (0 a anosMax) e todos os
  * estados (mais a MEDIA) para achar o menor/maior valor liquido mensal e
@@ -2890,7 +2945,38 @@ function menorMultiploMaiorQue(valor, passo) {
  * do eixo X do grafico de barras, evitando que o eixo "pule" ao mover o
  * slider de anos.
  */
-function calcularLimitesEixoBarras(opcoes) {
+function obterLinhaCacheBarras(estado, anosServico, opcoes, cache) {
+  if (!cache) {
+    return montarLinha(
+      estado,
+      anosServico,
+      opcoes.diasTrabalhados,
+      opcoes.numeroFilhos,
+      opcoes.usarTetoNacional,
+      opcoes.regimePrevidencia || "com_complementar"
+    );
+  }
+  let porAno = cache.get(estado);
+  if (!porAno) {
+    porAno = new Map();
+    cache.set(estado, porAno);
+  }
+  if (porAno.has(anosServico)) return porAno.get(anosServico);
+  const linha = montarLinha(
+    estado,
+    anosServico,
+    opcoes.diasTrabalhados,
+    opcoes.numeroFilhos,
+    opcoes.usarTetoNacional,
+    opcoes.regimePrevidencia || "com_complementar"
+  );
+  porAno.set(anosServico, linha);
+  return linha;
+}
+
+function calcularLimitesEixoBarras(opcoes, cache = null, estadosData = null, anoSelecionado = null) {
+  const emValorHora = (opcoes.metricaGrafico || "mensal") === "hora";
+  const emAcumulado = (opcoes.metricaGrafico || "mensal") === "acumulado";
   const anosMax = window.__dados.anosMax;
   let minLiquido = Infinity, maxLiquido = -Infinity;
   let minPorHora = Infinity, maxPorHora = -Infinity;
@@ -2898,22 +2984,37 @@ function calcularLimitesEixoBarras(opcoes) {
   const somaPorHoraPorAno = new Array(anosMax + 1).fill(0);
   let totalEstados = 0;
 
-  for (const { uf } of window.__dados.listaEstados) {
-    const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
+  const estados = estadosData || window.__dados.listaEstados.map(({ uf }) => ({
+    uf,
+    estado: obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade),
+  }));
+  const anoInicial = emAcumulado && Number.isFinite(anoSelecionado) ? anoSelecionado : 0;
+  const anoFinal = emAcumulado && Number.isFinite(anoSelecionado) ? anoSelecionado : anosMax;
+
+  for (const item of estados) {
+    const estado = item.estado;
+    if (!estado || estado.dadosIncompletos) continue;
+    let acumuladoPorAno = 0;
     for (let ano = 0; ano <= anosMax; ano++) {
-      const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
-      minLiquido = Math.min(minLiquido, linha.remuneracaoLiquida);
-      maxLiquido = Math.max(maxLiquido, linha.remuneracaoLiquida);
+      const linha = obterLinhaCacheBarras(estado, ano, opcoes, cache);
+      let valorLiquido = linha.remuneracaoLiquida;
+      if (emAcumulado) {
+        acumuladoPorAno += linha.remuneracaoLiquida * 12;
+        valorLiquido = acumuladoPorAno;
+      }
+      if (ano < anoInicial || ano > anoFinal) continue;
+      minLiquido = Math.min(minLiquido, valorLiquido);
+      maxLiquido = Math.max(maxLiquido, valorLiquido);
       minPorHora = Math.min(minPorHora, linha.liquidoPorHora);
       maxPorHora = Math.max(maxPorHora, linha.liquidoPorHora);
-      somaLiquidaPorAno[ano] += linha.remuneracaoLiquida;
+      somaLiquidaPorAno[ano] += valorLiquido;
       somaPorHoraPorAno[ano] += linha.liquidoPorHora;
     }
     totalEstados++;
   }
 
   if (totalEstados > 0) {
-    for (let ano = 0; ano <= anosMax; ano++) {
+    for (let ano = anoInicial; ano <= anoFinal; ano++) {
       const mediaLiquida = somaLiquidaPorAno[ano] / totalEstados;
       const mediaPorHora = somaPorHoraPorAno[ano] / totalEstados;
       minLiquido = Math.min(minLiquido, mediaLiquida);
@@ -2939,6 +3040,7 @@ function renderizarBarras(opcoes) {
   const emAcumulado = (opcoes.metricaGrafico || "mensal") === "acumulado";
   const ano = anosBarrasAtual();
   const telaPequena = ehTelaPequenaBarras();
+  const linhaCache = new Map();
 
   const itens = [];
   let somaLiquida = 0;
@@ -2946,17 +3048,21 @@ function renderizarBarras(opcoes) {
   let somaLiquidaAcumulada = 0;
   let totalEstados = 0;
 
-  for (const { uf } of window.__dados.listaEstados) {
-    const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
-    const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
-    let valorAcumulado = null;
+  const estadosParaBarras = window.__dados.listaEstados.map(({ uf }) => ({
+    uf,
+    estado: obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade),
+  }));
+
+  const limitesEixo = calcularLimitesEixoBarras(opcoes, linhaCache, estadosParaBarras, emAcumulado ? ano : null);
+
+  for (const { uf, estado } of estadosParaBarras) {
+    const linha = obterLinhaCacheBarras(estado, ano, opcoes, linhaCache);
+    let valorAcumulado = 0;
     if (emAcumulado) {
-      let acumulado = 0;
       for (let anoAcumulado = 0; anoAcumulado <= ano; anoAcumulado++) {
-        const linhaAno = montarLinha(estado, anoAcumulado, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
-        acumulado += linhaAno.remuneracaoLiquida * 12;
+        const linhaAno = obterLinhaCacheBarras(estado, anoAcumulado, opcoes, linhaCache);
+        valorAcumulado += linhaAno.remuneracaoLiquida * 12;
       }
-      valorAcumulado = acumulado;
     }
     itens.push({
       uf,
@@ -3004,27 +3110,22 @@ function renderizarBarras(opcoes) {
     _item: item,
   }));
 
-  const limitesEixo = calcularLimitesEixoBarras(opcoes);
   const passoEixo = emValorHora ? 20 : emAcumulado ? 10000 : 2000;
-  const margemEixo = emValorHora ? 5 : emAcumulado ? 10000 : 500;
-  const minAtual = Math.min(...itens.map(item => Number(item.valor) || 0));
-  const maxAtual = Math.max(...itens.map(item => Number(item.valor) || 0));
-  const minEixoValor = emValorHora
-    ? limitesEixo.minPorHora
-    : emAcumulado
-      ? minAtual
-      : limitesEixo.minLiquido;
-  const maxEixoValor = emValorHora
-    ? limitesEixo.maxPorHora
-    : emAcumulado
-      ? maxAtual
-      : limitesEixo.maxLiquido;
+  const margemEixo = emValorHora ? 5 : emAcumulado ? Math.max(10000, (limitesEixo.maxLiquido || 0) * 0.08) : 500;
+  const minEixoValor = emValorHora ? limitesEixo.minPorHora : limitesEixo.minLiquido;
+  const maxEixoValor = emValorHora ? limitesEixo.maxPorHora : limitesEixo.maxLiquido;
   const xAxisMin = Number.isFinite(minEixoValor)
     ? (emAcumulado ? maiorMultiploMenorQue(minEixoValor, passoEixo) : maiorMultiploMenorQue(minEixoValor - margemEixo, passoEixo))
     : undefined;
   const xAxisMax = Number.isFinite(maxEixoValor)
     ? menorMultiploMaiorQue(maxEixoValor + margemEixo, passoEixo)
     : undefined;
+  const xAxisInterval = calcularIntervaloEixoBarras(xAxisMin ?? 0, xAxisMax ?? (xAxisMin ?? 0) + passoEixo, telaPequena ? 5 : 6);
+
+  const notaAcumuladoEl = document.getElementById("barras-acumulado-nota");
+  if (notaAcumuladoEl) {
+    notaAcumuladoEl.style.display = emAcumulado ? "block" : "none";
+  }
 
   const opcoesEchart = {
     animationDurationUpdate: 700,
@@ -3036,6 +3137,7 @@ function renderizarBarras(opcoes) {
       type: "value",
       min: xAxisMin,
       max: xAxisMax,
+      interval: xAxisInterval,
       axisLabel: {
         formatter: v => telaPequena ? formatarValorBarrasCompacto(v, emValorHora) : formatarValorBarras(v, emValorHora),
         fontSize: telaPequena ? 10 : 12,
@@ -3113,7 +3215,7 @@ function renderizarBarras(opcoes) {
         color: "#1a1f2b",
         fontWeight: 700,
         fontSize: telaPequena ? 10 : 12,
-        formatter: p => telaPequena ? formatarValorBarrasCompacto(p.value, emValorHora) : formatarValorBarras(p.value, emValorHora),
+        formatter: p => formatarValorBarrasCompacto(p.value, emValorHora),
       },
     }],
     tooltip: {
