@@ -455,6 +455,54 @@
     color: #334155;
     font-weight: 600;
   }
+  #painel-grafico {
+    padding: 74px 16px 16px;
+  }
+  .acoes-legenda-grafico {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    right: 16px;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #dbe2ec;
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .acoes-legenda-texto {
+    color: #334155;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .acoes-legenda-botoes {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .acao-legenda-btn {
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  }
+  .acao-legenda-btn:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    color: #0f172a;
+  }
   @keyframes girar-loading {
     to { transform: rotate(360deg); }
   }
@@ -999,6 +1047,26 @@
       padding: 8px;
       height: 690px;
     }
+    #painel-grafico {
+      padding: 94px 8px 8px;
+    }
+    .acoes-legenda-grafico {
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      padding: 7px 8px;
+      gap: 8px;
+    }
+    .acoes-legenda-texto {
+      font-size: 0.72rem;
+    }
+    .acoes-legenda-botoes {
+      gap: 6px;
+    }
+    .acao-legenda-btn {
+      font-size: 0.7rem;
+      padding: 5px 8px;
+    }
     .instagram-callout { flex-direction: column; }
     .instagram-callout-midia { width: 60px; height: 60px; }
   }
@@ -1049,6 +1117,7 @@
       <label>Métrica do gráfico</label>
       <div class="grupo-vista">
         <button class="btn-vista ativo" id="btn-metrica-mensal" onclick="setMetricaGrafico('mensal')">Líquido Mensal</button>
+        <button class="btn-vista" id="btn-metrica-acumulado" onclick="setMetricaGrafico('acumulado')">Líquido Acumulado</button>
         <button class="btn-vista" id="btn-metrica-hora" onclick="setMetricaGrafico('hora')">Líquido por hora</button>
       </div>
     </div>
@@ -1087,12 +1156,24 @@
       <label for="escolaridade">Escolaridade</label>
       <select id="escolaridade"></select>
     </div>
+
+    <div class="campo" id="campo-comparacao-acumulado" style="display:none;">
+      <label for="comparacaoAcumulado">Comparação do acumulado</label>
+      <select id="comparacaoAcumulado"></select>
+    </div>
   </div>
 
   <div class="grafico-wrapper" id="painel-grafico" style="display:none;">
     <div class="grafico-loading ativo" id="grafico-loading" aria-live="polite">
       <div class="grafico-loading-spinner" aria-hidden="true"></div>
       <div class="grafico-loading-texto">Carregando gráfico...</div>
+    </div>
+    <div class="acoes-legenda-grafico" id="campo-visibilidade-estados" style="display:none;">
+      <span class="acoes-legenda-texto">Clique no nome de um estado na legenda para destacar, ocultar ou reexibir a linha.</span>
+      <div class="acoes-legenda-botoes">
+        <button class="acao-legenda-btn" id="btn-estados-habilitar" onclick="setVisibilidadeEstados(true)">Habilitar todos</button>
+        <button class="acao-legenda-btn" id="btn-estados-desabilitar" onclick="setVisibilidadeEstados(false)">Desabilitar todos</button>
+      </div>
     </div>
     <canvas id="grafico"></canvas>
     <div id="grafico-posicao" style="display:none;width:100%;height:100%;"></div>
@@ -1299,7 +1380,24 @@ function ehSingular(valor) {
   return valor != null && Math.abs(valor) > 0 && Math.abs(valor) < 2;
 }
 
-function montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora) {
+function montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora, emAcumulado = false, mediaLiquidaMensal = null, mediaDiferencaAcumulado = null, rotuloComparacaoAcumulado = "pior estado") {
+  if (emAcumulado) {
+    return montarConteudoTooltipLiquidoAcumulado(
+      { nome: "Média entre os estados" },
+      {
+        anosServico,
+        remuneracaoLiquida: mediaLiquida,
+        remuneracaoLiquidaAcumulada: mediaLiquida,
+        remuneracaoLiquidaMensal: Number.isFinite(mediaLiquidaMensal) ? mediaLiquidaMensal : mediaLiquida,
+        diferencaAcumulado: mediaDiferencaAcumulado
+      },
+      {
+        mostrarDiferencaPiorEstado: true,
+        diferencaAcumulado: mediaDiferencaAcumulado,
+        rotuloComparacao: rotuloComparacaoAcumulado
+      }
+    );
+  }
   return `
     <div class="tooltip-resumo-titulo">Média entre os estados · ${anosServico} ano${ehSingular(anosServico) ? "" : "s"}</div>
     <div class="tooltip-resumo-item"><span>Remuneração Líquida Mensal</span><span class="tooltip-resumo-valor pos">${formatarMoeda(mediaLiquida)}</span></div>
@@ -1307,7 +1405,7 @@ function montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora) {
   `;
 }
 
-function renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, cx, cy) {
+function renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, emAcumulado, mediaLiquidaMensal, mediaDiferencaAcumulado, rotuloComparacaoAcumulado, cx, cy) {
   if (tooltipBloqueadoNoModal()) {
     tooltipEl.style.display = "none";
     tooltipEl.classList.remove("resumo");
@@ -1318,7 +1416,53 @@ function renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, 
   __tooltipAtual = null;
   tooltipEl.classList.remove("resumo");
   tooltipEl.style.pointerEvents = "none";
-  tooltipEl.innerHTML = `<div style="padding:12px 14px">${montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora)}</div>`;
+  const conteudo = montarConteudoTooltipMedia(anosServico, mediaLiquida, mediaPorHora, emAcumulado, mediaLiquidaMensal, mediaDiferencaAcumulado, rotuloComparacaoAcumulado);
+  tooltipEl.innerHTML = emAcumulado ? conteudo : `<div style="padding:12px 14px">${conteudo}</div>`;
+  tooltipEl.style.display = "block";
+  posicionarTooltip(tooltipEl, cx, cy, false);
+}
+
+function montarConteudoTooltipLiquidoAcumulado(estado, linha, opcoes = {}) {
+  const valorAcumulado = Number.isFinite(opcoes.valorAcumulado)
+    ? opcoes.valorAcumulado
+    : (linha?.remuneracaoLiquidaAcumulada ?? linha?.remuneracaoLiquida);
+  const valorMensal = Number.isFinite(linha?.remuneracaoLiquidaMensal)
+    ? linha.remuneracaoLiquidaMensal
+    : linha?.remuneracaoLiquida;
+  const diferencaAcumulado = Number.isFinite(opcoes.diferencaAcumulado)
+    ? opcoes.diferencaAcumulado
+    : linha?.diferencaAcumulado;
+  const rotuloComparacao = String(opcoes.rotuloComparacao || "pior estado");
+  const mostrarDiferencaPiorEstado = Boolean(opcoes.mostrarDiferencaPiorEstado) && Number.isFinite(diferencaAcumulado);
+  const diferencaFormatada = !Number.isFinite(diferencaAcumulado)
+    ? "Não disponível"
+    : (diferencaAcumulado > 0 ? `+${formatarMoeda(diferencaAcumulado)}` : formatarMoeda(diferencaAcumulado));
+  return `<div style="padding:14px 16px;max-width:640px;white-space:normal;">
+    <div style="font-weight:700;margin-bottom:10px">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}</div>
+    <div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid #e2e8f0;">
+      <span>Remuneração Líquida Acumulada</span><strong>${formatarMoeda(valorAcumulado)}</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;${mostrarDiferencaPiorEstado ? "border-bottom:1px solid #e2e8f0;" : ""}">
+      <span>Remuneração Líquida Mensal</span><strong>${formatarMoeda(valorMensal)}</strong>
+    </div>
+    ${mostrarDiferencaPiorEstado
+      ? `<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;"><span>Líquido acumulado em relação a ${htmlEsc(rotuloComparacao)}</span><strong>${diferencaFormatada}</strong></div>`
+      : ""}
+  </div>`;
+}
+
+function renderTooltipLiquidoAcumulado(tooltipEl, linha, estadoTooltip, opcoes, cx, cy) {
+  if (tooltipBloqueadoNoModal()) {
+    tooltipEl.style.display = "none";
+    tooltipEl.classList.remove("resumo");
+    tooltipEl.style.pointerEvents = "none";
+    __tooltipAtual = null;
+    return;
+  }
+  __tooltipAtual = null;
+  tooltipEl.classList.remove("resumo");
+  tooltipEl.style.pointerEvents = "none";
+  tooltipEl.innerHTML = montarConteudoTooltipLiquidoAcumulado(estadoTooltip, linha, opcoes);
   tooltipEl.style.display = "block";
   posicionarTooltip(tooltipEl, cx, cy, false);
 }
@@ -1641,14 +1785,22 @@ function montarTabelaComparacao(opcoes) {
   const anos = [0, 3, 6, 10, 20, 40];
   const labelsAno = ["Inicial", "3 anos", "6 anos", "10 anos", "20 anos", "40 anos"];
   const emValorHora = opcoes.metricaGrafico === "hora";
+  const emAcumulado = opcoes.metricaGrafico === "acumulado";
   const listaEstados = window.__dados.listaEstados;
 
   const dadosPorUf = {};
   for (const { uf } of listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
-    const valores = anos.map(ano => {
-      const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
-      return emValorHora ? linha.liquidoPorHora : linha.remuneracaoLiquida;
+    const valoresLinha = anos.map(ano => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
+    const acumulado = [];
+    let acumuladoTotal = 0;
+    valoresLinha.forEach((linha, idx) => {
+      const anosPassados = idx === 0 ? 1 : anos[idx] - anos[idx - 1];
+      acumuladoTotal += linha.remuneracaoLiquida * 12 * anosPassados;
+      acumulado[idx] = acumuladoTotal;
+    });
+    const valores = valoresLinha.map((linha, idx) => {
+      return emValorHora ? linha.liquidoPorHora : emAcumulado ? acumulado[idx] : linha.remuneracaoLiquida;
     });
     dadosPorUf[uf] = { nome: estado.nome, valores };
   }
@@ -1704,8 +1856,79 @@ function lerOpcoes() {
     usarTetoNacional: __usarTetoNacional,
     regimePrevidencia: __regimePrevidencia,
     metricaGrafico: __metricaGrafico,
+    comparacaoAcumulado: __comparacaoAcumulado,
     escolaridade: document.getElementById("escolaridade").value || null,
   };
+}
+
+function eixoRemuneracaoAcumuladoAtivo() {
+  return __metricaGrafico === "acumulado" && __vista === "grafico" && __eixoYGrafico === "remuneracao";
+}
+
+function atualizarCampoComparacaoAcumulado() {
+  const campo = document.getElementById("campo-comparacao-acumulado");
+  if (!campo) return;
+  const metricaVisivel = document.getElementById("campo-metrica-grafico").style.display !== "none";
+  campo.style.display = metricaVisivel && eixoRemuneracaoAcumuladoAtivo() ? "" : "none";
+}
+
+function listarEstadosComparacaoAcumulado() {
+  if (!window.__dados || !Array.isArray(window.__dados.listaEstados)) return [];
+  return window.__dados.listaEstados
+    .map(({ uf, nome }) => ({ uf, nome }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+}
+
+function popularSeletorComparacaoAcumulado() {
+  const select = document.getElementById("comparacaoAcumulado");
+  if (!select) return;
+  const opcoesFixas = [
+    { value: "pior", label: "Pior estado" },
+    { value: "melhor", label: "Melhor estado" },
+    { value: "media", label: "Média" },
+  ];
+  const estados = listarEstadosComparacaoAcumulado().map(({ uf, nome }) => ({
+    value: `estado:${uf}`,
+    label: `${nome} (${uf})`
+  }));
+  select.innerHTML = [...opcoesFixas, ...estados]
+    .map((item) => `<option value="${htmlEsc(item.value)}">${htmlEsc(item.label)}</option>`)
+    .join("");
+  if (![...select.options].some((opt) => opt.value === __comparacaoAcumulado)) {
+    __comparacaoAcumulado = "pior";
+  }
+  select.value = __comparacaoAcumulado;
+}
+
+function obterRotuloComparacaoAcumulado(comparacaoAcumulado) {
+  if (comparacaoAcumulado === "melhor") return "melhor estado";
+  if (comparacaoAcumulado === "media") return "média";
+  if (comparacaoAcumulado && comparacaoAcumulado.startsWith("estado:")) {
+    const uf = comparacaoAcumulado.slice("estado:".length);
+    const estado = window.__dados?.estados?.[uf];
+    if (estado && estado.nome) return `${estado.nome} (${uf})`;
+    return uf;
+  }
+  return "pior estado";
+}
+
+function obterValorComparacaoAcumulado(comparacaoAcumulado, ano, acumuladoPorUf, mediaLiquidaAcumulada) {
+  const valoresAno = Object.values(acumuladoPorUf)
+    .map((serie) => serie?.[ano])
+    .filter((valor) => Number.isFinite(valor));
+  if (!valoresAno.length) return 0;
+  if (comparacaoAcumulado === "melhor") return Math.max(...valoresAno);
+  if (comparacaoAcumulado === "media") {
+    const media = mediaLiquidaAcumulada?.[ano];
+    return Number.isFinite(media) ? media : (valoresAno.reduce((acc, v) => acc + v, 0) / valoresAno.length);
+  }
+  if (comparacaoAcumulado && comparacaoAcumulado.startsWith("estado:")) {
+    const uf = comparacaoAcumulado.slice("estado:".length);
+    const serie = acumuladoPorUf[uf];
+    const valorEstado = serie?.[ano];
+    if (Number.isFinite(valorEstado)) return valorEstado;
+  }
+  return Math.min(...valoresAno);
 }
 
 /**
@@ -1778,6 +2001,40 @@ function sincronizarEstadoLegendaDatasets(chart) {
       meta.hidden = dataset._estadoLegenda === ESTADO_LINHA_DESATIVADO;
     }
   });
+}
+
+function atualizarCampoVisibilidadeEstados() {
+  const campo = document.getElementById("campo-visibilidade-estados");
+  if (!campo) return;
+  campo.style.display = (__vista === "grafico" && __eixoYGrafico === "remuneracao") ? "" : "none";
+  if (__grafico && __vista === "grafico") {
+    requestAnimationFrame(() => {
+      if (__grafico) __grafico.resize();
+    });
+  }
+}
+
+function setVisibilidadeEstados(habilitar) {
+  if (!__grafico || __vista !== "grafico" || __eixoYGrafico !== "remuneracao") return;
+  __grafico.data.datasets.forEach((dataset) => {
+    if (habilitar) {
+      if (dataset._estadoLegenda === ESTADO_LINHA_DESATIVADO) {
+        dataset._estadoLegenda = ESTADO_LINHA_OFUSCADO;
+      }
+      return;
+    }
+    dataset._estadoLegenda = ESTADO_LINHA_DESATIVADO;
+  });
+
+  if (__tooltipFixa && !habilitar) {
+    const datasetAtual = __grafico.data.datasets[__tooltipFixa.datasetIndex];
+    if (datasetAtual) {
+      limparTooltipFixa();
+    }
+  }
+
+  sincronizarEstadoLegendaDatasets(__grafico);
+  aplicarEstiloGrafico(__grafico, obterIndiceHoverPadrao(__grafico));
 }
 
 function corDataset(corBase, estadoLinha, index) {
@@ -2006,6 +2263,7 @@ function renderizarGrafico(opcoes) {
   __opcoesGrafico = { ...opcoes };
   const metricaGrafico = opcoes.metricaGrafico || "mensal";
   const emValorHora = metricaGrafico === "hora";
+  const emAcumulado = metricaGrafico === "acumulado";
   const anosMax = window.__dados.anosMax;
   const labels = Array.from({ length: anosMax + 1 }, (_, i) => i);
   const datasets = [];
@@ -2016,19 +2274,29 @@ function renderizarGrafico(opcoes) {
 
   const somaLiquida = new Array(anosMax + 1).fill(0);
   const somaPorHora = new Array(anosMax + 1).fill(0);
+  const somaLiquidaAcumulada = new Array(anosMax + 1).fill(0);
+  const acumuladoPorUf = {};
   let totalEstados = 0;
 
   for (const { uf } of window.__dados.listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
     const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
+    const acumuladoLiquido = [];
+    let cumul = 0;
+    linhas.forEach((l, i) => {
+      cumul += l.remuneracaoLiquida * 12;
+      acumuladoLiquido[i] = cumul;
+    });
+    acumuladoPorUf[uf] = acumuladoLiquido;
     const ehMinas = uf === "MG";
     const label = `${estado.nome} (${uf})`;
     const datasetEstado = {
       label,
-      data: linhas.map(l => emValorHora ? l.liquidoPorHora : l.remuneracaoLiquida),
+      data: linhas.map((l, i) => emValorHora ? l.liquidoPorHora : emAcumulado ? acumuladoLiquido[i] : l.remuneracaoLiquida),
       _isMinas: ehMinas,
       tension: 0,
       _linhas: linhas,
+      _acumuladoLiquido: acumuladoLiquido,
       _estado: estado,
       _estadoLegenda: normalizarEstadoLinha(estadosLegendaAnteriores.get(label), ehMinas)
     };
@@ -2044,6 +2312,7 @@ function renderizarGrafico(opcoes) {
     linhas.forEach((l, i) => {
       somaLiquida[i] += l.remuneracaoLiquida;
       somaPorHora[i] += l.liquidoPorHora;
+      somaLiquidaAcumulada[i] += acumuladoLiquido[i];
     });
     totalEstados++;
     ci++;
@@ -2051,26 +2320,57 @@ function renderizarGrafico(opcoes) {
 
   const mediaLiquida = somaLiquida.map(v => totalEstados > 0 ? v / totalEstados : 0);
   const mediaPorHora = somaPorHora.map(v => totalEstados > 0 ? v / totalEstados : 0);
+  const mediaLiquidaAcumulada = somaLiquidaAcumulada.map(v => totalEstados > 0 ? v / totalEstados : 0);
+  const rotuloComparacaoAcumulado = emAcumulado
+    ? obterRotuloComparacaoAcumulado(opcoes.comparacaoAcumulado)
+    : "pior estado";
+  const referenciaAcumuladoPorAno = emAcumulado
+    ? labels.map((_, index) => obterValorComparacaoAcumulado(opcoes.comparacaoAcumulado, index, acumuladoPorUf, mediaLiquidaAcumulada))
+    : null;
   const labelMedia = "Média entre estados";
   const datasetMedia = {
     label: labelMedia,
-    data: emValorHora ? mediaPorHora : mediaLiquida,
+    data: emValorHora ? mediaPorHora : emAcumulado ? mediaLiquidaAcumulada : mediaLiquida,
     _isMedia: true,
     tension: 0,
     _mediaLiquida: mediaLiquida,
     _mediaPorHora: mediaPorHora,
+    _mediaLiquidaAcumulada: mediaLiquidaAcumulada,
     _estadoLegenda: normalizarEstadoLinha(estadosLegendaAnteriores.get(labelMedia), true)
   };
   Object.assign(datasetMedia, estiloDataset(COR_MEDIA, () => datasetMedia._estadoLegenda, ci));
   datasets.push(datasetMedia);
   ci++;
 
+  if (emAcumulado) {
+    datasets.forEach(dataset => {
+      if (dataset._isMedia && Array.isArray(dataset.data)) {
+        dataset._mediaDiferencaAcumulada = dataset.data.map((valor, index) => {
+          const base = Number.isFinite(referenciaAcumuladoPorAno[index]) ? referenciaAcumuladoPorAno[index] : 0;
+          return Number.isFinite(valor) ? valor - base : null;
+        });
+      }
+      if (!dataset._isMedia && Array.isArray(dataset._acumuladoLiquido)) {
+        dataset._diferencaAcumulado = dataset._acumuladoLiquido.map((valor, index) => {
+          const base = Number.isFinite(referenciaAcumuladoPorAno[index]) ? referenciaAcumuladoPorAno[index] : 0;
+          return Number.isFinite(valor) ? valor - base : null;
+        });
+      }
+      dataset.data = dataset.data.map((valor, index) => {
+        const base = Number.isFinite(referenciaAcumuladoPorAno[index]) ? referenciaAcumuladoPorAno[index] : 0;
+        return Number.isFinite(valor) ? valor - base : valor;
+      });
+    });
+  }
+
   if (__grafico) {
     __grafico.data.datasets = datasets;
     sincronizarEstadoLegendaDatasets(__grafico);
     __grafico.options.scales.y.title.text = emValorHora
       ? "Remuneração Líquida por Hora (R$/h)"
-      : "Remuneração Líquida (R$)";
+      : emAcumulado
+        ? `Remuneração Líquida Acumulada em relação a ${rotuloComparacaoAcumulado} (R$)`
+        : "Remuneração Líquida (R$)";
     __grafico.options.scales.y.ticks.callback = v => emValorHora
       ? "R$/h " + new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v)
       : "R$ " + new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v);
@@ -2137,8 +2437,12 @@ function renderizarGrafico(opcoes) {
         setTimeout(() => { __tooltipFixaViaClique = false; }, 0);
 
         if (dataset._isMedia) {
+          const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
           const anosServico = chart.data.labels[item.index];
-          const mediaLiquida = dataset._mediaLiquida[item.index];
+          const emAcumuladoTooltip = (__opcoesGrafico.metricaGrafico || "mensal") === "acumulado";
+          const mediaLiquida = emAcumuladoTooltip ? dataset._mediaLiquidaAcumulada[item.index] : dataset._mediaLiquida[item.index];
+          const mediaLiquidaMensal = dataset._mediaLiquida[item.index];
+          const mediaDiferencaAcumulado = emAcumuladoTooltip ? dataset._mediaDiferencaAcumulada?.[item.index] : null;
           const mediaPorHora = dataset._mediaPorHora[item.index];
           __tooltipFixa = {
             chave: chavePontoTooltip(item.datasetIndex, item.index),
@@ -2146,28 +2450,52 @@ function renderizarGrafico(opcoes) {
             media: true,
             anosServico,
             mediaLiquida,
+            mediaLiquidaMensal,
+            mediaDiferencaAcumulado,
             mediaPorHora,
+            emAcumulado: emAcumuladoTooltip,
+            rotuloComparacaoAcumulado: rotuloComparacaoTooltip,
             cx,
             cy
           };
-          renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, cx, cy);
+          renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, emAcumuladoTooltip, mediaLiquidaMensal, mediaDiferencaAcumulado, rotuloComparacaoTooltip, cx, cy);
           return;
         }
 
         const linha = dataset._linhas[item.index];
         const estadoTooltip = dataset._estado;
+        const emAcumuladoTooltip = (__opcoesGrafico.metricaGrafico || "mensal") === "acumulado";
+        const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
+        const linhaTooltip = emAcumuladoTooltip
+          ? {
+            ...linha,
+            remuneracaoLiquidaAcumulada: dataset._acumuladoLiquido?.[item.index],
+            remuneracaoLiquidaMensal: linha.remuneracaoLiquida,
+            diferencaAcumulado: dataset._diferencaAcumulado?.[item.index]
+          }
+          : linha;
         const resumo = ehTelaPequena();
         __tooltipFixa = {
           chave: chavePontoTooltip(item.datasetIndex, item.index),
           datasetIndex: item.datasetIndex,
-          linha,
+          linha: linhaTooltip,
           estado: estadoTooltip,
           opcoes: { ...__opcoesGrafico },
+          emAcumulado: emAcumuladoTooltip,
           resumo,
           cx,
           cy
         };
-        renderTooltipHolerite(tooltipEl, linha, estadoTooltip, __tooltipFixa.opcoes, cx, cy, resumo);
+        if (emAcumuladoTooltip) {
+          renderTooltipLiquidoAcumulado(tooltipEl, linhaTooltip, estadoTooltip, {
+            valorAcumulado: linhaTooltip.remuneracaoLiquidaAcumulada,
+            diferencaAcumulado: linhaTooltip.diferencaAcumulado,
+            mostrarDiferencaPiorEstado: true,
+            rotuloComparacao: rotuloComparacaoTooltip
+          }, cx, cy);
+          return;
+        }
+        renderTooltipHolerite(tooltipEl, linhaTooltip, estadoTooltip, __tooltipFixa.opcoes, cx, cy, resumo);
       },
       plugins: {
         legend: {
@@ -2268,7 +2596,19 @@ function renderizarGrafico(opcoes) {
             if (__tooltipFixa) {
               if (__tooltipFixa.chave === chaveHovered) {
                 if (__tooltipFixa.media) {
-                  renderTooltipMedia(tooltipEl, __tooltipFixa.anosServico, __tooltipFixa.mediaLiquida, __tooltipFixa.mediaPorHora, __tooltipFixa.cx, __tooltipFixa.cy);
+                  const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
+                  renderTooltipMedia(tooltipEl, __tooltipFixa.anosServico, __tooltipFixa.mediaLiquida, __tooltipFixa.mediaPorHora, __tooltipFixa.emAcumulado, __tooltipFixa.mediaLiquidaMensal, __tooltipFixa.mediaDiferencaAcumulado, rotuloComparacaoTooltip, __tooltipFixa.cx, __tooltipFixa.cy);
+                  if (__tooltipFixa.emAcumulado && __tooltipFixa.rotuloComparacaoAcumulado !== rotuloComparacaoTooltip) {
+                    __tooltipFixa.rotuloComparacaoAcumulado = rotuloComparacaoTooltip;
+                  }
+                } else if (__tooltipFixa.emAcumulado) {
+                  const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
+                  renderTooltipLiquidoAcumulado(tooltipEl, __tooltipFixa.linha, __tooltipFixa.estado, {
+                    valorAcumulado: __tooltipFixa.linha.remuneracaoLiquidaAcumulada,
+                    diferencaAcumulado: __tooltipFixa.linha.diferencaAcumulado,
+                    mostrarDiferencaPiorEstado: true,
+                    rotuloComparacao: rotuloComparacaoTooltip
+                  }, __tooltipFixa.cx, __tooltipFixa.cy);
                 } else {
                   renderTooltipHolerite(tooltipEl, __tooltipFixa.linha, __tooltipFixa.estado, __tooltipFixa.opcoes, __tooltipFixa.cx, __tooltipFixa.cy, __tooltipFixa.resumo);
                 }
@@ -2278,15 +2618,36 @@ function renderizarGrafico(opcoes) {
             }
 
             if (ds._isMedia) {
+              const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
               const anosServico = context.chart.data.labels[closest.dataIndex];
-              const mediaLiquida = ds._mediaLiquida[closest.dataIndex];
+              const emAcumuladoTooltip = (__opcoesGrafico.metricaGrafico || "mensal") === "acumulado";
+              const mediaLiquida = emAcumuladoTooltip ? ds._mediaLiquidaAcumulada[closest.dataIndex] : ds._mediaLiquida[closest.dataIndex];
+              const mediaLiquidaMensal = ds._mediaLiquida[closest.dataIndex];
+              const mediaDiferencaAcumulado = emAcumuladoTooltip ? ds._mediaDiferencaAcumulada?.[closest.dataIndex] : null;
               const mediaPorHora = ds._mediaPorHora[closest.dataIndex];
-              renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, cx, cy);
+              renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, emAcumuladoTooltip, mediaLiquidaMensal, mediaDiferencaAcumulado, rotuloComparacaoTooltip, cx, cy);
               return;
             }
 
             const linha = ds._linhas[closest.dataIndex];
             const estadoTooltip = ds._estado;
+            const emAcumuladoTooltip = (__opcoesGrafico.metricaGrafico || "mensal") === "acumulado";
+            const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
+            if (emAcumuladoTooltip) {
+              const linhaTooltip = {
+                ...linha,
+                remuneracaoLiquidaAcumulada: ds._acumuladoLiquido?.[closest.dataIndex],
+                remuneracaoLiquidaMensal: linha.remuneracaoLiquida,
+                diferencaAcumulado: ds._diferencaAcumulado?.[closest.dataIndex]
+              };
+              renderTooltipLiquidoAcumulado(tooltipEl, linhaTooltip, estadoTooltip, {
+                valorAcumulado: linhaTooltip.remuneracaoLiquidaAcumulada,
+                diferencaAcumulado: linhaTooltip.diferencaAcumulado,
+                mostrarDiferencaPiorEstado: true,
+                rotuloComparacao: rotuloComparacaoTooltip
+              }, cx, cy);
+              return;
+            }
             renderTooltipHolerite(tooltipEl, linha, estadoTooltip, __opcoesGrafico, cx, cy, resumo);
           }
         }
@@ -2296,7 +2657,11 @@ function renderizarGrafico(opcoes) {
         y: {
           title: {
             display: true,
-            text: emValorHora ? "Remuneração Líquida por Hora (R$/h)" : "Remuneração Líquida (R$)"
+            text: emValorHora
+              ? "Remuneração Líquida por Hora (R$/h)"
+              : emAcumulado
+                ? `Remuneração Líquida Acumulada em relação a ${rotuloComparacaoAcumulado} (R$)`
+                : "Remuneração Líquida (R$)"
           },
           ticks: {
             callback: v => emValorHora
@@ -2324,6 +2689,7 @@ function renderizarPosicao(opcoes) {
   __opcoesGrafico = { ...opcoes };
   const metricaGrafico = opcoes.metricaGrafico || "mensal";
   const emValorHora = metricaGrafico === "hora";
+  const emAcumulado = metricaGrafico === "acumulado";
   const anosMax = window.__dados.anosMax;
   const labels = Array.from({ length: anosMax + 1 }, (_, i) => i);
   const listaEstados = window.__dados.listaEstados;
@@ -2331,14 +2697,24 @@ function renderizarPosicao(opcoes) {
 
   const valoresPorUf = {};
   const linhasPorUf = {};
+  const linhasAcumuladasPorUf = {};
   const estadosPorUf = {};
   const coresPorUf = {};
+  const acumuladoMinPorAno = emAcumulado ? new Array(labels.length).fill(Infinity) : null;
   let ci = 0;
   for (const { uf } of listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
     const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
-    valoresPorUf[uf] = linhas.map(l => emValorHora ? l.liquidoPorHora : l.remuneracaoLiquida);
+    const acumulado = [];
+    let cumul = 0;
+    linhas.forEach((l, ano) => {
+      cumul += l.remuneracaoLiquida * 12;
+      acumulado[ano] = cumul;
+      if (emAcumulado) acumuladoMinPorAno[ano] = Math.min(acumuladoMinPorAno[ano], cumul);
+    });
+    valoresPorUf[uf] = emValorHora ? linhas.map(l => l.liquidoPorHora) : emAcumulado ? acumulado : linhas.map(l => l.remuneracaoLiquida);
     linhasPorUf[uf] = linhas;
+    linhasAcumuladasPorUf[uf] = acumulado;
     estadosPorUf[uf] = estado;
     coresPorUf[uf] = uf === "MG" ? COR_MINAS_GERAIS : CORES_GRAFICO[ci % CORES_GRAFICO.length];
     ci++;
@@ -2357,10 +2733,29 @@ function renderizarPosicao(opcoes) {
     const ehMinas = uf === "MG";
     const cor = coresPorUf[uf];
     const estado = estadosPorUf[uf];
-    const data = rankPorUf[uf].map((rank, ano) => ({
-      value: rank,
-      _item: { linha: linhasPorUf[uf][ano], estado, ano }
-    }));
+    const data = rankPorUf[uf].map((rank, ano) => {
+      const linhaBase = linhasPorUf[uf][ano];
+      const valorAcumulado = emAcumulado ? linhasAcumuladasPorUf[uf][ano] : null;
+      return {
+        value: rank,
+        _item: {
+          linha: emAcumulado
+            ? {
+              ...linhaBase,
+              remuneracaoLiquida: linhaBase.remuneracaoLiquida,
+              remuneracaoLiquidaAcumulada: linhasAcumuladasPorUf[uf][ano],
+              remuneracaoLiquidaMensal: linhaBase.remuneracaoLiquida,
+              diferencaAcumulado: linhasAcumuladasPorUf[uf][ano] - acumuladoMinPorAno[ano],
+              acumuladoMinimo: acumuladoMinPorAno[ano]
+            }
+            : linhaBase,
+          estado,
+          ano,
+          valorAcumulado: emAcumulado ? linhasAcumuladasPorUf[uf][ano] : null,
+          diferencaAcumulado: emAcumulado ? linhasAcumuladasPorUf[uf][ano] - acumuladoMinPorAno[ano] : null
+        }
+      };
+    });
     return {
       id: uf,
       name: uf,
@@ -2431,6 +2826,14 @@ function renderizarPosicao(opcoes) {
         }
         const item = params.data._item;
         const estiloBase = "font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:0.78rem;line-height:normal;";
+        if (emAcumulado) {
+          __posicaoTooltipAtual = null;
+          return `<div style="${estiloBase}">${montarConteudoTooltipLiquidoAcumulado(item.estado, item.linha, {
+            valorAcumulado: item.valorAcumulado,
+            diferencaAcumulado: item.diferencaAcumulado,
+            mostrarDiferencaPiorEstado: false
+          })}</div>`;
+        }
         const resumo = ehTelaPequena();
         if (resumo) {
           __posicaoTooltipAtual = { linha: item.linha, estado: item.estado, opcoes: { ...opcoes } };
@@ -2533,37 +2936,52 @@ function calcularLimitesEixoBarras(opcoes) {
  */
 function renderizarBarras(opcoes) {
   const emValorHora = (opcoes.metricaGrafico || "mensal") === "hora";
+  const emAcumulado = (opcoes.metricaGrafico || "mensal") === "acumulado";
   const ano = anosBarrasAtual();
   const telaPequena = ehTelaPequenaBarras();
 
   const itens = [];
   let somaLiquida = 0;
   let somaPorHora = 0;
+  let somaLiquidaAcumulada = 0;
   let totalEstados = 0;
 
   for (const { uf } of window.__dados.listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
     const linha = montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
+    let valorAcumulado = null;
+    if (emAcumulado) {
+      let acumulado = 0;
+      for (let anoAcumulado = 0; anoAcumulado <= ano; anoAcumulado++) {
+        const linhaAno = montarLinha(estado, anoAcumulado, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar");
+        acumulado += linhaAno.remuneracaoLiquida * 12;
+      }
+      valorAcumulado = acumulado;
+    }
     itens.push({
       uf,
-      valor: emValorHora ? linha.liquidoPorHora : linha.remuneracaoLiquida,
+      valor: emValorHora ? linha.liquidoPorHora : emAcumulado ? valorAcumulado : linha.remuneracaoLiquida,
+      valorAcumulado,
       cargaHoraria: estado.cargaHorariaSemanal,
       linha,
       estado,
     });
     somaLiquida += linha.remuneracaoLiquida;
     somaPorHora += linha.liquidoPorHora;
+    somaLiquidaAcumulada += valorAcumulado || 0;
     totalEstados++;
   }
 
   const mediaLiquida = totalEstados > 0 ? somaLiquida / totalEstados : 0;
   const mediaPorHora = totalEstados > 0 ? somaPorHora / totalEstados : 0;
+  const mediaLiquidaAcumulada = totalEstados > 0 ? somaLiquidaAcumulada / totalEstados : 0;
   itens.push({
     uf: null,
     isMedia: true,
-    valor: emValorHora ? mediaPorHora : mediaLiquida,
+    valor: emValorHora ? mediaPorHora : emAcumulado ? mediaLiquidaAcumulada : mediaLiquida,
     mediaLiquida,
     mediaPorHora,
+    mediaLiquidaAcumulada,
   });
 
   itens.sort((a, b) => b.valor - a.valor);
@@ -2587,12 +3005,26 @@ function renderizarBarras(opcoes) {
   }));
 
   const limitesEixo = calcularLimitesEixoBarras(opcoes);
-  const passoEixo = emValorHora ? 20 : 2000;
-  const margemEixo = emValorHora ? 5 : 500;
-  const minEixoValor = emValorHora ? limitesEixo.minPorHora : limitesEixo.minLiquido;
-  const maxEixoValor = emValorHora ? limitesEixo.maxPorHora : limitesEixo.maxLiquido;
-  const xAxisMin = Number.isFinite(minEixoValor) ? maiorMultiploMenorQue(minEixoValor - margemEixo, passoEixo) : undefined;
-  const xAxisMax = Number.isFinite(maxEixoValor) ? menorMultiploMaiorQue(maxEixoValor + margemEixo, passoEixo) : undefined;
+  const passoEixo = emValorHora ? 20 : emAcumulado ? 10000 : 2000;
+  const margemEixo = emValorHora ? 5 : emAcumulado ? 10000 : 500;
+  const minAtual = Math.min(...itens.map(item => Number(item.valor) || 0));
+  const maxAtual = Math.max(...itens.map(item => Number(item.valor) || 0));
+  const minEixoValor = emValorHora
+    ? limitesEixo.minPorHora
+    : emAcumulado
+      ? minAtual
+      : limitesEixo.minLiquido;
+  const maxEixoValor = emValorHora
+    ? limitesEixo.maxPorHora
+    : emAcumulado
+      ? maxAtual
+      : limitesEixo.maxLiquido;
+  const xAxisMin = Number.isFinite(minEixoValor)
+    ? (emAcumulado ? maiorMultiploMenorQue(minEixoValor, passoEixo) : maiorMultiploMenorQue(minEixoValor - margemEixo, passoEixo))
+    : undefined;
+  const xAxisMax = Number.isFinite(maxEixoValor)
+    ? menorMultiploMaiorQue(maxEixoValor + margemEixo, passoEixo)
+    : undefined;
 
   const opcoesEchart = {
     animationDurationUpdate: 700,
@@ -2715,7 +3147,17 @@ function renderizarBarras(opcoes) {
         const item = params.data._item;
         const estiloBase = "font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:0.78rem;line-height:normal;";
         if (item.isMedia) {
-          return `<div style="padding:12px 14px;width:min(340px, calc(100vw - 24px));white-space:normal;${estiloBase}">${montarConteudoTooltipMedia(ano, item.mediaLiquida, item.mediaPorHora)}</div>`;
+          const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
+          const conteudoMedia = montarConteudoTooltipMedia(ano, emAcumulado ? item.mediaLiquidaAcumulada : item.mediaLiquida, item.mediaPorHora, emAcumulado, item.mediaLiquida, null, rotuloComparacaoTooltip);
+          return emAcumulado
+            ? `<div style="${estiloBase}">${conteudoMedia}</div>`
+            : `<div style="padding:12px 14px;width:min(340px, calc(100vw - 24px));white-space:normal;${estiloBase}">${conteudoMedia}</div>`;
+        }
+        if (emAcumulado) {
+          return `<div style="${estiloBase}">${montarConteudoTooltipLiquidoAcumulado(item.estado, item.linha, {
+            valorAcumulado: item.valorAcumulado,
+            mostrarDiferencaPiorEstado: false
+          })}</div>`;
         }
         const resumo = ehTelaPequena();
         if (resumo) {
@@ -2742,6 +3184,7 @@ function renderizarBarras(opcoes) {
 
 let __vista = "barras";
 let __metricaGrafico = "mensal";
+let __comparacaoAcumulado = "pior";
 let __usarTetoNacional = false;
 let __regimePrevidencia = "com_complementar";
 let __eixoYGrafico = "remuneracao";
@@ -2752,7 +3195,10 @@ let __resizeRenderTimer = null;
 function setMetricaGrafico(valor) {
   __metricaGrafico = valor;
   document.getElementById("btn-metrica-mensal").classList.toggle("ativo", valor === "mensal");
+  const botãoAcumulado = document.getElementById("btn-metrica-acumulado");
+  if (botãoAcumulado) botãoAcumulado.classList.toggle("ativo", valor === "acumulado");
   document.getElementById("btn-metrica-hora").classList.toggle("ativo", valor === "hora");
+  atualizarCampoComparacaoAcumulado();
   renderizar();
 }
 
@@ -2777,6 +3223,8 @@ function setModoTabela(valor) {
   document.getElementById("btn-modo-comparacao").classList.toggle("ativo", valor === "comparacao");
   document.getElementById("campo-estado").style.display = valor === "holerite" ? "" : "none";
   document.getElementById("campo-metrica-grafico").style.display = valor === "comparacao" ? "" : "none";
+  atualizarCampoVisibilidadeEstados();
+  atualizarCampoComparacaoAcumulado();
   atualizarControleEscolaridade();
   atualizarLinkComposicao();
   renderizar();
@@ -2788,6 +3236,8 @@ function setEixoYGrafico(valor) {
   document.getElementById("btn-eixo-posicao").classList.toggle("ativo", valor === "posicao");
   document.getElementById("grafico").style.display = valor === "posicao" ? "none" : "";
   document.getElementById("grafico-posicao").style.display = valor === "posicao" ? "" : "none";
+  atualizarCampoVisibilidadeEstados();
+  atualizarCampoComparacaoAcumulado();
   renderizar();
   if (valor === "remuneracao" && __grafico) __grafico.resize();
   if (valor === "posicao" && __posicaoChart) __posicaoChart.resize();
@@ -2828,6 +3278,8 @@ function setVista(v) {
   document.getElementById("campo-eixo-y-grafico").style.display = v === "grafico" ? "" : "none";
   document.getElementById("campo-modo-tabela").style.display = v === "tabela" ? "" : "none";
   if (v === "tabela") document.getElementById("campo-estado").style.display = __modoTabela === "holerite" ? "" : "none";
+  atualizarCampoVisibilidadeEstados();
+  atualizarCampoComparacaoAcumulado();
   atualizarControleEscolaridade();
   if (v === "grafico" && __eixoYGrafico === "remuneracao" && __grafico) __grafico.resize();
   if (v === "grafico" && __eixoYGrafico === "posicao" && __posicaoChart) __posicaoChart.resize();
@@ -2918,7 +3370,16 @@ async function carregarDados() {
   montarReguaBarras(window.__dados.anosMax);
   atualizarBolhaAnosBarras();
 
+  popularSeletorComparacaoAcumulado();
+  const seletorComparacao = document.getElementById("comparacaoAcumulado");
+  seletorComparacao.addEventListener("change", () => {
+    __comparacaoAcumulado = seletorComparacao.value || "pior";
+    renderizar();
+  });
+
   atualizarControleEscolaridade();
+  atualizarCampoVisibilidadeEstados();
+  atualizarCampoComparacaoAcumulado();
   atualizarLinkComposicao();
   renderizar();
 }
