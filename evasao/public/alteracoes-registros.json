@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-07T17:59:50.984Z",
-  "commitCount": 173,
-  "totalChangeCount": 62,
+  "generatedAt": "2026-08-07T19:28:08.702Z",
+  "commitCount": 174,
+  "totalChangeCount": 63,
   "history": [
     {
       "commit": {
@@ -1782,6 +1782,39 @@
             "NOME": "LEONARDO BORGES DOS SANTOS",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "CAGE RS"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "876a79c40a2baacd5490c74e8b99672d670a7718",
+        "date": "2026-08-07T19:27:32Z",
+        "author": "observatoriosefmg",
+        "message": "LUCAS RESENDE"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556517",
+          "inscricao": "266017683",
+          "nome": "LUCAS FIGUEIREDO RESENDE PEREIRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "ISS BH",
+          "before": {
+            "MASP": "7556517",
+            "INSCRICAO": "266017683",
+            "NOME": "LUCAS FIGUEIREDO RESENDE PEREIRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556517",
+            "INSCRICAO": "266017683",
+            "NOME": "LUCAS FIGUEIREDO RESENDE PEREIRA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "ISS BH"
           }
         }
       ]
