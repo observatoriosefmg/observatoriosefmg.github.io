@@ -319,6 +319,8 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    height: auto;
+    min-height: 760px;
   }
   #painel-grafico {
     display: flex;
@@ -345,8 +347,9 @@
     font-size: 1.05em;
   }
   #painel-barras #barras-echart {
-    flex: 1 1 auto;
-    min-height: 0;
+    flex: 0 0 clamp(540px, 68vh, 620px);
+    height: clamp(540px, 68vh, 620px);
+    min-height: clamp(540px, 68vh, 620px);
   }
   .barras-controle-anos {
     display: flex;
@@ -3147,11 +3150,16 @@ function renderizarBarras(opcoes) {
   const margemEixo = emValorHora ? 5 : emAcumulado ? Math.max(10000, (limitesEixo.maxLiquido || 0) * 0.08) : 500;
   const minEixoValor = emValorHora ? limitesEixo.minPorHora : limitesEixo.minLiquido;
   const maxEixoValor = emValorHora ? limitesEixo.maxPorHora : limitesEixo.maxLiquido;
+  const amplitudeEixo = Number.isFinite(minEixoValor) && Number.isFinite(maxEixoValor)
+    ? Math.max(maxEixoValor - minEixoValor, passoEixo)
+    : passoEixo;
+  const margemInicialEixo = Math.max(amplitudeEixo * (telaPequena ? 0.08 : 0.05), margemEixo);
+  const margemFinalEixo = Math.max(amplitudeEixo * (telaPequena ? 0.10 : 0.08), margemEixo);
   const xAxisMin = Number.isFinite(minEixoValor)
-    ? (emAcumulado ? maiorMultiploMenorQue(minEixoValor, passoEixo) : maiorMultiploMenorQue(minEixoValor - margemEixo, passoEixo))
+    ? minEixoValor - margemInicialEixo
     : undefined;
   const xAxisMax = Number.isFinite(maxEixoValor)
-    ? menorMultiploMaiorQue(maxEixoValor + margemEixo, passoEixo)
+    ? maxEixoValor + margemFinalEixo
     : undefined;
   const xAxisInterval = calcularIntervaloEixoBarras(xAxisMin ?? 0, xAxisMax ?? (xAxisMin ?? 0) + passoEixo, telaPequena ? 5 : 6);
 
@@ -3164,7 +3172,7 @@ function renderizarBarras(opcoes) {
     animationDurationUpdate: 700,
     animationEasingUpdate: "quinticInOut",
     grid: telaPequena
-      ? { left: 44, right: 44, top: 8, bottom: 40, containLabel: true }
+      ? { left: 44, right: 56, top: 8, bottom: 40, containLabel: true }
       : { left: 44, right: 44, top: 10, bottom: 30, containLabel: true },
     xAxis: {
       type: "value",
@@ -3240,10 +3248,15 @@ function renderizarBarras(opcoes) {
       type: "bar",
       data: dadosBarras,
       realtimeSort: true,
+      clip: false,
       barMaxWidth: 22,
+      barCategoryGap: "35%",
+      labelLayout: { hideOverlap: false },
       label: {
         show: true,
         position: "right",
+        distance: 6,
+        overflow: "none",
         valueAnimation: true,
         color: "#1a1f2b",
         fontWeight: 700,
