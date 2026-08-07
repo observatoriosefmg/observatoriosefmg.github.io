@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-07T19:28:08.702Z",
-  "commitCount": 174,
-  "totalChangeCount": 63,
+  "generatedAt": "2026-08-07T21:27:32.179Z",
+  "commitCount": 175,
+  "totalChangeCount": 64,
   "history": [
     {
       "commit": {
@@ -1815,6 +1815,39 @@
             "NOME": "LUCAS FIGUEIREDO RESENDE PEREIRA",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "ISS BH"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "1489412652459af88ed77c782de79829312864d4",
+        "date": "2026-08-07T21:26:54Z",
+        "author": "observatoriosefmg",
+        "message": "exonera;'ao sefaz pi"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7559099",
+          "inscricao": "266002872",
+          "nome": "LUCIANO FERNANDES DA SILVA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ PI",
+          "before": {
+            "MASP": "7559099",
+            "INSCRICAO": "266002872",
+            "NOME": "LUCIANO FERNANDES DA SILVA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7559099",
+            "INSCRICAO": "266002872",
+            "NOME": "LUCIANO FERNANDES DA SILVA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ PI"
           }
         }
       ]

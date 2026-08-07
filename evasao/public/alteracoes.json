@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-07T19:28:08.702Z",
-  "commitCount": 174,
+  "generatedAt": "2026-08-07T21:27:32.179Z",
+  "commitCount": 175,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1046,6 +1046,12 @@
       "date": "2026-08-07T19:27:32Z",
       "author": "observatoriosefmg",
       "message": "LUCAS RESENDE"
+    },
+    {
+      "hash": "1489412652459af88ed77c782de79829312864d4",
+      "date": "2026-08-07T21:26:54Z",
+      "author": "observatoriosefmg",
+      "message": "exonera;'ao sefaz pi"
     }
   ]
 }
