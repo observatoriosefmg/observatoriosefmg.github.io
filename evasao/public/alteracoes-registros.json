@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-03T01:32:48.032Z",
-  "commitCount": 171,
-  "totalChangeCount": 61,
+  "generatedAt": "2026-08-07T17:49:27.522Z",
+  "commitCount": 172,
+  "totalChangeCount": 62,
   "history": [
     {
       "commit": {
@@ -1749,6 +1749,39 @@
             "NOME": "MARIA ELIZA FREIRE E SILVA COELHO",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
             "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "6f50154ac37434d77d9f148adfb12260bff216d3",
+        "date": "2026-08-07T17:48:55Z",
+        "author": "observatoriosefmg",
+        "message": "LEONARDO BORGES DOS SANTOS"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7556475",
+          "inscricao": "266016461",
+          "nome": "LEONARDO BORGES DOS SANTOS",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "CAGE RS",
+          "before": {
+            "MASP": "7556475",
+            "INSCRICAO": "266016461",
+            "NOME": "LEONARDO BORGES DOS SANTOS",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556475",
+            "INSCRICAO": "266016461",
+            "NOME": "LEONARDO BORGES DOS SANTOS",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "CAGE RS"
           }
         }
       ]
