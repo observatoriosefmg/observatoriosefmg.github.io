@@ -2001,6 +2001,7 @@ const ESTADO_LINHA_DESATIVADO = "desativado";
 const COR_BARRAS_PADRAO = '#16a34a';
 const COR_BARRAS_MEDIA = COR_MEDIA;
 const COR_BARRAS_DESTAQUE = COR_MINAS_GERAIS;
+const COR_FUNDO_NEGATIVO_GRAFICO = 'rgba(248, 113, 113, 0.18)';
 let __barrasChart = null;
 let __barrasTooltipAtual = null;
 
@@ -2164,6 +2165,33 @@ const pluginLegendaNegritoDestaque = {
       ctx.fillText(item.text, hit.left + deslocamentoTexto, hit.top + hit.height / 2);
     });
 
+    ctx.restore();
+  }
+};
+
+const pluginFundoNegativoGrafico = {
+  id: "fundoNegativoGrafico",
+  beforeDatasetsDraw(chart) {
+    const yScale = chart.scales?.y;
+    const area = chart.chartArea;
+    if (!yScale || !area) return;
+    if (typeof yScale.min !== "number" || typeof yScale.max !== "number") return;
+    if (yScale.min >= 0) return;
+
+    const { ctx } = chart;
+    let yInicio = area.top;
+    let altura = area.bottom - area.top;
+
+    if (yScale.max > 0) {
+      const yZero = yScale.getPixelForValue(0);
+      yInicio = Math.min(Math.max(yZero, area.top), area.bottom);
+      altura = area.bottom - yInicio;
+    }
+
+    if (altura <= 0) return;
+    ctx.save();
+    ctx.fillStyle = COR_FUNDO_NEGATIVO_GRAFICO;
+    ctx.fillRect(area.left, yInicio, area.right - area.left, altura);
     ctx.restore();
   }
 };
@@ -2461,7 +2489,7 @@ function renderizarGrafico(opcoes) {
   __grafico = new Chart(ctx, {
     type: "line",
     data: { labels, datasets },
-    plugins: [pluginDestaqueNaFrente, pluginLegendaNegritoDestaque],
+    plugins: [pluginFundoNegativoGrafico, pluginDestaqueNaFrente, pluginLegendaNegritoDestaque],
     options: {
       responsive: true,
       maintainAspectRatio: false,
