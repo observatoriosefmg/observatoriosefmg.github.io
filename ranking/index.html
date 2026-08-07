@@ -339,6 +339,11 @@
     font-size: 0.85rem;
     line-height: 1.4;
   }
+  .formula-mathml {
+    margin-left: 6px;
+    vertical-align: middle;
+    font-size: 1.05em;
+  }
   #painel-barras #barras-echart {
     flex: 1 1 auto;
     min-height: 0;
@@ -1195,7 +1200,7 @@
     </div>
     <div class="acoes-legenda-grafico" id="campo-visibilidade-estados" style="display:none;">
       <div class="acoes-legenda-textos">
-        <span class="acoes-legenda-texto" id="texto-aviso-acumulado-grafico" style="display:none;">Cálculo simplificado: o valor acumulado é estimado como o líquido mensal × 12, acumulado ao longo dos anos de serviço selecionados.</span>
+        <span class="acoes-legenda-texto" id="texto-aviso-acumulado-grafico" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal de cada ano, entre zero e o ano estimado. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mi>ano</mi></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></span>
         <span class="acoes-legenda-texto" id="texto-aviso-legenda-grafico">Clique no nome de um estado na legenda para destacar, ocultar ou reexibir a linha.</span>
       </div>
       <div class="acoes-legenda-botoes" id="acoes-legenda-botoes">
@@ -1217,7 +1222,7 @@
       </div>
       <input id="anosBarrasInput" type="number" min="0" max="40" step="1" value="0" />
     </div>
-    <div id="barras-acumulado-nota" class="barras-acumulado-nota" style="display:none;">Cálculo simplificado: o valor acumulado é estimado como o líquido mensal × 12, acumulado ao longo dos anos de serviço selecionados.</div>
+    <div id="barras-acumulado-nota" class="barras-acumulado-nota" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal de cada ano, entre zero e o ano estimado. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mi>ano</mi></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>
     <div id="barras-echart" style="width:100%;"></div>
   </div>
 
@@ -1875,7 +1880,7 @@ function montarTabelaComparacao(opcoes) {
     .join("");
 
   const notaAcumulado = emAcumulado
-    ? `<div class="barras-acumulado-nota" style="margin-bottom:10px;">Cálculo simplificado: o valor acumulado é estimado como o líquido mensal × 12, acumulado ao longo dos anos de serviço selecionados.</div>`
+    ? `<div class="barras-acumulado-nota" style="margin-bottom:10px;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal de cada ano, entre zero e o ano estimado. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mi>ano</mi></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>`
     : "";
   return `${notaAcumulado}<div class="tabela-wrapper">${cabecalho}${linhasHtml}</tbody></table></div>`;
 }
@@ -3300,6 +3305,7 @@ function setMetricaGrafico(valor) {
   const botãoAcumulado = document.getElementById("btn-metrica-acumulado");
   if (botãoAcumulado) botãoAcumulado.classList.toggle("ativo", valor === "acumulado");
   document.getElementById("btn-metrica-hora").classList.toggle("ativo", valor === "hora");
+  atualizarCampoVisibilidadeEstados();
   atualizarCampoComparacaoAcumulado();
   renderizar();
 }
