@@ -15,7 +15,8 @@ export default defineConfig(({ mode }) => {
           input: {
             main: path.resolve(__dirname, 'index.html'),
             dados_detalhados: path.resolve(__dirname, 'dados_detalhados.html'),
-            historico_alteracoes: path.resolve(__dirname, 'historico_alteracoes.html')
+            historico_alteracoes: path.resolve(__dirname, 'historico_alteracoes.html'),
+            relatorio_impressao: path.resolve(__dirname, 'relatorio_impressao.html')
           }
         }
       },
