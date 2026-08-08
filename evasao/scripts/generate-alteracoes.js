@@ -5,8 +5,7 @@ import path from 'path';
 const cwd = process.cwd();
 const relativeDataPathLocal = 'data/dados.csv';
 const dataFile = path.resolve(cwd, relativeDataPathLocal);
-const outputMetaFile = path.resolve(cwd, 'public/alteracoes.json');
-const outputRecordFile = path.resolve(cwd, 'public/alteracoes-registros.json');
+const outputDirectories = ['public', 'dist'].map((directory) => path.resolve(cwd, directory));
 const maxCommits = 20;
 
 const runGit = (args) => {
@@ -233,9 +232,18 @@ const resultado = {
   commits,
 };
 
-fs.mkdirSync(path.dirname(outputMetaFile), { recursive: true });
-fs.writeFileSync(outputMetaFile, JSON.stringify(resultado, null, 2) + '\n', 'utf8');
-fs.writeFileSync(outputRecordFile, JSON.stringify(changedFile, null, 2) + '\n', 'utf8');
+const metaJson = JSON.stringify(resultado, null, 2) + '\n';
+const recordsJson = JSON.stringify(changedFile, null, 2) + '\n';
 
-console.log(`Arquivo gerado: ${outputMetaFile} (${commits.length} commits)`);
-console.log(`Arquivo gerado: ${outputRecordFile} (${changedFile.totalChangeCount} registros alterados)`);
+for (const outputDirectory of outputDirectories) {
+  fs.mkdirSync(outputDirectory, { recursive: true });
+
+  const outputMetaFile = path.join(outputDirectory, 'alteracoes.json');
+  const outputRecordFile = path.join(outputDirectory, 'alteracoes-registros.json');
+
+  fs.writeFileSync(outputMetaFile, metaJson, 'utf8');
+  fs.writeFileSync(outputRecordFile, recordsJson, 'utf8');
+
+  console.log(`Arquivo gerado: ${outputMetaFile} (${commits.length} commits)`);
+  console.log(`Arquivo gerado: ${outputRecordFile} (${changedFile.totalChangeCount} registros alterados)`);
+}

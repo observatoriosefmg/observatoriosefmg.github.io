@@ -884,13 +884,29 @@ const App: React.FC = () => {
     return data.toLocaleDateString('pt-BR');
   };
 
+  const calcularVencimentoParaOrdenacao = (
+    dataHomologacao: string,
+    dataVencimento: string,
+    prorrogavel: boolean,
+  ): number | null => {
+    const vencimento = analisarDataBrasil(dataVencimento);
+    if (!vencimento) return null;
+    if (!prorrogavel) return vencimento.getTime();
+
+    const homologacao = analisarDataBrasil(dataHomologacao);
+    if (!homologacao || homologacao.getTime() >= vencimento.getTime()) return vencimento.getTime();
+
+    const duracaoOriginal = vencimento.getTime() - homologacao.getTime();
+    return vencimento.getTime() + duracaoOriginal;
+  };
+
   // Agrupa dados de aprovados em outros concursos por concurso/órgão
   const agregarPorAprovacaoOutroConcurso = (
     registros: AprovacaoOutroConcursoRaw[],
     concursos: OutroConcursoRaw[],
     areaFiltro: string | null,
   ): {
-    dadosAprovado: { concurso: string; count: number; statusConcurso: string }[];
+    dadosAprovado: { concurso: string; count: number; statusConcurso: string; dataVencimentoOrdenacao: number | null }[];
     detalhesAprovado: Record<string, { name: string; area?: string | null; unidade?: string | null; tipoAprovacao: TipoAprovacao; aprovacoes: { tipoAprovacao: TipoAprovacao; cargo: string; modalidade: string; posicao: number | null; numeroVagas: number | null; ultimaVagaNomeada: number | null; observacao?: string | null }[] }[]>;
   } => {
     const mapaConcursosInfo = new Map<string, OutroConcursoNormalizado>();
@@ -905,7 +921,7 @@ const App: React.FC = () => {
 
     const detalhesPorConcurso = new Map<string, Map<string, { name: string; area?: string | null; unidade?: string | null; aprovacoes: { tipoAprovacao: TipoAprovacao; cargo: string; modalidade: string; posicao: number | null; numeroVagas: number | null; ultimaVagaNomeada: number | null; observacao?: string | null }[] }>>();
     const detalhes: Record<string, { name: string; area?: string | null; unidade?: string | null; tipoAprovacao: TipoAprovacao; aprovacoes: { tipoAprovacao: TipoAprovacao; cargo: string; modalidade: string; posicao: number | null; numeroVagas: number | null; ultimaVagaNomeada: number | null; observacao?: string | null }[] }[]> = {};
-    const statusConcursoMap = new Map<string, { homologado: boolean; dataVencimento: string; prorrogavel: boolean }>();
+    const statusConcursoMap = new Map<string, { homologado: boolean; dataVencimento: string; prorrogavel: boolean; dataVencimentoOrdenacao: number | null }>();
 
     for (const registro of registros) {
       const aprovado = normalizarLinhaAprovacao(registro);
@@ -945,7 +961,7 @@ const App: React.FC = () => {
 
       if (areaFiltro && auditorEmExercicio.area !== areaFiltro) continue;
 
-      const statusAtual = statusConcursoMap.get(aprovado.concurso) ?? { homologado: false, dataVencimento: '', prorrogavel: false };
+      const statusAtual = statusConcursoMap.get(aprovado.concurso) ?? { homologado: false, dataVencimento: '', prorrogavel: false, dataVencimentoOrdenacao: null };
       const homologado = statusAtual.homologado || !!concursoRelacionado.dataHomologacao;
       const dataVencimento = (() => {
         if (!concursoRelacionado.dataVencimento) return statusAtual.dataVencimento;
@@ -960,6 +976,14 @@ const App: React.FC = () => {
         homologado,
         dataVencimento,
         prorrogavel: statusAtual.prorrogavel || concursoRelacionado.prorrogavel,
+        dataVencimentoOrdenacao: Math.max(
+          statusAtual.dataVencimentoOrdenacao ?? Number.NEGATIVE_INFINITY,
+          calcularVencimentoParaOrdenacao(
+            concursoRelacionado.dataHomologacao,
+            concursoRelacionado.dataVencimento,
+            concursoRelacionado.prorrogavel,
+          ) ?? Number.NEGATIVE_INFINITY,
+        ),
       });
 
       let porPessoa = detalhesPorConcurso.get(aprovado.concurso);
@@ -1048,7 +1072,14 @@ const App: React.FC = () => {
         if (status?.homologado) {
           statusConcurso = `Valido até ${formatarDataValidade(status.dataVencimento)}${status.prorrogavel ? ' (Prorrogável)' : ''}`;
         }
-        return { concurso, count, statusConcurso };
+        return {
+          concurso,
+          count,
+          statusConcurso,
+          dataVencimentoOrdenacao: status?.dataVencimentoOrdenacao === Number.NEGATIVE_INFINITY
+            ? null
+            : status?.dataVencimentoOrdenacao ?? null,
+        };
       })
       .sort((a, b) => (b.count - a.count) || a.concurso.localeCompare(b.concurso));
 

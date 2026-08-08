@@ -22,6 +22,18 @@ interface EvasionTableProps {
 
 const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [buscaOrgao, setBuscaOrgao] = useState('');
+
+  const normalizarBusca = (valor: string) => valor
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLocaleLowerCase('pt-BR')
+    .trim();
+
+  const termoBusca = normalizarBusca(buscaOrgao);
+  const dadosFiltrados = termoBusca
+    ? data.filter((item) => normalizarBusca(item.destino).includes(termoBusca))
+    : data;
 
   const toggle = (destino: string) => {
     setOpen(prev => ({ ...prev, [destino]: !prev[destino] }));
@@ -163,7 +175,19 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div>
+      <label htmlFor="busca-destino-evasao" className="block text-sm font-medium text-gray-300 mb-2">
+        Pesquisar por órgão
+      </label>
+      <input
+        id="busca-destino-evasao"
+        type="search"
+        value={buscaOrgao}
+        onChange={(event) => setBuscaOrgao(event.target.value)}
+        placeholder="Digite o nome do órgão..."
+        className="w-full md:max-w-md mb-4 px-3 py-2 rounded-lg border border-gray-700 bg-gray-950 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-400"
+      />
+      <div className="overflow-x-auto">
       <table className="w-full text-left table-auto">
         <thead className="bg-gray-800 text-gray-300 uppercase text-sm border-b border-gray-700">
           <tr>
@@ -172,7 +196,7 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-700">
-          {data.map((item, index) => {
+          {dadosFiltrados.map((item, index) => {
             const dest = item.destino;
             const rows = details[dest] ?? [];
             const isOpen = !!open[dest];
@@ -216,8 +240,16 @@ const EvasionTable: React.FC<EvasionTableProps> = ({ data, details = {} }) => {
               </React.Fragment>
             );
           })}
+          {dadosFiltrados.length === 0 && (
+            <tr>
+              <td colSpan={2} className="px-6 py-6 text-center text-gray-400">
+                Nenhum órgão encontrado.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

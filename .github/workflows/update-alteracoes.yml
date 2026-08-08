@@ -7,6 +7,10 @@ on:
     paths:
       - 'evasao/data/dados.csv'
 
+concurrency:
+  group: atualizar-historico-alteracoes-main
+  cancel-in-progress: false
+
 jobs:
   gerar-alteracoes:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
@@ -37,7 +41,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add evasao/public/alteracoes.json evasao/public/alteracoes-registros.json
+          git add \
+            evasao/public/alteracoes.json \
+            evasao/public/alteracoes-registros.json \
+            evasao/dist/alteracoes.json \
+            evasao/dist/alteracoes-registros.json
           if ! git diff --cached --quiet; then
             git commit -m "[skip ci] Atualiza histórico de alterações do dados.csv"
             git push

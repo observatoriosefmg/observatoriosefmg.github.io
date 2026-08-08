@@ -23,6 +23,7 @@ interface AprovadoData {
   concurso: string;
   count: number;
   statusConcurso: string;
+  dataVencimentoOrdenacao: number | null;
 }
 
 interface AprovadosOutrosConcursosTableProps {
@@ -32,6 +33,8 @@ interface AprovadosOutrosConcursosTableProps {
 
 const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps> = ({ data, details = {} }) => {
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [buscaOrgao, setBuscaOrgao] = useState('');
+  const [ordenacao, setOrdenacao] = useState<'aprovados' | 'vencimento'>('aprovados');
 
   const analisarDataBrasil = (valor: string): Date | null => {
     const match = valor.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -206,8 +209,60 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
     })
     .filter((entry): entry is { item: AprovadoData; rows: AuditorAguardandoDetail[]; count: number } => entry !== null);
 
+  const normalizarBusca = (valor: string) => valor
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLocaleLowerCase('pt-BR')
+    .trim();
+
+  const termoBusca = normalizarBusca(buscaOrgao);
+  const concursosFiltradosEOrdenados = concursosExibidos
+    .filter(({ item }) => !termoBusca || normalizarBusca(item.concurso).includes(termoBusca))
+    .sort((a, b) => {
+      if (ordenacao === 'vencimento') {
+        const dataA = a.item.dataVencimentoOrdenacao;
+        const dataB = b.item.dataVencimentoOrdenacao;
+        if (dataA == null && dataB != null) return 1;
+        if (dataA != null && dataB == null) return -1;
+        if (dataA != null && dataB != null && dataA !== dataB) return dataA - dataB;
+      } else if (a.count !== b.count) {
+        return b.count - a.count;
+      }
+      return a.item.concurso.localeCompare(b.item.concurso, 'pt-BR');
+    });
+
   return (
-    <div className="overflow-x-auto">
+    <div>
+      <div className="mb-4 flex flex-col md:flex-row md:items-end gap-4">
+        <div className="flex-1">
+          <label htmlFor="busca-concurso-orgao" className="block text-sm font-medium text-gray-300 mb-2">
+            Pesquisar por órgão
+          </label>
+          <input
+            id="busca-concurso-orgao"
+            type="search"
+            value={buscaOrgao}
+            onChange={(event) => setBuscaOrgao(event.target.value)}
+            placeholder="Digite o nome do órgão..."
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 bg-gray-950 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+        </div>
+        <div className="flex-1">
+          <label htmlFor="ordenacao-concursos" className="block text-sm font-medium text-gray-300 mb-2">
+            Ordenar por
+          </label>
+          <select
+            id="ordenacao-concursos"
+            value={ordenacao}
+            onChange={(event) => setOrdenacao(event.target.value as 'aprovados' | 'vencimento')}
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 bg-gray-950 text-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400"
+          >
+            <option value="aprovados">Maior número de aprovados</option>
+            <option value="vencimento">Concursos próximos ao vencimento</option>
+          </select>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-left table-auto">
         <thead className="bg-gray-800 text-gray-300 uppercase text-sm border-b border-gray-700">
           <tr>
@@ -216,7 +271,7 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-700">
-          {concursosExibidos.map(({ item, rows, count }, index) => {
+          {concursosFiltradosEOrdenados.map(({ item, rows, count }, index) => {
             const concurso = item.concurso;
             const isOpen = !!open[concurso];
 
@@ -262,8 +317,16 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
               </React.Fragment>
             );
           })}
+          {concursosFiltradosEOrdenados.length === 0 && (
+            <tr>
+              <td colSpan={2} className="px-6 py-6 text-center text-gray-400">
+                Nenhum órgão encontrado.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };
