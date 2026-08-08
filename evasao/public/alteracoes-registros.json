@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-07T21:27:32.179Z",
-  "commitCount": 175,
-  "totalChangeCount": 64,
+  "generatedAt": "2026-08-08T00:00:51.900Z",
+  "commitCount": 176,
+  "totalChangeCount": 65,
   "history": [
     {
       "commit": {
@@ -1848,6 +1848,39 @@
             "NOME": "LUCIANO FERNANDES DA SILVA",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "SEFAZ PI"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "61776ed82908c372ec69eca3acc26ab8064cbb35",
+        "date": "2026-08-08T00:00:27Z",
+        "author": "observatoriosefmg",
+        "message": "SEFA PA"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7554553",
+          "inscricao": "266000566",
+          "nome": "CATHERINA PAULA CABRAL DA COSTA AMARAL",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFA PA",
+          "before": {
+            "MASP": "7554553",
+            "INSCRICAO": "266000566",
+            "NOME": "CATHERINA PAULA CABRAL DA COSTA AMARAL",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7554553",
+            "INSCRICAO": "266000566",
+            "NOME": "CATHERINA PAULA CABRAL DA COSTA AMARAL",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFA PA"
           }
         }
       ]
