@@ -171,17 +171,17 @@ const RelatorioImpressao: React.FC = () => {
 
   const configuracoes = {
     exonerados: {
-      titulo: 'Auditores Exonerados',
+      titulo: 'Auditores exonerados',
       dataPrincipal: 'Data de exoneração',
       publicacao: 'Publicação da exoneração',
     },
     desistentes: {
-      titulo: 'Auditores Desistentes',
+      titulo: 'Auditores desistentes',
       dataPrincipal: 'Data de nomeação',
       publicacao: 'Nomeação sem efeito',
     },
     nomeados: {
-      titulo: 'Auditores Já Nomeados',
+      titulo: 'Auditores nomeados recentemente em outros concursos',
       dataPrincipal: 'Data da última nomeação',
       publicacao: null,
     },
