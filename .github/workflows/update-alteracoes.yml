@@ -13,7 +13,6 @@ concurrency:
 
 jobs:
   gerar-alteracoes:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -47,7 +46,7 @@ jobs:
             evasao/dist/alteracoes.json \
             evasao/dist/alteracoes-registros.json
           if ! git diff --cached --quiet; then
-            git commit -m "[skip ci] Atualiza histórico de alterações do dados.csv"
+            git commit -m "Atualiza histórico de alterações do dados.csv"
             git push
           else
             echo "Nenhuma alteração nos arquivos de histórico"
