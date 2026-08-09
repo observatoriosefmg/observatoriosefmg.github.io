@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-09T00:46:51.667Z",
-  "commitCount": 181,
-  "totalChangeCount": 67,
+  "generatedAt": "2026-08-09T01:32:58.683Z",
+  "commitCount": 182,
+  "totalChangeCount": 69,
   "history": [
     {
       "commit": {
@@ -1947,6 +1947,61 @@
             "NOME": "LUIS AFFONSO RODRIGUES DRESCH",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "SEFA PR"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "c1f72f7e180cbc651da92071b162d09c65c9a26c",
+        "date": "2026-08-09T01:31:37Z",
+        "author": "observatoriosefmg",
+        "message": "alexandre raymundo e  igor ferreyra"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "7558901",
+          "inscricao": "266018099",
+          "nome": "IGOR FERREYRO NUNES DA SILVA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ RJ",
+          "before": {
+            "MASP": "7558901",
+            "INSCRICAO": "266018099",
+            "NOME": "IGOR FERREYRO NUNES DA SILVA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7558901",
+            "INSCRICAO": "266018099",
+            "NOME": "IGOR FERREYRO NUNES DA SILVA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ RJ"
+          }
+        },
+        {
+          "masp": "266003141",
+          "inscricao": "266003141",
+          "nome": "ALEXANDRE RAYMUNDO DE JESUS",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "CAGE RS",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266003141",
+            "NOME": "ALEXANDRE RAYMUNDO DE JESUS",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266003141",
+            "NOME": "ALEXANDRE RAYMUNDO DE JESUS",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "CAGE RS"
           }
         }
       ]
