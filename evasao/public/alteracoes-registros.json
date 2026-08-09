@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-08T14:47:59.043Z",
-  "commitCount": 180,
-  "totalChangeCount": 66,
+  "generatedAt": "2026-08-09T00:46:51.667Z",
+  "commitCount": 181,
+  "totalChangeCount": 67,
   "history": [
     {
       "commit": {
@@ -1914,6 +1914,39 @@
             "NOME": "LAURA RIBAS DE OLIVEIRA PAIVA",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "ISS BH"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "40d8c806da269d5fc964493cb6a11b7ac96065f9",
+        "date": "2026-08-09T00:46:14Z",
+        "author": "observatoriosefmg",
+        "message": "luis dresch"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "266004453",
+          "inscricao": "266004453",
+          "nome": "LUIS AFFONSO RODRIGUES DRESCH",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFA PR",
+          "before": {
+            "MASP": "",
+            "INSCRICAO": "266004453",
+            "NOME": "LUIS AFFONSO RODRIGUES DRESCH",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "",
+            "INSCRICAO": "266004453",
+            "NOME": "LUIS AFFONSO RODRIGUES DRESCH",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFA PR"
           }
         }
       ]
