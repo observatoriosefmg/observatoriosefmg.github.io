@@ -483,13 +483,11 @@
     font-weight: 600;
   }
   #painel-grafico {
-    padding: 74px 16px 16px;
+    padding: 16px;
   }
   .acoes-legenda-grafico {
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    right: 16px;
+    position: static;
+    flex: 0 0 auto;
     z-index: 3;
     display: flex;
     flex-wrap: wrap;
@@ -1081,12 +1079,9 @@
       height: 690px;
     }
     #painel-grafico {
-      padding: 94px 8px 8px;
+      padding: 8px;
     }
     .acoes-legenda-grafico {
-      top: 8px;
-      left: 8px;
-      right: 8px;
       padding: 7px 8px;
       gap: 8px;
     }
@@ -1203,7 +1198,7 @@
     </div>
     <div class="acoes-legenda-grafico" id="campo-visibilidade-estados" style="display:none;">
       <div class="acoes-legenda-textos">
-        <span class="acoes-legenda-texto" id="texto-aviso-acumulado-grafico" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal de cada ano, entre zero e o ano estimado. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mi>ano</mi></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></span>
+        <span class="acoes-legenda-texto" id="texto-aviso-acumulado-grafico" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal, do ano zero até o ano estimado menos um. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>ano</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></span>
         <span class="acoes-legenda-texto" id="texto-aviso-legenda-grafico">Clique no nome de um estado na legenda para destacar, ocultar ou reexibir a linha.</span>
       </div>
       <div class="acoes-legenda-botoes" id="acoes-legenda-botoes">
@@ -1225,7 +1220,7 @@
       </div>
       <input id="anosBarrasInput" type="number" min="0" max="40" step="1" value="0" />
     </div>
-    <div id="barras-acumulado-nota" class="barras-acumulado-nota" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal de cada ano, entre zero e o ano estimado. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mi>ano</mi></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>
+    <div id="barras-acumulado-nota" class="barras-acumulado-nota" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal, do ano zero até o ano estimado menos um. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>ano</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>
     <div id="barras-echart" style="width:100%;"></div>
   </div>
 
@@ -1460,6 +1455,7 @@ function renderTooltipMedia(tooltipEl, anosServico, mediaLiquida, mediaPorHora, 
 }
 
 function montarConteudoTooltipLiquidoAcumulado(estado, linha, opcoes = {}) {
+  const anosCompletos = linha.anosServico + 1;
   const valorAcumulado = Number.isFinite(opcoes.valorAcumulado)
     ? opcoes.valorAcumulado
     : (linha?.remuneracaoLiquidaAcumulada ?? linha?.remuneracaoLiquida);
@@ -1475,7 +1471,7 @@ function montarConteudoTooltipLiquidoAcumulado(estado, linha, opcoes = {}) {
     ? "Não disponível"
     : (diferencaAcumulado > 0 ? `+${formatarMoeda(diferencaAcumulado)}` : formatarMoeda(diferencaAcumulado));
   return `<div style="padding:14px 16px;max-width:640px;white-space:normal;">
-    <div style="font-weight:700;margin-bottom:10px">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}</div>
+    <div style="font-weight:700;margin-bottom:10px">${htmlEsc(estado.nome)} · ${anosCompletos} ano${ehSingular(anosCompletos) ? "" : "s"}</div>
     <div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid #e2e8f0;">
       <span>Remuneração Líquida Acumulada</span><strong>${formatarMoeda(valorAcumulado)}</strong>
     </div>
@@ -1819,10 +1815,12 @@ function montarTabela(estado, opcoes) {
 // ── Tabela: Comparação entre estados ────────────────────────────────────────
 
 function montarTabelaComparacao(opcoes) {
-  const anos = [0, 3, 6, 10, 20, 40];
-  const labelsAno = ["Inicial", "3 anos", "6 anos", "10 anos", "20 anos", "40 anos"];
   const emValorHora = opcoes.metricaGrafico === "hora";
   const emAcumulado = opcoes.metricaGrafico === "acumulado";
+  const anos = emAcumulado ? [0, 2, 5, 9, 19, 39] : [0, 3, 6, 10, 20, 40];
+  const labelsAno = emAcumulado
+    ? ["1 ano", "3 anos", "6 anos", "10 anos", "20 anos", "40 anos"]
+    : ["Inicial", "3 anos", "6 anos", "10 anos", "20 anos", "40 anos"];
   const anoMaxComparacao = Math.max(...anos);
   const listaEstados = window.__dados.listaEstados;
 
@@ -1883,7 +1881,7 @@ function montarTabelaComparacao(opcoes) {
     .join("");
 
   const notaAcumulado = emAcumulado
-    ? `<div class="barras-acumulado-nota" style="margin-bottom:10px;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal de cada ano, entre zero e o ano estimado. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mi>ano</mi></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>`
+    ? `<div class="barras-acumulado-nota" style="margin-bottom:10px;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal, do ano zero até o ano estimado menos um. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>ano</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>`
     : "";
   return `${notaAcumulado}<div class="tabela-wrapper">${cabecalho}${linhasHtml}</tbody></table></div>`;
 }
@@ -2347,22 +2345,23 @@ function renderizarGrafico(opcoes) {
   const emValorHora = metricaGrafico === "hora";
   const emAcumulado = metricaGrafico === "acumulado";
   const anosMax = window.__dados.anosMax;
-  const labels = Array.from({ length: anosMax + 1 }, (_, i) => i);
+  const anosCalculo = Array.from({ length: emAcumulado ? anosMax : anosMax + 1 }, (_, i) => i);
+  const labels = anosCalculo.map(ano => emAcumulado ? ano + 1 : ano);
   const datasets = [];
   const estadosLegendaAnteriores = (__grafico && __grafico.data && Array.isArray(__grafico.data.datasets))
     ? new Map(__grafico.data.datasets.map(ds => [ds.label, ds._estadoLegenda]))
     : new Map();
   let ci = 0;
 
-  const somaLiquida = new Array(anosMax + 1).fill(0);
-  const somaPorHora = new Array(anosMax + 1).fill(0);
-  const somaLiquidaAcumulada = new Array(anosMax + 1).fill(0);
+  const somaLiquida = new Array(labels.length).fill(0);
+  const somaPorHora = new Array(labels.length).fill(0);
+  const somaLiquidaAcumulada = new Array(labels.length).fill(0);
   const acumuladoPorUf = {};
   let totalEstados = 0;
 
   for (const { uf } of window.__dados.listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
-    const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
+    const linhas = anosCalculo.map(ano => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
     const acumuladoLiquido = [];
     let cumul = 0;
     linhas.forEach((l, i) => {
@@ -2446,6 +2445,7 @@ function renderizarGrafico(opcoes) {
   }
 
   if (__grafico) {
+    __grafico.data.labels = labels;
     __grafico.data.datasets = datasets;
     sincronizarEstadoLegendaDatasets(__grafico);
     __grafico.options.scales.y.title.text = emValorHora
@@ -2520,7 +2520,7 @@ function renderizarGrafico(opcoes) {
 
         if (dataset._isMedia) {
           const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
-          const anosServico = chart.data.labels[item.index];
+          const anosServico = chart.data.labels[item.index] - (((__opcoesGrafico.metricaGrafico || "mensal") === "acumulado") ? 1 : 0);
           const emAcumuladoTooltip = (__opcoesGrafico.metricaGrafico || "mensal") === "acumulado";
           const mediaLiquida = emAcumuladoTooltip ? dataset._mediaLiquidaAcumulada[item.index] : dataset._mediaLiquida[item.index];
           const mediaLiquidaMensal = dataset._mediaLiquida[item.index];
@@ -2701,7 +2701,7 @@ function renderizarGrafico(opcoes) {
 
             if (ds._isMedia) {
               const rotuloComparacaoTooltip = obterRotuloComparacaoAcumulado(__opcoesGrafico.comparacaoAcumulado);
-              const anosServico = context.chart.data.labels[closest.dataIndex];
+              const anosServico = context.chart.data.labels[closest.dataIndex] - (((__opcoesGrafico.metricaGrafico || "mensal") === "acumulado") ? 1 : 0);
               const emAcumuladoTooltip = (__opcoesGrafico.metricaGrafico || "mensal") === "acumulado";
               const mediaLiquida = emAcumuladoTooltip ? ds._mediaLiquidaAcumulada[closest.dataIndex] : ds._mediaLiquida[closest.dataIndex];
               const mediaLiquidaMensal = ds._mediaLiquida[closest.dataIndex];
@@ -2773,7 +2773,8 @@ function renderizarPosicao(opcoes) {
   const emValorHora = metricaGrafico === "hora";
   const emAcumulado = metricaGrafico === "acumulado";
   const anosMax = window.__dados.anosMax;
-  const labels = Array.from({ length: anosMax + 1 }, (_, i) => i);
+  const anosCalculo = Array.from({ length: emAcumulado ? anosMax : anosMax + 1 }, (_, i) => i);
+  const labels = anosCalculo.map(ano => emAcumulado ? ano + 1 : ano);
   const listaEstados = window.__dados.listaEstados;
   const totalEstados = listaEstados.length;
 
@@ -2786,7 +2787,7 @@ function renderizarPosicao(opcoes) {
   let ci = 0;
   for (const { uf } of listaEstados) {
     const estado = obterDatasetEstado(window.__dados.estados[uf], opcoes.escolaridade);
-    const linhas = Array.from({ length: anosMax + 1 }, (_, ano) => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
+    const linhas = anosCalculo.map(ano => montarLinha(estado, ano, opcoes.diasTrabalhados, opcoes.numeroFilhos, opcoes.usarTetoNacional, opcoes.regimePrevidencia || "com_complementar"));
     const acumulado = [];
     let cumul = 0;
     linhas.forEach((l, ano) => {
@@ -2803,8 +2804,8 @@ function renderizarPosicao(opcoes) {
   }
 
   const rankPorUf = {};
-  listaEstados.forEach(({ uf }) => { rankPorUf[uf] = new Array(anosMax + 1).fill(0); });
-  for (let ano = 0; ano <= anosMax; ano++) {
+  listaEstados.forEach(({ uf }) => { rankPorUf[uf] = new Array(labels.length).fill(0); });
+  for (let ano = 0; ano < labels.length; ano++) {
     const ordenado = listaEstados
       .map(({ uf }) => ({ uf, valor: valoresPorUf[uf][ano] }))
       .sort((a, b) => b.valor - a.valor);
@@ -3074,7 +3075,8 @@ function calcularLimitesEixoBarras(opcoes, cache = null, estadosData = null, ano
 function renderizarBarras(opcoes) {
   const emValorHora = (opcoes.metricaGrafico || "mensal") === "hora";
   const emAcumulado = (opcoes.metricaGrafico || "mensal") === "acumulado";
-  const ano = anosBarrasAtual();
+  const anoExibido = anosBarrasAtual();
+  const ano = emAcumulado ? anoExibido - 1 : anoExibido;
   const telaPequena = ehTelaPequenaBarras();
   const linhaCache = new Map();
 
@@ -3341,11 +3343,13 @@ let __ultimoModoTelaPequenaBarras = ehTelaPequenaBarras();
 let __resizeRenderTimer = null;
 
 function setMetricaGrafico(valor) {
+  const eraAcumulado = __metricaGrafico === "acumulado";
   __metricaGrafico = valor;
   document.getElementById("btn-metrica-mensal").classList.toggle("ativo", valor === "mensal");
   const botãoAcumulado = document.getElementById("btn-metrica-acumulado");
   if (botãoAcumulado) botãoAcumulado.classList.toggle("ativo", valor === "acumulado");
   document.getElementById("btn-metrica-hora").classList.toggle("ativo", valor === "hora");
+  configurarControleAnosBarras(valor === "acumulado", eraAcumulado);
   atualizarCampoVisibilidadeEstados();
   atualizarCampoComparacaoAcumulado();
   renderizar();
@@ -3539,16 +3543,37 @@ async function carregarDados() {
 });
 
 function montarReguaBarras(anosMax) {
+  const anosMin = Number(document.getElementById("anosBarras").min) || 0;
   const passo = anosMax % 5 === 0 ? 5 : Math.max(1, Math.round(anosMax / 8));
   const marcas = [];
-  for (let a = 0; a <= anosMax; a += passo) marcas.push(a);
+  for (let a = anosMin; a <= anosMax; a++) {
+    if (a === anosMin || a === anosMax || a % passo === 0) marcas.push(a);
+  }
   if (marcas[marcas.length - 1] !== anosMax) marcas.push(anosMax);
   const thumbWidth = 8;
   document.getElementById("barras-regua").innerHTML = marcas.map(a => {
-    const pct = anosMax > 0 ? a / anosMax : 0;
+    const pct = anosMax > anosMin ? (a - anosMin) / (anosMax - anosMin) : 0;
     const left = `calc(${pct * 100}% + ${(0.5 - pct) * thumbWidth}px)`;
     return `<span style="left:${left}">${a}</span>`;
   }).join("");
+}
+
+function configurarControleAnosBarras(emAcumulado, eraAcumulado) {
+  const slider = document.getElementById("anosBarras");
+  const numero = document.getElementById("anosBarrasInput");
+  if (!slider || !numero) return;
+  let valor = Number(slider.value) || 0;
+  if (emAcumulado && !eraAcumulado) valor += 1;
+  if (!emAcumulado && eraAcumulado) valor -= 1;
+  const minimo = emAcumulado ? 1 : 0;
+  const maximo = window.__dados.anosMax;
+  valor = Math.min(maximo, Math.max(minimo, valor));
+  slider.min = String(minimo);
+  numero.min = String(minimo);
+  slider.value = String(valor);
+  numero.value = String(valor);
+  montarReguaBarras(maximo);
+  atualizarBolhaAnosBarras();
 }
 
 function atualizarBolhaAnosBarras() {
@@ -3572,7 +3597,8 @@ document.getElementById("anosBarrasInput").addEventListener("input", () => {
   const anosMax = Number(document.getElementById("anosBarras").max) || 40;
   let valor = Number(el.value);
   if (!Number.isFinite(valor)) return;
-  valor = Math.min(anosMax, Math.max(0, valor));
+  const anosMin = Number(document.getElementById("anosBarras").min) || 0;
+  valor = Math.min(anosMax, Math.max(anosMin, valor));
   document.getElementById("anosBarras").value = valor;
   atualizarBolhaAnosBarras();
 });
