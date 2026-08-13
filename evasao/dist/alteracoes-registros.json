@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-09T01:32:58.683Z",
-  "commitCount": 182,
-  "totalChangeCount": 69,
+  "generatedAt": "2026-08-13T12:12:31.035Z",
+  "commitCount": 183,
+  "totalChangeCount": 70,
   "history": [
     {
       "commit": {
@@ -2002,6 +2002,39 @@
             "NOME": "ALEXANDRE RAYMUNDO DE JESUS",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "CAGE RS"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "a123408c65a684a3ad0741b34e2f071cf9c382e2",
+        "date": "2026-08-13T12:11:57Z",
+        "author": "observatoriosefmg",
+        "message": "exoneração luiz"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7555956",
+          "inscricao": "266008778",
+          "nome": "LUIZ DE LIMA SOUZA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "TCU",
+          "before": {
+            "MASP": "7555956",
+            "INSCRICAO": "266008778",
+            "NOME": "LUIZ DE LIMA SOUZA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555956",
+            "INSCRICAO": "266008778",
+            "NOME": "LUIZ DE LIMA SOUZA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "TCU"
           }
         }
       ]
