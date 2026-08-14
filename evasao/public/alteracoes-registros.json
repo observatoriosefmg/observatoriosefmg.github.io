@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-13T12:12:31.035Z",
-  "commitCount": 183,
-  "totalChangeCount": 70,
+  "generatedAt": "2026-08-14T11:19:48.672Z",
+  "commitCount": 184,
+  "totalChangeCount": 72,
   "history": [
     {
       "commit": {
@@ -2035,6 +2035,61 @@
             "NOME": "LUIZ DE LIMA SOUZA",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "TCU"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "42a3175c31efb082b90332ae896e51c74eca6f79",
+        "date": "2026-08-14T11:19:00Z",
+        "author": "observatoriosefmg",
+        "message": "2 AFASTAMENTOS"
+      },
+      "changeCount": 2,
+      "changes": [
+        {
+          "masp": "2768935",
+          "inscricao": "",
+          "nome": "JUNIA DE SALLES MOURAO CARVALHAES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "2768935",
+            "INSCRICAO": "",
+            "NOME": "JUNIA DE SALLES MOURAO CARVALHAES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "2768935",
+            "INSCRICAO": "",
+            "NOME": "JUNIA DE SALLES MOURAO CARVALHAES",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        },
+        {
+          "masp": "3744521",
+          "inscricao": "",
+          "nome": "CLAUDIA ELISABETE EVANGELISTA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3744521",
+            "INSCRICAO": "",
+            "NOME": "CLAUDIA ELISABETE EVANGELISTA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3744521",
+            "INSCRICAO": "",
+            "NOME": "CLAUDIA ELISABETE EVANGELISTA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
           }
         }
       ]

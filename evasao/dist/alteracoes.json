@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-13T12:12:31.035Z",
-  "commitCount": 183,
+  "generatedAt": "2026-08-14T11:19:48.672Z",
+  "commitCount": 184,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1100,6 +1100,12 @@
       "date": "2026-08-13T12:11:57Z",
       "author": "observatoriosefmg",
       "message": "exoneração luiz"
+    },
+    {
+      "hash": "42a3175c31efb082b90332ae896e51c74eca6f79",
+      "date": "2026-08-14T11:19:00Z",
+      "author": "observatoriosefmg",
+      "message": "2 AFASTAMENTOS"
     }
   ]
 }
