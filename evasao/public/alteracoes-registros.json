@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-14T13:08:30.934Z",
-  "commitCount": 185,
-  "totalChangeCount": 73,
+  "generatedAt": "2026-08-14T19:34:19.029Z",
+  "commitCount": 186,
+  "totalChangeCount": 88,
   "history": [
     {
       "commit": {
@@ -2123,6 +2123,347 @@
             "NOME": "THIAGO SILVA DE BRITTO",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "SEFAZ RJ"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "896fd7cfed2b1b2a777a5435bd656b00aaf7daba",
+        "date": "2026-08-14T19:33:52Z",
+        "author": "observatoriosefmg",
+        "message": "SEFAZ SP"
+      },
+      "changeCount": 15,
+      "changes": [
+        {
+          "masp": "7557614",
+          "inscricao": "266008016",
+          "nome": "ROBERTO BLACK",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7557614",
+            "INSCRICAO": "266008016",
+            "NOME": "ROBERTO BLACK",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7557614",
+            "INSCRICAO": "266008016",
+            "NOME": "ROBERTO BLACK",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7556715",
+          "inscricao": "266003395",
+          "nome": "VINICIUS DE CARLOS HAYDU",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7556715",
+            "INSCRICAO": "266003395",
+            "NOME": "VINICIUS DE CARLOS HAYDU",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556715",
+            "INSCRICAO": "266003395",
+            "NOME": "VINICIUS DE CARLOS HAYDU",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7554082",
+          "inscricao": "266001202",
+          "nome": "GABRIEL PEREZ BRESSAN",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7554082",
+            "INSCRICAO": "266001202",
+            "NOME": "GABRIEL PEREZ BRESSAN",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7554082",
+            "INSCRICAO": "266001202",
+            "NOME": "GABRIEL PEREZ BRESSAN",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7554058",
+          "inscricao": "266010106",
+          "nome": "TAMIRIS VIANA DE OLIVEIRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7554058",
+            "INSCRICAO": "266010106",
+            "NOME": "TAMIRIS VIANA DE OLIVEIRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7554058",
+            "INSCRICAO": "266010106",
+            "NOME": "TAMIRIS VIANA DE OLIVEIRA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7554215",
+          "inscricao": "266009931",
+          "nome": "RAFAEL CABRAL DE LACERDA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7554215",
+            "INSCRICAO": "266009931",
+            "NOME": "RAFAEL CABRAL DE LACERDA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7554215",
+            "INSCRICAO": "266009931",
+            "NOME": "RAFAEL CABRAL DE LACERDA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7554306",
+          "inscricao": "266010238",
+          "nome": "RODRIGO SERPELLONE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7554306",
+            "INSCRICAO": "266010238",
+            "NOME": "RODRIGO SERPELLONE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7554306",
+            "INSCRICAO": "266010238",
+            "NOME": "RODRIGO SERPELLONE",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7554488",
+          "inscricao": "266002250",
+          "nome": "FELIPE CARDOSO MOREIRA ROZENBERG",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7554488",
+            "INSCRICAO": "266002250",
+            "NOME": "FELIPE CARDOSO MOREIRA ROZENBERG",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7554488",
+            "INSCRICAO": "266002250",
+            "NOME": "FELIPE CARDOSO MOREIRA ROZENBERG",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7555071",
+          "inscricao": "266018624",
+          "nome": "JOSE DIEGO PORTELA MESSIAS",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7555071",
+            "INSCRICAO": "266018624",
+            "NOME": "JOSE DIEGO PORTELA MESSIAS",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555071",
+            "INSCRICAO": "266018624",
+            "NOME": "JOSE DIEGO PORTELA MESSIAS",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7555832",
+          "inscricao": "266001379",
+          "nome": "DIOGO FERNANDES DIAS",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7555832",
+            "INSCRICAO": "266001379",
+            "NOME": "DIOGO FERNANDES DIAS",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555832",
+            "INSCRICAO": "266001379",
+            "NOME": "DIOGO FERNANDES DIAS",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7555378",
+          "inscricao": "266005688",
+          "nome": "LUCAS MAURI NASCIMENTO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7555378",
+            "INSCRICAO": "266005688",
+            "NOME": "LUCAS MAURI NASCIMENTO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555378",
+            "INSCRICAO": "266005688",
+            "NOME": "LUCAS MAURI NASCIMENTO",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7555865",
+          "inscricao": "266004610",
+          "nome": "RICARDO DRUDI",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7555865",
+            "INSCRICAO": "266004610",
+            "NOME": "RICARDO DRUDI",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555865",
+            "INSCRICAO": "266004610",
+            "NOME": "RICARDO DRUDI",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7556004",
+          "inscricao": "266000576",
+          "nome": "THADEU ARGOLO DE ANDRADE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7556004",
+            "INSCRICAO": "266000576",
+            "NOME": "THADEU ARGOLO DE ANDRADE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7556004",
+            "INSCRICAO": "266000576",
+            "NOME": "THADEU ARGOLO DE ANDRADE",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7555915",
+          "inscricao": "266013462",
+          "nome": "PEDRO MANFRIM MAGALHAES DE PAULA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7555915",
+            "INSCRICAO": "266013462",
+            "NOME": "PEDRO MANFRIM MAGALHAES DE PAULA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555915",
+            "INSCRICAO": "266013462",
+            "NOME": "PEDRO MANFRIM MAGALHAES DE PAULA",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7555931",
+          "inscricao": "266004596",
+          "nome": "ELTON LAGROTERIA DOS SANTOS",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7555931",
+            "INSCRICAO": "266004596",
+            "NOME": "ELTON LAGROTERIA DOS SANTOS",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7555931",
+            "INSCRICAO": "266004596",
+            "NOME": "ELTON LAGROTERIA DOS SANTOS",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        },
+        {
+          "masp": "7557580",
+          "inscricao": "266000550",
+          "nome": "FABIANO TAKEMI ISHII",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7557580",
+            "INSCRICAO": "266000550",
+            "NOME": "FABIANO TAKEMI ISHII",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7557580",
+            "INSCRICAO": "266000550",
+            "NOME": "FABIANO TAKEMI ISHII",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
           }
         }
       ]
