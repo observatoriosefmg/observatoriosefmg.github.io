@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -33,6 +33,80 @@ interface EvasionChartProps {
 }
 
 const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, details = {}, backgroundPoints, inactivityPoints, inactivityDetails = {}, backgroundInactivityPoints }) => {
+  const tooltipElementRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      tooltipElementRef.current?.remove();
+      tooltipElementRef.current = null;
+    };
+  }, []);
+
+  const renderExternalTooltip = ({ chart, tooltip }: any) => {
+    let tooltipElement = tooltipElementRef.current;
+
+    if (!tooltipElement) {
+      tooltipElement = document.createElement('div');
+      tooltipElement.setAttribute('role', 'tooltip');
+      Object.assign(tooltipElement.style, {
+        position: 'absolute',
+        zIndex: '9999',
+        pointerEvents: 'none',
+        padding: '10px 12px',
+        borderRadius: '6px',
+        background: 'rgba(0, 0, 0, 0.9)',
+        color: '#fff',
+        fontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+        fontSize: '12px',
+        lineHeight: '1.35',
+        whiteSpace: 'nowrap',
+        width: 'max-content',
+        maxWidth: 'none',
+        maxHeight: 'none',
+        overflow: 'visible',
+        transition: 'opacity 0.1s ease',
+      });
+      document.body.appendChild(tooltipElement);
+      tooltipElementRef.current = tooltipElement;
+    }
+
+    if (!tooltip || tooltip.opacity === 0) {
+      tooltipElement.style.opacity = '0';
+      return;
+    }
+
+    tooltipElement.replaceChildren();
+
+    const appendLines = (lines: unknown[], fontWeight = 'normal') => {
+      lines.forEach((line) => {
+        if (line === undefined || line === null || line === '') return;
+        const row = document.createElement('div');
+        row.textContent = String(line);
+        row.style.fontWeight = fontWeight;
+        tooltipElement!.appendChild(row);
+      });
+    };
+
+    appendLines(tooltip.title ?? [], 'bold');
+    (tooltip.beforeBody ?? []).forEach((line: string) => appendLines([line]));
+    (tooltip.body ?? []).forEach((bodyItem: any) => {
+      appendLines(bodyItem.before ?? []);
+      appendLines(bodyItem.lines ?? []);
+      appendLines(bodyItem.after ?? []);
+    });
+    appendLines(tooltip.afterBody ?? []);
+    appendLines(tooltip.footer ?? [], 'bold');
+
+    const canvasRect = chart.canvas.getBoundingClientRect();
+    const left = canvasRect.left + window.scrollX + tooltip.caretX;
+    const top = canvasRect.top + window.scrollY + tooltip.caretY;
+
+    tooltipElement.style.opacity = '1';
+    tooltipElement.style.left = `${left}px`;
+    tooltipElement.style.top = `${top}px`;
+    tooltipElement.style.transform = 'translate(-50%, 12px)';
+  };
+
   // Detectar se é gráfico por unidade
   const isUnidadeChart = points.length > 0 && points[0].tipo === 'unidade';
   
@@ -133,6 +207,8 @@ const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, detai
       },
       title: { display: false },
       tooltip: {
+        enabled: false,
+        external: renderExternalTooltip,
         callbacks: {
           title: (context: any) => {
             // Se for gráfico de unidades, mostrar o nome completo da unidade no tooltip
