@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-14T11:19:48.672Z",
-  "commitCount": 184,
-  "totalChangeCount": 72,
+  "generatedAt": "2026-08-14T13:08:30.934Z",
+  "commitCount": 185,
+  "totalChangeCount": 73,
   "history": [
     {
       "commit": {
@@ -2090,6 +2090,39 @@
             "NOME": "CLAUDIA ELISABETE EVANGELISTA",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
             "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "84ab55f44d5d30d684d5d829ff321943da53f373",
+        "date": "2026-08-14T13:08:05Z",
+        "author": "observatoriosefmg",
+        "message": "Thiago Brito"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7557002",
+          "inscricao": "266014616",
+          "nome": "THIAGO SILVA DE BRITTO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ RJ",
+          "before": {
+            "MASP": "7557002",
+            "INSCRICAO": "266014616",
+            "NOME": "THIAGO SILVA DE BRITTO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7557002",
+            "INSCRICAO": "266014616",
+            "NOME": "THIAGO SILVA DE BRITTO",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ RJ"
           }
         }
       ]
