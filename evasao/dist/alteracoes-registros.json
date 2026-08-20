@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-14T19:49:58.767Z",
-  "commitCount": 187,
-  "totalChangeCount": 88,
+  "generatedAt": "2026-08-20T13:58:25.708Z",
+  "commitCount": 188,
+  "totalChangeCount": 89,
   "history": [
     {
       "commit": {
@@ -2462,6 +2462,39 @@
             "MASP": "7557580",
             "INSCRICAO": "266000550",
             "NOME": "FABIANO TAKEMI ISHII",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "0b945b887d19103a7e388e618c3df5c26b505c19",
+        "date": "2026-08-20T13:57:49Z",
+        "author": "observatoriosefmg",
+        "message": "thiago akira"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7557069",
+          "inscricao": "266003522",
+          "nome": "THIAGO AKIRA KORONOMA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ SP",
+          "before": {
+            "MASP": "7557069",
+            "INSCRICAO": "266003522",
+            "NOME": "THIAGO AKIRA KORONOMA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7557069",
+            "INSCRICAO": "266003522",
+            "NOME": "THIAGO AKIRA KORONOMA",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "SEFAZ SP"
           }
