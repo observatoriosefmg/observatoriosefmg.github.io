@@ -3048,6 +3048,11 @@ function aplicarSimulacaoViMgNoRanking(uf, estado, linha, opcoes) {
   const acrescimo = valorNovo - valorAtual;
   if (!(acrescimo > 0)) return linha;
 
+  const diasTrabalhados = Number(opcoes.diasTrabalhados || 0);
+  const legendaValorDiario = diasTrabalhados > 0
+    ? `${formatarMoeda(valorNovo / diasTrabalhados)}/dia`
+    : linha.legendasVerbas?.[ID_VI_AJUDA_CUSTO_MG];
+
   const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * ((opcoes.diasTrabalhados || 0) / 5);
   const remuneracaoIndenizatoria = (linha.remuneracaoIndenizatoria || 0) + acrescimo;
   const remuneracaoBruta = (linha.remuneracaoBruta || 0) + acrescimo;
@@ -3059,6 +3064,10 @@ function aplicarSimulacaoViMgNoRanking(uf, estado, linha, opcoes) {
     valoresVerbas: {
       ...(linha.valoresVerbas || {}),
       [ID_VI_AJUDA_CUSTO_MG]: valorNovo,
+    },
+    legendasVerbas: {
+      ...(linha.legendasVerbas || {}),
+      [ID_VI_AJUDA_CUSTO_MG]: legendaValorDiario,
     },
     remuneracaoIndenizatoria,
     remuneracaoBruta,
