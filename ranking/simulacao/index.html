@@ -456,6 +456,26 @@
     font-weight: 600;
     text-align: center;
   }
+  .barras-controle-simulacao {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .barras-btn-simulacao {
+    border: 1px solid #d0d5dd;
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: #ffffff;
+    color: #1f2a44;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .barras-btn-simulacao.ativo {
+    border-color: #14532d;
+    background: #166534;
+    color: #ffffff;
+  }
   .grafico-loading {
     position: absolute;
     inset: 0;
@@ -1114,7 +1134,7 @@
       <button type="button" class="btn-colabora-calculadora" id="btn-colabora-calculadora">
         <i class="fa-solid fa-envelope" aria-hidden="true"></i> Colabore com informações
       </button>
-      <a class="btn-link-composicao" href="./composicao/"><i class="fa-solid fa-eye" aria-hidden="true"></i> Ver composições detalhadas</a>
+      <a class="btn-link-composicao" href="../composicao/"><i class="fa-solid fa-eye" aria-hidden="true"></i> Ver composições detalhadas</a>
     </div>
   </div>
 
@@ -1220,6 +1240,11 @@
       </div>
       <input id="anosBarrasInput" type="number" min="0" max="40" step="1" value="0" />
     </div>
+    <div class="barras-controle-simulacao">
+      <button type="button" id="btn-simulacao-vi-mg" class="barras-btn-simulacao" aria-pressed="false">
+        Simular +138% na VI de MG: desativada
+      </button>
+    </div>
     <div id="barras-acumulado-nota" class="barras-acumulado-nota" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal, do ano zero até o ano estimado menos um. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>ano</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>
     <div id="barras-echart" style="width:100%;"></div>
   </div>
@@ -1229,7 +1254,7 @@
   </div>
 
   <div class="instagram-callout" aria-label="Aviso sobre a origem do levantamento salarial">
-    <img class="instagram-callout-midia" src="./img/pifado.png" alt="Perfil do Instagram Concurseiropifado" />
+    <img class="instagram-callout-midia" src="../img/pifado.png" alt="Perfil do Instagram Concurseiropifado" />
     <div class="instagram-callout-texto">
       <p>
         As postagens do <strong>@concurseiropifado</strong> no Instagram foram o ponto de partida para o levantamento da estrutura remuneratória de vários fiscos. Siga o perfil para acompanhar novidades sobre concursos da área fiscal.
@@ -1509,7 +1534,7 @@ function montarResumoTooltip(linha, estado, opcoes = {}) {
     return `
       <div class="tooltip-resumo-em-construcao">
         <div class="hol-wip">
-          <img class="hol-wip-imagem" src="./img/wip.png" alt="" />
+          <img class="hol-wip-imagem" src="../img/wip.png" alt="" />
           <div class="hol-wip-titulo">Em construção</div>
           <div class="hol-wip-texto">Ainda não temos o detalhamento completo da remuneração deste estado. Estamos trabalhando para disponibilizar o mais breve possível.</div>
           <div class="hol-wip-barra"><div class="hol-wip-barra-preenchimento"></div></div>
@@ -1731,7 +1756,7 @@ function montarTabela(estado, opcoes) {
 
   if (estado.remuneracaoSimplificada) {
     const avisoHtml = `<div class="hol-wip">
-      <img class="hol-wip-imagem" src="./img/wip.png" alt="" />
+      <img class="hol-wip-imagem" src="../img/wip.png" alt="" />
       <div class="hol-wip-titulo">Em construção</div>
       <div class="hol-wip-texto">Ainda não temos o detalhamento completo da remuneração deste estado. Estamos trabalhando para disponibilizar o mais breve possível.</div>
       <div class="hol-wip-barra"><div class="hol-wip-barra-preenchimento"></div></div>
@@ -2003,8 +2028,11 @@ const COR_BARRAS_PADRAO = '#16a34a';
 const COR_BARRAS_MEDIA = COR_MEDIA;
 const COR_BARRAS_DESTAQUE = COR_MINAS_GERAIS;
 const COR_FUNDO_NEGATIVO_GRAFICO = 'rgba(248, 113, 113, 0.18)';
+const ID_VI_AJUDA_CUSTO_MG = "vi_ajuda_custo";
+const MULTIPLICADOR_VI_AJUDA_CUSTO_MG = 2.38;
 let __barrasChart = null;
 let __barrasTooltipAtual = null;
+let __simulacaoViMgAtiva = false;
 
 function corComAlpha(cor, alpha) {
   const limpa = cor.replace("#", "");
@@ -2209,7 +2237,7 @@ function renderHolerite(linha, estado, opcoes = {}) {
     </div>`;
     const html = `<div class="hol-body">
       <div class="hol-wip">
-        <img class="hol-wip-imagem" src="./img/wip.png" alt="" />
+        <img class="hol-wip-imagem" src="../img/wip.png" alt="" />
         <div class="hol-wip-titulo">Em construção</div>
         <div class="hol-wip-texto">Ainda não temos o detalhamento completo da remuneração deste estado. Estamos trabalhando para disponibilizar o mais breve possível.</div>
         <div class="hol-wip-barra"><div class="hol-wip-barra-preenchimento"></div></div>
@@ -3011,6 +3039,44 @@ function obterLinhaCacheBarras(estado, anosServico, opcoes, cache) {
   return linha;
 }
 
+function aplicarSimulacaoViMgNoRanking(uf, estado, linha, opcoes) {
+  if (!__simulacaoViMgAtiva || uf !== "MG" || !linha || linha.simplificado) return linha;
+  const valorAtual = Number(linha.valoresVerbas?.[ID_VI_AJUDA_CUSTO_MG] || 0);
+  if (!(valorAtual > 0)) return linha;
+
+  const valorNovo = valorAtual * MULTIPLICADOR_VI_AJUDA_CUSTO_MG;
+  const acrescimo = valorNovo - valorAtual;
+  if (!(acrescimo > 0)) return linha;
+
+  const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * ((opcoes.diasTrabalhados || 0) / 5);
+  const remuneracaoIndenizatoria = (linha.remuneracaoIndenizatoria || 0) + acrescimo;
+  const remuneracaoBruta = (linha.remuneracaoBruta || 0) + acrescimo;
+  const remuneracaoLiquida = (linha.remuneracaoLiquida || 0) + acrescimo;
+  const liquidoPorHora = horasNoPeriodo > 0 ? remuneracaoLiquida / horasNoPeriodo : (linha.liquidoPorHora || 0);
+
+  return {
+    ...linha,
+    valoresVerbas: {
+      ...(linha.valoresVerbas || {}),
+      [ID_VI_AJUDA_CUSTO_MG]: valorNovo,
+    },
+    remuneracaoIndenizatoria,
+    remuneracaoBruta,
+    remuneracaoLiquida,
+    liquidoPorHora,
+  };
+}
+
+function atualizarBotaoSimulacaoViMg() {
+  const botao = document.getElementById("btn-simulacao-vi-mg");
+  if (!botao) return;
+  botao.classList.toggle("ativo", __simulacaoViMgAtiva);
+  botao.setAttribute("aria-pressed", __simulacaoViMgAtiva ? "true" : "false");
+  botao.textContent = __simulacaoViMgAtiva
+    ? "Simular +138% na VI de MG: ativada"
+    : "Simular +138% na VI de MG: desativada";
+}
+
 function calcularLimitesEixoBarras(opcoes, cache = null, estadosData = null, anoSelecionado = null) {
   const emValorHora = (opcoes.metricaGrafico || "mensal") === "hora";
   const emAcumulado = (opcoes.metricaGrafico || "mensal") === "acumulado";
@@ -3029,11 +3095,13 @@ function calcularLimitesEixoBarras(opcoes, cache = null, estadosData = null, ano
   const anoFinal = emAcumulado && Number.isFinite(anoSelecionado) ? anoSelecionado : anosMax;
 
   for (const item of estados) {
+    const uf = item.uf;
     const estado = item.estado;
     if (!estado || estado.dadosIncompletos) continue;
     let acumuladoPorAno = 0;
     for (let ano = 0; ano <= anosMax; ano++) {
-      const linha = obterLinhaCacheBarras(estado, ano, opcoes, cache);
+      const linhaBase = obterLinhaCacheBarras(estado, ano, opcoes, cache);
+      const linha = aplicarSimulacaoViMgNoRanking(uf, estado, linhaBase, opcoes);
       let valorLiquido = linha.remuneracaoLiquida;
       if (emAcumulado) {
         acumuladoPorAno += linha.remuneracaoLiquida * 12;
@@ -3094,11 +3162,13 @@ function renderizarBarras(opcoes) {
   const limitesEixo = calcularLimitesEixoBarras(opcoes, linhaCache, estadosParaBarras, emAcumulado ? ano : null);
 
   for (const { uf, estado } of estadosParaBarras) {
-    const linha = obterLinhaCacheBarras(estado, ano, opcoes, linhaCache);
+    const linhaBase = obterLinhaCacheBarras(estado, ano, opcoes, linhaCache);
+    const linha = aplicarSimulacaoViMgNoRanking(uf, estado, linhaBase, opcoes);
     let valorAcumulado = 0;
     if (emAcumulado) {
       for (let anoAcumulado = 0; anoAcumulado <= ano; anoAcumulado++) {
-        const linhaAno = obterLinhaCacheBarras(estado, anoAcumulado, opcoes, linhaCache);
+        const linhaAnoBase = obterLinhaCacheBarras(estado, anoAcumulado, opcoes, linhaCache);
+        const linhaAno = aplicarSimulacaoViMgNoRanking(uf, estado, linhaAnoBase, opcoes);
         valorAcumulado += linhaAno.remuneracaoLiquida * 12;
       }
     }
@@ -3403,8 +3473,8 @@ function atualizarLinkComposicao() {
   const estado = uf ? window.__dados.estados[uf] : null;
   const podeDirecionarParaEstado = __vista === "tabela" && __modoTabela === "holerite" && uf && estado && !estado.remuneracaoSimplificada;
   link.href = podeDirecionarParaEstado
-    ? `./composicao/?estado=${uf}`
-    : "./composicao/";
+    ? `../composicao/?estado=${uf}`
+    : "../composicao/";
 }
 
 function atualizarControleEscolaridade() {
@@ -3471,7 +3541,7 @@ function renderizar() {
 async function carregarDados() {
   setLoadingGrafico(true);
   try {
-    const resposta = await fetch("./dados-grafico.json", { cache: "no-store" });
+    const resposta = await fetch("../dados-grafico.json", { cache: "no-store" });
     if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
     window.__dados = await resposta.json();
   } catch (erro) {
@@ -3522,6 +3592,13 @@ async function carregarDados() {
   inputAnosBarrasTexto.value = inputAnosBarras.value;
   montarReguaBarras(window.__dados.anosMax);
   atualizarBolhaAnosBarras();
+
+  atualizarBotaoSimulacaoViMg();
+  document.getElementById("btn-simulacao-vi-mg")?.addEventListener("click", () => {
+    __simulacaoViMgAtiva = !__simulacaoViMgAtiva;
+    atualizarBotaoSimulacaoViMg();
+    renderizar();
+  });
 
   popularSeletorComparacaoAcumulado();
   const seletorComparacao = document.getElementById("comparacaoAcumulado");
