@@ -32,7 +32,7 @@ interface EvasionChartProps {
   backgroundInactivityPoints?: Point[];
 }
 
-const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 220, details = {}, backgroundPoints, inactivityPoints, inactivityDetails = {}, backgroundInactivityPoints }) => {
+const EvasionChart: React.FC<EvasionChartProps> = ({ points, height = 500, details = {}, backgroundPoints, inactivityPoints, inactivityDetails = {}, backgroundInactivityPoints }) => {
   const tooltipElementRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

@@ -1371,56 +1371,6 @@ const App: React.FC = () => {
 
           </section>
 
-          <div className="mb-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
-              <h3 className="text-lg font-semibold text-red-300">
-                {mostrarPorUnidade ? 'Exonerações e Aposentadorias por Unidade' : 'Exonerações e Aposentadorias por mês'}
-              </h3>
-              <button
-                onClick={() => setMostrarPorUnidade(!mostrarPorUnidade)}
-                className="px-4 py-2 rounded bg-amber-500 text-black font-bold hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-300 transition-colors"
-              >
-                {mostrarPorUnidade ? 'Ver por mês' : 'Ver por Unidade'}
-              </button>
-            </div>
-
-            {mostrarPorUnidade ? (
-              <EvasionChart 
-                points={areaSelecionada === 'TODAS' ? pontosUnidadeEvasaoDetalhados : pontosUnidadeEvasaoFiltradosDetalhados} 
-                details={areaSelecionada === 'TODAS' ? detalhesUnidadeEvasao : detalhesUnidadeEvasaoFiltrados} 
-                inactivityPoints={areaSelecionada === 'TODAS' ? pontosUnidadeInatividades : pontosUnidadeInatividadeFiltradosDetalhados}
-                inactivityDetails={areaSelecionada === 'TODAS' ? detalhesUnidadeInatividade : detalhesUnidadeInatividadeFiltrados}
-                height={400}
-              />
-            ) : (
-              <EvasionChart 
-                points={areaSelecionada === 'TODAS' ? pontosMensais : pontosMensaisFiltrados} 
-                details={areaSelecionada === 'TODAS' ? detalhesMensais : detalhesMensaisFiltrados} 
-                backgroundPoints={pontosMensaisUnificados} 
-                inactivityPoints={areaSelecionada === 'TODAS' ? pontosMensaisInatividade : pontosMensaisInatividadeFiltrados}
-                inactivityDetails={areaSelecionada === 'TODAS' ? detalhesMensaisInatividade : detalhesMensaisInatividadeFiltrados}
-                backgroundInactivityPoints={pontosMensaisInatividade}
-                height={220}
-              />
-            )}
-          </div>
-
-          <div className="mb-4 flex flex-col items-center">
-            <div className="text-sm text-gray-300 mb-2">Filtrar por especialidade:</div>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {areas.map(area => (
-                <button
-                  key={area}
-                  onClick={() => setAreaSelecionada(area)}
-                  aria-pressed={areaSelecionada === area}
-                  className={`px-3 py-1 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-400 ${areaSelecionada === area ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'}`}
-                >
-                  {area}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <section className="bg-gray-900 rounded-xl p-4 border border-gray-800 mb-8">
             <div className="mb-3">
               <h2 className="text-2xl font-bold text-amber-400">Últimas evasões cadastradas no Observatório</h2>
@@ -1446,6 +1396,56 @@ const App: React.FC = () => {
               </>
             )}
           </section>
+
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+              <h3 className="text-lg font-semibold text-red-300">
+                {mostrarPorUnidade ? 'Exonerações e Aposentadorias por Unidade' : 'Exonerações e Aposentadorias por mês'}
+              </h3>
+              <button
+                onClick={() => setMostrarPorUnidade(!mostrarPorUnidade)}
+                className="px-4 py-2 rounded bg-amber-500 text-black font-bold hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-300 transition-colors"
+              >
+                {mostrarPorUnidade ? 'Ver por mês' : 'Ver por Unidade'}
+              </button>
+            </div>
+
+            {mostrarPorUnidade ? (
+              <EvasionChart 
+                points={areaSelecionada === 'TODAS' ? pontosUnidadeEvasaoDetalhados : pontosUnidadeEvasaoFiltradosDetalhados} 
+                details={areaSelecionada === 'TODAS' ? detalhesUnidadeEvasao : detalhesUnidadeEvasaoFiltrados} 
+                inactivityPoints={areaSelecionada === 'TODAS' ? pontosUnidadeInatividades : pontosUnidadeInatividadeFiltradosDetalhados}
+                inactivityDetails={areaSelecionada === 'TODAS' ? detalhesUnidadeInatividade : detalhesUnidadeInatividadeFiltrados}
+                height={500}
+              />
+            ) : (
+              <EvasionChart 
+                points={areaSelecionada === 'TODAS' ? pontosMensais : pontosMensaisFiltrados} 
+                details={areaSelecionada === 'TODAS' ? detalhesMensais : detalhesMensaisFiltrados} 
+                backgroundPoints={pontosMensaisUnificados} 
+                inactivityPoints={areaSelecionada === 'TODAS' ? pontosMensaisInatividade : pontosMensaisInatividadeFiltrados}
+                inactivityDetails={areaSelecionada === 'TODAS' ? detalhesMensaisInatividade : detalhesMensaisInatividadeFiltrados}
+                backgroundInactivityPoints={pontosMensaisInatividade}
+                height={350}
+              />
+            )}
+          </div>
+
+          <div className="mb-4 flex flex-col items-center">
+            <div className="text-sm text-gray-300 mb-2">Filtrar por especialidade:</div>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {areas.map(area => (
+                <button
+                  key={area}
+                  onClick={() => setAreaSelecionada(area)}
+                  aria-pressed={areaSelecionada === area}
+                  className={`px-3 py-1 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-400 ${areaSelecionada === area ? 'bg-red-500 text-white shadow-lg' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'}`}
+                >
+                  {area}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <section className="bg-gray-900 rounded-xl p-6 shadow-2xl border border-gray-800">
             <h2 className="text-2xl font-bold text-red-300 mb-4">Destinos da Evasão</h2>
