@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-20T13:58:25.708Z",
-  "commitCount": 188,
+  "generatedAt": "2026-08-24T12:20:11.050Z",
+  "commitCount": 191,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1130,6 +1130,24 @@
       "date": "2026-08-20T13:57:49Z",
       "author": "observatoriosefmg",
       "message": "thiago akira"
+    },
+    {
+      "hash": "d5728593171a7c544cb032db7662feb91724ad4e",
+      "date": "2026-08-20T14:49:51Z",
+      "author": "observatoriosefmg",
+      "message": "substituindo ISS por Prefeitura e alterando o tamanho e disposição do gráfico de evasões"
+    },
+    {
+      "hash": "5fe33a1976e5ad25095c5033c6c2fa01edd6da6b",
+      "date": "2026-08-20T17:00:22Z",
+      "author": "observatoriosefmg",
+      "message": "prefeituras em maiusculo"
+    },
+    {
+      "hash": "28773fa04b1b1be9c272b970e1e9a344c1dc8feb",
+      "date": "2026-08-24T12:19:51Z",
+      "author": "observatoriosefmg",
+      "message": "dados cargos"
     }
   ]
 }

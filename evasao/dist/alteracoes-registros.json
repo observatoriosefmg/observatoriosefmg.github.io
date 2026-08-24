@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-20T13:58:25.708Z",
-  "commitCount": 188,
+  "generatedAt": "2026-08-24T12:20:11.050Z",
+  "commitCount": 191,
   "totalChangeCount": 89,
   "history": [
     {
@@ -19,7 +19,7 @@
           "nome": "FELIPE DE MENEZES LIMA",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE BELO HORIZONTE",
+          "orgaoDestino": "ISS BH",
           "before": {
             "MASP": "",
             "INSCRICAO": "266012520",
@@ -32,7 +32,7 @@
             "INSCRICAO": "266012520",
             "NOME": "FELIPE DE MENEZES LIMA",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE BELO HORIZONTE"
+            "ORGAO_DESTINO": "ISS BH"
           }
         }
       ]
@@ -162,7 +162,7 @@
           "nome": "ALEXANDER RODRIGUES LADEIRA",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE BELO HORIZONTE",
+          "orgaoDestino": "ISS BH",
           "before": {
             "MASP": "",
             "INSCRICAO": "266013391",
@@ -175,7 +175,7 @@
             "INSCRICAO": "266013391",
             "NOME": "ALEXANDER RODRIGUES LADEIRA",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE BELO HORIZONTE"
+            "ORGAO_DESTINO": "ISS BH"
           }
         }
       ]
@@ -261,7 +261,7 @@
           "nome": "RACHID ELIAS ARAB",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE CUIABÁ",
+          "orgaoDestino": "ISS Cuiabá",
           "before": {
             "MASP": "7557093",
             "INSCRICAO": "266004129",
@@ -274,7 +274,7 @@
             "INSCRICAO": "266004129",
             "NOME": "RACHID ELIAS ARAB",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE CUIABÁ"
+            "ORGAO_DESTINO": "ISS Cuiabá"
           }
         }
       ]
@@ -294,7 +294,7 @@
           "nome": "RACHID ELIAS ARAB",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE CUIABÁ",
+          "orgaoDestino": "ISS CUIABÁ",
           "before": {
             "MASP": "7557093",
             "INSCRICAO": "266004129",
@@ -307,7 +307,7 @@
             "INSCRICAO": "266004129",
             "NOME": "RACHID ELIAS ARAB",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE CUIABÁ"
+            "ORGAO_DESTINO": "ISS CUIABÁ"
           }
         }
       ]
@@ -437,7 +437,7 @@
           "nome": "GABRIEL BRESSANE SILVA",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE CUIABÁ",
+          "orgaoDestino": "ISS CUIABÁ",
           "before": {
             "MASP": "7556624",
             "INSCRICAO": "266004165",
@@ -450,7 +450,7 @@
             "INSCRICAO": "266004165",
             "NOME": "GABRIEL BRESSANE SILVA",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE CUIABÁ"
+            "ORGAO_DESTINO": "ISS CUIABÁ"
           }
         }
       ]
@@ -470,7 +470,7 @@
           "nome": "FERNANDA MARCHIORI DAMASCENO",
           "fromSituacao": "NOMEADO",
           "toSituacao": "DESISTENTE",
-          "orgaoDestino": "PREFEITURA DE SÃO PAULO",
+          "orgaoDestino": "ISS SP",
           "before": {
             "MASP": "",
             "INSCRICAO": "266014059",
@@ -483,7 +483,7 @@
             "INSCRICAO": "266014059",
             "NOME": "FERNANDA MARCHIORI DAMASCENO",
             "SITUACAO": "DESISTENTE",
-            "ORGAO_DESTINO": "PREFEITURA DE SÃO PAULO"
+            "ORGAO_DESTINO": "ISS SP"
           }
         },
         {
@@ -613,7 +613,7 @@
           "nome": "GABRIEL BRESSANE SILVA",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE CUIABÁ",
+          "orgaoDestino": "ISS CUIABÁ",
           "before": {
             "MASP": "7556624",
             "INSCRICAO": "266004165",
@@ -626,7 +626,7 @@
             "INSCRICAO": "266004165",
             "NOME": "GABRIEL BRESSANE SILVA",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE CUIABÁ"
+            "ORGAO_DESTINO": "ISS CUIABÁ"
           }
         },
         {
@@ -767,7 +767,7 @@
           "nome": "GABRIEL BRESSANE SILVA",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE CUIABÁ",
+          "orgaoDestino": "ISS CUIABÁ",
           "before": {
             "MASP": "7556624",
             "INSCRICAO": "266004165",
@@ -780,7 +780,7 @@
             "INSCRICAO": "266004165",
             "NOME": "GABRIEL BRESSANE SILVA",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE CUIABÁ"
+            "ORGAO_DESTINO": "ISS CUIABÁ"
           }
         }
       ]
@@ -1020,7 +1020,7 @@
           "nome": "JULIANA SILVA PEREIRA",
           "fromSituacao": "NOMEADO",
           "toSituacao": "DESISTENTE",
-          "orgaoDestino": "PREFEITURA DE FORTALEZA",
+          "orgaoDestino": "ISS FORTALEZA",
           "before": {
             "MASP": "",
             "INSCRICAO": "266004708",
@@ -1033,7 +1033,7 @@
             "INSCRICAO": "266004708",
             "NOME": "JULIANA SILVA PEREIRA",
             "SITUACAO": "DESISTENTE",
-            "ORGAO_DESTINO": "PREFEITURA DE FORTALEZA"
+            "ORGAO_DESTINO": "ISS FORTALEZA"
           }
         },
         {
@@ -1295,7 +1295,7 @@
           "nome": "YURI TELES DAMACENA",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE ARACAJU",
+          "orgaoDestino": "ISS ARACAJU",
           "before": {
             "MASP": "7558471",
             "INSCRICAO": "266007191",
@@ -1308,7 +1308,7 @@
             "INSCRICAO": "266007191",
             "NOME": "YURI TELES DAMACENA",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE ARACAJU"
+            "ORGAO_DESTINO": "ISS ARACAJU"
           }
         },
         {
@@ -1801,7 +1801,7 @@
           "nome": "LUCAS FIGUEIREDO RESENDE PEREIRA",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE BELO HORIZONTE",
+          "orgaoDestino": "ISS BH",
           "before": {
             "MASP": "7556517",
             "INSCRICAO": "266017683",
@@ -1814,7 +1814,7 @@
             "INSCRICAO": "266017683",
             "NOME": "LUCAS FIGUEIREDO RESENDE PEREIRA",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE BELO HORIZONTE"
+            "ORGAO_DESTINO": "ISS BH"
           }
         }
       ]
@@ -1900,7 +1900,7 @@
           "nome": "LAURA RIBAS DE OLIVEIRA PAIVA",
           "fromSituacao": "EM EXERCÍCIO",
           "toSituacao": "EXONERADO",
-          "orgaoDestino": "PREFEITURA DE BELO HORIZONTE",
+          "orgaoDestino": "ISS BH",
           "before": {
             "MASP": "7557390",
             "INSCRICAO": "266000104",
@@ -1913,7 +1913,7 @@
             "INSCRICAO": "266000104",
             "NOME": "LAURA RIBAS DE OLIVEIRA PAIVA",
             "SITUACAO": "EXONERADO",
-            "ORGAO_DESTINO": "PREFEITURA DE BELO HORIZONTE"
+            "ORGAO_DESTINO": "ISS BH"
           }
         }
       ]
