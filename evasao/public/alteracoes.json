@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-24T12:20:11.050Z",
-  "commitCount": 191,
+  "generatedAt": "2026-08-24T12:28:45.005Z",
+  "commitCount": 192,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1148,6 +1148,12 @@
       "date": "2026-08-24T12:19:51Z",
       "author": "observatoriosefmg",
       "message": "dados cargos"
+    },
+    {
+      "hash": "ad5f4eb9c8e7cd7edbcfb4a699e458356efc5eae",
+      "date": "2026-08-24T12:22:00Z",
+      "author": "observatoriosefmg",
+      "message": "lotação"
     }
   ]
 }
