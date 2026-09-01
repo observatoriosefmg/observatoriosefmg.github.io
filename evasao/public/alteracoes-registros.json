@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-27T10:56:46.080Z",
-  "commitCount": 194,
-  "totalChangeCount": 89,
+  "generatedAt": "2026-09-01T09:11:26.477Z",
+  "commitCount": 195,
+  "totalChangeCount": 90,
   "history": [
     {
       "commit": {
@@ -2497,6 +2497,39 @@
             "NOME": "THIAGO AKIRA KORONOMA",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "SEFAZ SP"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "5fb421e5d02da630bec0e6aee7763244fd6bad45",
+        "date": "2026-09-01T09:10:38Z",
+        "author": "observatoriosefmg",
+        "message": "evasao/data/dados.csv"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "3868809",
+          "inscricao": "",
+          "nome": "MARCELO DE MIRANDA VALLE",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3868809",
+            "INSCRICAO": "",
+            "NOME": "MARCELO DE MIRANDA VALLE",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3868809",
+            "INSCRICAO": "",
+            "NOME": "MARCELO DE MIRANDA VALLE",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
           }
         }
       ]

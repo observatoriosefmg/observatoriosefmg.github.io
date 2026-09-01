@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-08-27T10:56:46.081Z",
-  "commitCount": 194,
+  "generatedAt": "2026-09-01T09:11:26.477Z",
+  "commitCount": 195,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1166,6 +1166,12 @@
       "date": "2026-08-27T10:53:40Z",
       "author": "observatoriosefmg",
       "message": "Aposentadorias"
+    },
+    {
+      "hash": "5fb421e5d02da630bec0e6aee7763244fd6bad45",
+      "date": "2026-09-01T09:10:38Z",
+      "author": "observatoriosefmg",
+      "message": "evasao/data/dados.csv"
     }
   ]
 }
