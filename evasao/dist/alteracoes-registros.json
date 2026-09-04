@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-09-01T09:13:15.877Z",
-  "commitCount": 196,
-  "totalChangeCount": 90,
+  "generatedAt": "2026-09-04T19:53:12.934Z",
+  "commitCount": 197,
+  "totalChangeCount": 91,
   "history": [
     {
       "commit": {
@@ -2529,6 +2529,39 @@
             "INSCRICAO": "",
             "NOME": "MARCELO DE MIRANDA VALLE",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "c6190a41162c6b042a19d5f9b1d230701d7f35f2",
+        "date": "2026-09-04T19:52:10Z",
+        "author": "observatoriosefmg",
+        "message": "aposentadoria exoneração 03/09"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "3867454",
+          "inscricao": "",
+          "nome": "MAURICIO MOURA MARQUES",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "APOSENTADO",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3867454",
+            "INSCRICAO": "",
+            "NOME": "MAURICIO MOURA MARQUES",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3867454",
+            "INSCRICAO": "",
+            "NOME": "MAURICIO MOURA MARQUES",
+            "SITUACAO": "APOSENTADO",
             "ORGAO_DESTINO": ""
           }
         }

@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-09-01T09:13:15.878Z",
-  "commitCount": 196,
+  "generatedAt": "2026-09-04T19:53:12.934Z",
+  "commitCount": 197,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1178,6 +1178,12 @@
       "date": "2026-09-01T09:12:52Z",
       "author": "observatoriosefmg",
       "message": "Correção da data de exoneração de Edgard"
+    },
+    {
+      "hash": "c6190a41162c6b042a19d5f9b1d230701d7f35f2",
+      "date": "2026-09-04T19:52:10Z",
+      "author": "observatoriosefmg",
+      "message": "aposentadoria exoneração 03/09"
     }
   ]
 }
