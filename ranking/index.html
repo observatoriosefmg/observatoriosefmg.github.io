@@ -1100,6 +1100,7 @@
   }
 
 </style>
+<script src="./mapa.js"></script>
 </head>
 <body>
   <div class="cabecalho-pagina">
@@ -1124,6 +1125,7 @@
       <div class="grupo-vista">
         <button class="btn-vista ativo" id="btn-barras" onclick="setVista('barras')">Gráfico de barras</button>
         <button class="btn-vista" id="btn-grafico" onclick="setVista('grafico')">Gráfico de linhas</button>
+        <button class="btn-vista" id="btn-mapa" onclick="setVista('mapa')">Mapa</button>
         <button class="btn-vista" id="btn-tabela" onclick="setVista('tabela')">Tabela</button>
       </div>
     </div>
@@ -1222,6 +1224,14 @@
     </div>
     <div id="barras-acumulado-nota" class="barras-acumulado-nota" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal, do ano zero até o ano estimado menos um. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>ano</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>
     <div id="barras-echart" style="width:100%;"></div>
+    <div id="painel-mapa" style="display:none;">
+      <p id="mapa-status" role="status">Carregando mapa…</p>
+      <div id="mapa-echart" style="width:100%;height:clamp(380px, 70vw, 680px);" role="img" aria-label="Mapa temático da remuneração por estado"></div>
+      <label for="mapa-estado">Consultar estado no mapa</label>
+      <select id="mapa-estado"><option value="">Selecione um estado</option></select>
+      <button type="button" id="mapa-restaurar" class="acao-legenda-btn">Restaurar mapa</button>
+      <p style="font-size:0.8rem;color:#667085;">Passe o cursor ou toque em um estado para consultar o holerite. Arraste para mover; use a roda do mouse ou o gesto de pinça para ampliar. Vermelho: menor valor; verde: maior valor. Cinza: sem dados disponíveis.<br>Malha: <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener noreferrer">IBGE — Malhas geográficas</a>.</p>
+    </div>
   </div>
 
   <div id="painel-tabela" style="display:none;">
@@ -1325,7 +1335,7 @@ function tooltipBloqueadoNoModal() {
 function atualizarBloqueioTooltipNoModal(ativo) {
   __tooltipBloqueadoNoModal = !!ativo;
   const habilitarInteracao = !ativo;
-  const idsGraficos = ["grafico", "barras-echart", "grafico-posicao"];
+  const idsGraficos = ["grafico", "barras-echart", "grafico-posicao", "mapa-echart"];
   idsGraficos.forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -1363,6 +1373,16 @@ function normalizarNumeroFilhos() {
   const normalizado = Math.max(0, Math.min(Number.isFinite(valor) ? Math.trunc(valor) : 0, max));
   if (input) input.value = String(normalizado);
   return normalizado;
+}
+
+// O flex do painel reduz o canvas quando a nota/legenda ocupa espaço.
+// Converte as coordenadas lógicas do Chart.js para pixels reais da viewport.
+function pontoGraficoNaTela(chart, ponto) {
+  const rect = chart.canvas.getBoundingClientRect();
+  return {
+    cx: rect.left + ponto.x * (rect.width / chart.width),
+    cy: rect.top + ponto.y * (rect.height / chart.height)
+  };
 }
 
 function posicionarTooltip(tooltipEl, cx, cy, resumo) {
@@ -1563,6 +1583,7 @@ function ocultarTooltipsInterativos() {
   }
   __tooltipAtual = null;
   __tooltipFixa = null;
+  if (__mapaChart) __mapaChart.dispatchAction({ type: "hideTip" });
   if (__barrasChart) __barrasChart.dispatchAction({ type: "hideTip" });
   if (__posicaoChart) __posicaoChart.dispatchAction({ type: "hideTip" });
   document.querySelectorAll(".echarts-tooltip").forEach((el) => {
@@ -2511,9 +2532,7 @@ function renderizarGrafico(opcoes) {
         const item = elements[0];
         const dataset = chart.data.datasets[item.datasetIndex];
         const elemento = chart.getDatasetMeta(item.datasetIndex).data[item.index];
-        const rect = chart.canvas.getBoundingClientRect();
-        const cx = rect.left + elemento.x;
-        const cy = rect.top + elemento.y;
+        const { cx, cy } = pontoGraficoNaTela(chart, elemento);
         aplicarEstiloGrafico(chart, item.datasetIndex);
         __tooltipFixaViaClique = true;
         setTimeout(() => { __tooltipFixaViaClique = false; }, 0);
@@ -2670,9 +2689,7 @@ function renderizarGrafico(opcoes) {
 
             const ds = context.chart.data.datasets[closest.datasetIndex];
             const resumo = ehTelaPequena();
-            const rect = context.chart.canvas.getBoundingClientRect();
-            const cx = rect.left + context.tooltip.caretX;
-            const cy = rect.top + context.tooltip.caretY;
+            const { cx, cy } = pontoGraficoNaTela(context.chart, closest.element);
 
             const chaveHovered = chavePontoTooltip(closest.datasetIndex, closest.dataIndex);
             if (__tooltipFixa) {
@@ -3320,6 +3337,10 @@ function renderizarBarras(opcoes) {
     },
   };
 
+  if (__vista === "mapa") {
+    renderizarMapa(itens, opcoes, opcoesEchart.tooltip);
+    return;
+  }
   if (!__barrasChart) {
     __barrasChart = echarts.init(document.getElementById("barras-echart"));
   }
@@ -3419,15 +3440,20 @@ function atualizarControleEscolaridade() {
 }
 
 function setVista(v) {
+  ocultarTooltipsInterativos();
   __vista = v;
+  document.getElementById("painel-mapa").style.display = v === "mapa" ? "" : "none";
+  document.getElementById("painel-barras").style.minHeight = v === "mapa" ? "0" : "";
+  document.getElementById("barras-echart").style.display = v === "mapa" ? "none" : "";
+  document.getElementById("btn-mapa").classList.toggle("ativo", v === "mapa");
   document.getElementById("painel-grafico").style.display = v === "grafico" ? "" : "none";
-  document.getElementById("painel-barras").style.display = v === "barras" ? "" : "none";
+  document.getElementById("painel-barras").style.display = (v === "barras" || v === "mapa") ? "" : "none";
   document.getElementById("painel-tabela").style.display  = v === "tabela"  ? "" : "none";
   document.getElementById("btn-grafico").classList.toggle("ativo", v === "grafico");
   document.getElementById("btn-barras").classList.toggle("ativo", v === "barras");
   document.getElementById("btn-tabela").classList.toggle("ativo", v === "tabela");
   document.getElementById("campo-estado").style.display = v === "tabela" ? "" : "none";
-  document.getElementById("campo-metrica-grafico").style.display = (v === "grafico" || v === "barras" || (v === "tabela" && __modoTabela === "comparacao")) ? "" : "none";
+  document.getElementById("campo-metrica-grafico").style.display = (v === "grafico" || v === "barras" || v === "mapa" || (v === "tabela" && __modoTabela === "comparacao")) ? "" : "none";
   document.getElementById("campo-eixo-y-grafico").style.display = v === "grafico" ? "" : "none";
   document.getElementById("campo-modo-tabela").style.display = v === "tabela" ? "" : "none";
   if (v === "tabela") document.getElementById("campo-estado").style.display = __modoTabela === "holerite" ? "" : "none";
@@ -3452,7 +3478,7 @@ function renderizar() {
       } else {
         renderizarGrafico(opcoes);
       }
-    } else if (__vista === "barras") {
+    } else if (__vista === "barras" || __vista === "mapa") {
       renderizarBarras(opcoes);
     } else if (__modoTabela === "comparacao") {
       renderizarTabelaComparacao(opcoes);
@@ -3613,6 +3639,10 @@ const __anosBarrasBolha = document.getElementById("barras-slider-bolha");
 });
 
 window.addEventListener("resize", () => {
+  if (__vista === "mapa" && __mapaChart) {
+    __mapaChart.dispatchAction({ type: "hideTip" });
+    __mapaChart.resize();
+  }
   const telaPequenaAtual = ehTelaPequenaBarras();
   const mudouBreakpoint = telaPequenaAtual !== __ultimoModoTelaPequenaBarras;
   __ultimoModoTelaPequenaBarras = telaPequenaAtual;
