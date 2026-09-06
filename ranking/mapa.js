@@ -189,6 +189,8 @@ async function renderizarMapa(itens, opcoes, tooltipBarras) {
       }],
       tooltip: {
         ...tooltipBarras,
+        // Usa o mapa como referência também no DOM, evitando deslocamentos ao rolar no mobile.
+        appendToBody: false,
         triggerOn: 'mousemove|click',
         position(point, params, dom, rect, size) {
           const caixa = document.getElementById('mapa-echart').getBoundingClientRect();
