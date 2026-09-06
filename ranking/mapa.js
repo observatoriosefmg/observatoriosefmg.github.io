@@ -14,15 +14,17 @@ const __mapaUFs = {
 function criarEscalaMapa(valores) {
   const ordenados = [...valores].sort((a, b) => a - b);
   const ancoras = [];
-  [0.05, 0.25, 0.5, 0.75, 0.95].forEach((percentil, indice) => {
+  const pontos = [];
+  [0, 0.1, 0.3, 0.7, 0.9, 1].forEach((percentil, indice) => {
     const posicao = (ordenados.length - 1) * percentil;
     const inferior = Math.floor(posicao);
     const valor = ordenados.length ? ordenados[inferior] + (ordenados[Math.ceil(posicao)] - ordenados[inferior]) * (posicao - inferior) : 0;
+    pontos.push({percentil: percentil * 100, valor, cor: indice / 5});
     const anterior = ancoras[ancoras.length - 1];
     if (anterior && anterior.valor === valor) {
-      anterior.fim = indice / 4;
+      anterior.fim = indice / 5;
       anterior.cor = (anterior.inicio + anterior.fim) / 2;
-    } else ancoras.push({valor, inicio: indice / 4, fim: indice / 4, cor: indice / 4});
+    } else ancoras.push({valor, inicio: indice / 5, fim: indice / 5, cor: indice / 5});
   });
   function interpolar(valor, entrada, saida) {
     if (valor <= ancoras[0][entrada]) return ancoras[0][saida];
@@ -32,7 +34,7 @@ function criarEscalaMapa(valores) {
     }
     return ancoras[ancoras.length - 1][saida];
   }
-  return {normalizar: valor => interpolar(valor, 'valor', 'cor'), valor: cor => interpolar(cor, 'cor', 'valor')};
+  return {pontos, normalizar: valor => interpolar(valor, 'valor', 'cor'), valor: cor => interpolar(cor, 'cor', 'valor')};
 }
 
 function estiloRotuloMapa(zoom) {
@@ -115,21 +117,69 @@ async function renderizarMapa(itens, opcoes, tooltipBarras) {
     }
     // Preserva a área explorada quando os filtros ou o ano mudam.
     const enquadramento = __mapaChart.getOption()?.series?.[0] || {};
+    const cores = ['#dc2626', '#f97316', '#facc15', '#a3e635', '#4d9f38', '#15803d'];
+    let legenda = document.getElementById('mapa-legenda');
+    if (!legenda) {
+      legenda = document.createElement('div');
+      legenda.id = 'mapa-legenda';
+      legenda.style.cssText = 'container-type:inline-size;min-width:0;margin:0 0 20px;padding:8px 0;';
+      document.getElementById('mapa-echart').after(legenda);
+    }
+    const estiloLegenda = document.createElement('style');
+    estiloLegenda.textContent = `
+      #mapa-legenda .mapa-faixa { position:relative;height:56px;margin:0 64px; }
+      #mapa-legenda .mapa-valor-compacto { display:none; }
+      @container (max-width:720px) {
+        #mapa-legenda .mapa-faixa { height:76px;margin:0 36px; }
+        #mapa-legenda .mapa-marca { font-size:10px !important; }
+        #mapa-legenda .mapa-marca:nth-child(odd) > :first-child { height:31px !important; }
+        #mapa-legenda .mapa-valor-completo { display:none; }
+        #mapa-legenda .mapa-valor-compacto { display:block; }
+      }
+    `;
+    const formatoCompacto = new Intl.NumberFormat('pt-BR', {
+      notation: 'compact', maximumFractionDigits: 1
+    });
+    const faixa = document.createElement('div');
+    faixa.className = 'mapa-faixa';
+    const gradiente = document.createElement('div');
+    gradiente.style.cssText = `height:14px;border-radius:4px;background:linear-gradient(to right, ${cores.join(',')});`;
+    faixa.append(gradiente);
+    escala.pontos.forEach(ponto => {
+      const marca = document.createElement('span');
+      marca.className = 'mapa-marca';
+      marca.style.cssText = `position:absolute;left:${ponto.cor * 100}%;top:14px;transform:translateX(-50%);text-align:center;white-space:nowrap;font-size:11px;line-height:1.5;`;
+      const traco = document.createElement('span');
+      traco.style.cssText = 'display:block;width:1px;height:7px;background:currentColor;margin:0 auto 4px;';
+      const valor = document.createElement('span');
+      valor.className = 'mapa-valor-completo';
+      valor.textContent = valores.length ? formatarMoeda(ponto.valor) + (metrica === 'hora' ? '/h' : '') : '—';
+      const compacto = document.createElement('span');
+      compacto.className = 'mapa-valor-compacto';
+      compacto.textContent = valores.length ? 'R$' + formatoCompacto.format(ponto.valor) + (metrica === 'hora' ? '/h' : '') : '—';
+      marca.title = valor.textContent;
+      marca.setAttribute('aria-label', valor.textContent);
+      marca.append(traco, valor, compacto);
+      faixa.append(marca);
+    });
+    legenda.replaceChildren(estiloLegenda, faixa);
     __mapaChart.setOption({
       animationDurationUpdate: 250,
       visualMap: {
         type: 'continuous', min: 0, max: 1, dimension: 1,
-        orient: 'horizontal', left: 'center', bottom: 0, calculable: false,
-        inRange: {color: ['#dc2626', '#f97316', '#fde047', '#84cc16', '#15803d']},
+        show: false,
+        inRange: {color: cores},
         text: [formatarMoeda(escala.valor(1)), formatarMoeda(escala.valor(0))],
         formatter: valor => formatarMoeda(escala.valor(Number(valor))),
         textStyle: {color: '#344054', fontSize: 11}, itemWidth: 14, itemHeight: 150
       },
       series: [{
         type: 'map', map: 'brasil-ibge', roam: true,
+        // Evita o achatamento horizontal padrão (0.75) e preserva a proporção no encaixe.
+        aspectScale: 1,
+        layoutCenter: ['50%', '50%'], layoutSize: '95%',
         scaleLimit: {min: 1, max: 8},
         zoom: enquadramento.zoom || 1, center: enquadramento.center || null,
-        top: 12, bottom: 65, left: '5%', right: '5%',
         selectedMode: false,
         label: {show: true, color: '#102a43', ...estiloRotuloMapa(enquadramento.zoom || 1), textBorderColor: '#fff', textBorderWidth: 2,
           formatter: params => `${params.name}\n{metrica|${params.data?._item ? formatarMoeda(params.data._item.valor) + (metrica === 'hora' ? '/h' : '') : '—'}}`},
