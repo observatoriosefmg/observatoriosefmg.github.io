@@ -3353,6 +3353,11 @@ function renderizarBarras(opcoes) {
 
 // ── Vista (grafico / barras / tabela) ──────────────────────────────────────
 
+function obterVistaInicial() {
+  const dataLimite = new Date(2026, 8, 22, 23, 59, 59, 999);
+  return new Date() <= dataLimite ? "mapa" : "barras";
+}
+
 let __vista = "barras";
 let __metricaGrafico = "mensal";
 let __comparacaoAcumulado = "pior";
@@ -3559,8 +3564,8 @@ async function carregarDados() {
   atualizarControleEscolaridade();
   atualizarCampoVisibilidadeEstados();
   atualizarCampoComparacaoAcumulado();
+  setVista(obterVistaInicial());
   atualizarLinkComposicao();
-  renderizar();
 }
 
 ["diasTrabalhados", "numeroFilhos", "escolaridade", "anosBarras", "anosBarrasInput"].forEach((id) => {
