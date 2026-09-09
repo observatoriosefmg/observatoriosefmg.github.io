@@ -20,6 +20,8 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root {
     color-scheme: light dark;
@@ -345,6 +347,100 @@
     margin-left: 6px;
     vertical-align: middle;
     font-size: 1.05em;
+  }
+  #mapa-layout {
+    display: block;
+  }
+  #mapa-coluna-principal { min-width: 0; }
+  #mapa-echart {
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid #dbe2ec;
+    border-radius: 10px;
+    background: #f8fafc;
+  }
+  #mapa-echart .leaflet-container {
+    width: 100%;
+    height: 100%;
+    background: #f8fafc;
+    font: inherit;
+  }
+  #mapa-echart .leaflet-tooltip.mapa-rotulo {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.05;
+    text-align: center;
+    -webkit-text-stroke: 0.65px #111827;
+    paint-order: stroke fill;
+    text-shadow: 0 0 1px #111827;
+    pointer-events: none;
+  }
+  #mapa-echart .leaflet-tooltip.mapa-rotulo::before { display: none; }
+  #mapa-echart .mapa-aviso-zoom {
+    position: absolute;
+    z-index: 1000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 32px;
+    border-radius: inherit;
+    background: rgba(31, 42, 68, 0.72);
+    color: #fff;
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  #mapa-echart .mapa-aviso-zoom.visivel {
+    opacity: 1;
+  }
+  #mapa-detalhamento {
+    display: none;
+    min-width: 0;
+    min-height: 420px;
+    max-height: 680px;
+    overflow: auto;
+    padding: 16px;
+    border: 1px solid #dbe2ec;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #334155;
+  }
+  #mapa-detalhamento > div:not(.mapa-detalhamento-vazio) {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  @media (min-width: 1500px) {
+    #mapa-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(712px, 712px);
+      gap: 16px;
+      align-items: start;
+    }
+    #mapa-detalhamento {
+      display: block;
+      margin-top: 0;
+    }
+  }
+  .mapa-detalhamento-vazio {
+    display: grid;
+    min-height: 388px;
+    place-items: center;
+    padding: 24px;
+    color: #64748b;
+    font-size: 0.9rem;
+    text-align: center;
   }
   #painel-barras #barras-echart {
     flex: 0 0 clamp(540px, 68vh, 620px);
@@ -990,6 +1086,8 @@
     .holerite-modal-corpo { padding: 10px; }
     .hol-layout { flex-direction: column; }
     .hol-col-lateral { border-left: none; border-top: 1px solid var(--cor-borda); }
+    #mapa-layout { display: block; }
+    #mapa-detalhamento { display: none; }
   }
 
   .instagram-callout {
@@ -1225,12 +1323,19 @@
     <div id="barras-acumulado-nota" class="barras-acumulado-nota" style="display:none;">Cálculo simplificado: o valor do líquido acumulado para um determinado ano é estimado como o somatório de 12 × líquido mensal, do ano zero até o ano estimado menos um. <math class="formula-mathml" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>L</mi><mtext>acum</mtext></msub><mo>(</mo><mi>ano</mi><mo>)</mo><mo>=</mo><munderover><mo largeop="true" movablelimits="true" style="font-size:1.45em;line-height:1;">&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>ano</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><mrow><mo>(</mo><mn>12</mn><mo>&#x00D7;</mo><msub><mi>L</mi><mtext>mensal</mtext></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>)</mo></mrow></mrow></math></div>
     <div id="barras-echart" style="width:100%;"></div>
     <div id="painel-mapa" style="display:none;">
-      <p id="mapa-status" role="status">Carregando mapa…</p>
-      <div id="mapa-echart" style="width:100%;height:clamp(380px, 70vw, 680px);" role="img" aria-label="Mapa temático da remuneração por estado"></div>
-      <label for="mapa-estado">Consultar estado no mapa</label>
-      <select id="mapa-estado"><option value="">Selecione um estado</option></select>
-      <button type="button" id="mapa-restaurar" class="acao-legenda-btn">Restaurar mapa</button>
-      <p style="font-size:0.8rem;color:#667085;">Passe o cursor ou toque em um estado para consultar o holerite. Arraste para mover; use a roda do mouse ou o gesto de pinça para ampliar. Vermelho: menor valor; verde: maior valor. Cinza: sem dados disponíveis.<br>Malha: <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener noreferrer">IBGE — Malhas geográficas</a>.</p>
+      <div id="mapa-status" role="status">Carregando mapa…</div>
+      <div id="mapa-layout">
+        <div id="mapa-coluna-principal">
+          <div id="mapa-echart" style="width:100%;height:clamp(380px, 70vw, 680px);" role="img" aria-label="Mapa temático da remuneração por estado"></div>
+          <label for="mapa-estado">Consultar estado no mapa</label>
+          <select id="mapa-estado"><option value="">Selecione um estado</option></select>
+          <button type="button" id="mapa-restaurar" class="acao-legenda-btn">Restaurar mapa</button>
+          <p style="font-size:0.8rem;color:#667085;">Passe o cursor ou toque em um estado para consultar o holerite. Arraste para mover; use a roda do mouse ou o gesto de pinça para ampliar. Vermelho: menor valor; verde: maior valor. Cinza: sem dados disponíveis.<br>Malha: <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener noreferrer">IBGE — Malhas geográficas</a>.</p>
+        </div>
+        <aside id="mapa-detalhamento" aria-live="polite">
+          <div class="mapa-detalhamento-vazio">Passe o mouse sobre um estado para consultar o holerite.</div>
+        </aside>
+      </div>
     </div>
   </div>
 
@@ -1583,7 +1688,7 @@ function ocultarTooltipsInterativos() {
   }
   __tooltipAtual = null;
   __tooltipFixa = null;
-  if (__mapaChart) __mapaChart.dispatchAction({ type: "hideTip" });
+  ocultarTooltipMapa();
   if (__barrasChart) __barrasChart.dispatchAction({ type: "hideTip" });
   if (__posicaoChart) __posicaoChart.dispatchAction({ type: "hideTip" });
   document.querySelectorAll(".echarts-tooltip").forEach((el) => {
@@ -2218,6 +2323,21 @@ const pluginFundoNegativoGrafico = {
   }
 };
 
+// O canvas pode ser reduzido pelo flex do painel depois que o Chart.js calcula
+// suas dimensoes internas. Normaliza o evento para que o hit-test use a mesma
+// escala da imagem que o usuario ve na tela.
+const pluginCoordenadasGrafico = {
+  id: "coordenadasGrafico",
+  beforeEvent(chart, args) {
+    if (args.replay || !args.event || args.event.type === "resize") return;
+    const rect = chart.canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height || !chart.width || !chart.height
+      || !Number.isFinite(args.event.x) || !Number.isFinite(args.event.y)) return;
+    args.event.x *= chart.width / rect.width;
+    args.event.y *= chart.height / rect.height;
+  }
+};
+
 function renderHolerite(linha, estado, opcoes = {}) {
   if (linha.simplificado) {
     const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * ((opcoes.diasTrabalhados || 0) / 5);
@@ -2513,7 +2633,7 @@ function renderizarGrafico(opcoes) {
   __grafico = new Chart(ctx, {
     type: "line",
     data: { labels, datasets },
-    plugins: [pluginFundoNegativoGrafico, pluginDestaqueNaFrente, pluginLegendaNegritoDestaque],
+    plugins: [pluginFundoNegativoGrafico, pluginCoordenadasGrafico, pluginDestaqueNaFrente, pluginLegendaNegritoDestaque],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -3353,11 +3473,6 @@ function renderizarBarras(opcoes) {
 
 // ── Vista (grafico / barras / tabela) ──────────────────────────────────────
 
-function obterVistaInicial() {
-  const dataLimite = new Date(2026, 8, 22, 23, 59, 59, 999);
-  return new Date() <= dataLimite ? "mapa" : "barras";
-}
-
 let __vista = "barras";
 let __metricaGrafico = "mensal";
 let __comparacaoAcumulado = "pior";
@@ -3367,6 +3482,11 @@ let __eixoYGrafico = "remuneracao";
 let __modoTabela = "holerite";
 let __ultimoModoTelaPequenaBarras = ehTelaPequenaBarras();
 let __resizeRenderTimer = null;
+
+function obterVistaInicial() {
+  const limiteMapa = new Date(2026, 8, 22, 23, 59, 59, 999);
+  return new Date() <= limiteMapa ? "mapa" : "barras";
+}
 
 function setMetricaGrafico(valor) {
   const eraAcumulado = __metricaGrafico === "acumulado";
@@ -3564,8 +3684,8 @@ async function carregarDados() {
   atualizarControleEscolaridade();
   atualizarCampoVisibilidadeEstados();
   atualizarCampoComparacaoAcumulado();
-  setVista(obterVistaInicial());
   atualizarLinkComposicao();
+  setVista(obterVistaInicial());
 }
 
 ["diasTrabalhados", "numeroFilhos", "escolaridade", "anosBarras", "anosBarrasInput"].forEach((id) => {
@@ -3644,9 +3764,9 @@ const __anosBarrasBolha = document.getElementById("barras-slider-bolha");
 });
 
 window.addEventListener("resize", () => {
-  if (__vista === "mapa" && __mapaChart) {
-    __mapaChart.dispatchAction({ type: "hideTip" });
-    __mapaChart.resize();
+  if (__vista === "mapa" && __mapaLeaflet) {
+    ocultarTooltipMapa();
+    redimensionarMapa();
   }
   const telaPequenaAtual = ehTelaPequenaBarras();
   const mudouBreakpoint = telaPequenaAtual !== __ultimoModoTelaPequenaBarras;
@@ -3698,7 +3818,7 @@ document.addEventListener("click", (event) => {
   if (tooltipBloqueadoNoModal()) return;
   const botao = event.target.closest("[data-acao='abrir-holerite']");
   if (!botao || botao.closest("#tooltip-holerite")) return;
-  const contexto = __barrasTooltipAtual || __posicaoTooltipAtual;
+  const contexto = __barrasTooltipAtual || __posicaoTooltipAtual || __mapaPopupAtual;
   if (!contexto) return;
   event.preventDefault();
   event.stopPropagation();
