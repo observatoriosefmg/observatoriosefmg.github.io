@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-09-04T19:53:12.934Z",
-  "commitCount": 197,
+  "generatedAt": "2026-09-11T15:01:04.447Z",
+  "commitCount": 198,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1184,6 +1184,12 @@
       "date": "2026-09-04T19:52:10Z",
       "author": "observatoriosefmg",
       "message": "aposentadoria exoneração 03/09"
+    },
+    {
+      "hash": "73e756932b72a6a9a6476b0219d955f1ee49b0c3",
+      "date": "2026-09-11T15:00:29Z",
+      "author": "observatoriosefmg",
+      "message": "PAULO PANTERA"
     }
   ]
 }
