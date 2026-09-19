@@ -64,6 +64,9 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
         return normalized === 'EM EXERCICIO';
     };
 
+    const isPosseJudicial = (situacao?: string) =>
+        normalizarSituacao(situacao) === 'POSSE JUDICIAL';
+
     const aguardandoNomeacaoPorNome = useMemo(() => {
         const mapaConcursosInfo = new Map<string, any>();
         for (const concursoRaw of dadosOutrosConcursos) {
@@ -157,25 +160,28 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
         getAguardandoNomeacaoPorOrgao(nome).map(item => item.nomeado ? `${item.orgao} (NOMEADO)` : item.orgao);
 
     const obterSituacaoExibida = (item: any) => {
+        if (isPosseJudicial(item['SITUACAO'])) {
+            return 'POSSE JUDICIAL / EM EXERCÍCIO';
+        }
         if (isSituacaoEmExercicio(item['SITUACAO']) && estaNomeadoEmOutroConcurso(item['NOME'])) {
             return 'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO';
         }
         return (item['SITUACAO'] || '???').toString();
     };
 
+    const obterStatusDoItem = (item: any): string[] => {
+        const situacao = (item['SITUACAO'] || '???').toString();
+        if (isPosseJudicial(situacao)) return ['POSSE JUDICIAL', 'EM EXERCÍCIO'];
+        if (isSituacaoEmExercicio(situacao) && estaNomeadoEmOutroConcurso(item['NOME'])) {
+            return ['EM EXERCÍCIO', 'NOMEADO EM OUTRO CONCURSO'];
+        }
+        return [situacao];
+    };
+
     const statusMatchesFilter = (status: string, filter: string) => {
-        const statusNorm = status.toUpperCase();
-        const filterNorm = filter.toUpperCase();
-
-        if (filterNorm === 'EM EXERCÍCIO') {
-            return statusNorm === 'EM EXERCÍCIO' || statusNorm === 'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO';
-        }
-
-        if (filterNorm === 'NOMEADO EM OUTRO CONCURSO') {
-            return statusNorm === 'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO';
-        }
-
-        return statusNorm === filterNorm;
+        const statusNorm = normalizarSituacao(status);
+        const filterNorm = normalizarSituacao(filter);
+        return statusNorm.split(' / ').includes(filterNorm);
     };
 
     // Carregar dados CSV principais (dados.csv)
@@ -459,8 +465,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
         // Filtrar por status se selecionado
         if (selectedStatus) {
             filtered = filtered.filter(item => {
-                const status = obterSituacaoExibida(item);
-                return statusMatchesFilter(status, selectedStatus);
+                return obterStatusDoItem(item).some(status => statusMatchesFilter(status, selectedStatus));
             });
         }
 
@@ -533,6 +538,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
 
         // Cores base por status
         const statusColors = {
+            'POSSE JUDICIAL / EM EXERCÍCIO': isEven ? 'bg-amber-200' : 'bg-amber-200/75',
             'EM EXERCÍCIO': isEven ? 'bg-green-200' : 'bg-green-200/75',
             'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO': isEven ? 'bg-lime-200' : 'bg-lime-200/75',
             'NOMEADO': isEven ? 'bg-blue-200' : 'bg-blue-200/75',
@@ -550,6 +556,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
     // Função para determinar apenas a cor do texto do status
     const getStatusTextColor = (situacao: string) => {
         const colors = {
+            'POSSE JUDICIAL / EM EXERCÍCIO': 'text-amber-700',
             'EM EXERCÍCIO': 'text-green-700',
             'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO': 'text-green-700',
             'NOMEADO': 'text-blue-700',
@@ -632,10 +639,7 @@ const DetailedTableApp: React.FC<DetailedTableAppProps> = () => {
                             {/* Status individuais */}
                             {Object.entries(
                                 filteredData.reduce((acc, item) => {
-                                    const situacaoExibida = obterSituacaoExibida(item);
-                                    const statuses = situacaoExibida === 'EM EXERCÍCIO / NOMEADO EM OUTRO CONCURSO'
-                                        ? ['EM EXERCÍCIO', 'NOMEADO EM OUTRO CONCURSO']
-                                        : [situacaoExibida];
+                                    const statuses = obterStatusDoItem(item);
                                     for (const status of statuses) {
                                         acc[status] = (acc[status] || 0) + 1;
                                     }
