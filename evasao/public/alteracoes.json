@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-09-14T16:46:18.122Z",
-  "commitCount": 201,
+  "generatedAt": "2026-09-19T14:24:01.377Z",
+  "commitCount": 202,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1208,6 +1208,12 @@
       "date": "2026-09-14T16:45:36Z",
       "author": "observatoriosefmg",
       "message": "david daniel"
+    },
+    {
+      "hash": "b2f5f651261e1419e24fb7dcf3d65c1d5d9ad2c6",
+      "date": "2026-09-19T14:23:26Z",
+      "author": "observatoriosefmg",
+      "message": "Exoneração de Fabiano Ishii e mudança no tratamento de posse judicial"
     }
   ]
 }
