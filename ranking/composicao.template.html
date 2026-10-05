@@ -290,14 +290,35 @@
   .dado-item {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
     gap: 12px;
+    min-width: 0;
     padding: 7px 0;
     border-bottom: 1px solid var(--cor-linha-alt);
   }
   .dado-item:last-child { border-bottom: none; }
-  .dado-item span { font-size: 0.78rem; color: #6b7280; flex-shrink: 0; }
-  .dado-item strong { font-size: 0.88rem; color: #111827; text-align: right; max-width: 60%; word-wrap: break-word; }
+  .dado-item span {
+    flex: 0 1 40%;
+    min-width: 0;
+    font-size: 0.78rem;
+    color: #6b7280;
+    overflow-wrap: anywhere;
+  }
+  .dado-item strong {
+    flex: 1 1 60%;
+    min-width: 0;
+    font-size: 0.88rem;
+    color: #111827;
+    text-align: right;
+    max-width: none;
+    overflow-wrap: anywhere;
+  }
+  .dado-item strong a { overflow-wrap: anywhere; }
+
+  @media (max-width: 700px) {
+    .dado-item { flex-direction: column; gap: 3px; }
+    .dado-item strong { width: 100%; text-align: left; }
+  }
 
   table.tabela-explicacao {
     border-collapse: collapse;
@@ -556,7 +577,7 @@
       Explicação detalhada de como cada verba é calculada em cada estado: valores, índices, regras de evolução, recorrência e previdência.
     </p>
     <div class="instagram-callout" aria-label="Aviso sobre a origem do levantamento salarial">
-      <img class="instagram-callout-midia" src="./img/pifado.png" alt="Perfil do Instagram Concurseiropifado" />
+      <img class="instagram-callout-midia" src="../img/pifado.png" alt="Perfil do Instagram Concurseiropifado" />
       <div class="instagram-callout-texto">
         <p>
           As postagens do <strong>@concurseiropifado</strong> no Instagram foram o ponto de partida para o levantamento da estrutura remuneratória de vários fiscos. Siga o perfil para acompanhar novidades sobre concursos da área fiscal.
@@ -574,7 +595,7 @@
         <div class="menu-lateral-alca" id="menu-lateral-alca"></div>
         <button type="button" class="menu-lateral-fechar" id="botao-fechar-menu-mobile">Fechar &#10005;</button>
         <div class="menu-lateral-lista" id="menu-lateral">{{MENU_LATERAL}}</div>
-        <a class="link-voltar" id="link-voltar-calculadora" href="./index.html">Ir para calculadora</a>
+        <a class="link-voltar" id="link-voltar-calculadora" href="../index.html">Ir para calculadora</a>
       </nav>
       <div class="conteudo-principal" id="conteudo-principal">{{CONTEUDO_ESTADOS}}</div>
     </div>
@@ -663,7 +684,7 @@ function mostrarEstado(uf) {
     botao.classList.toggle("ativo", botao.dataset.uf === uf);
   });
   const linkVoltar = document.getElementById("link-voltar-calculadora");
-  if (linkVoltar) linkVoltar.href = `./index.html?estado=${encodeURIComponent(uf)}`;
+  if (linkVoltar) linkVoltar.href = `../index.html?estado=${encodeURIComponent(uf)}`;
 }
 
 function rolarParaConteudoEstado() {

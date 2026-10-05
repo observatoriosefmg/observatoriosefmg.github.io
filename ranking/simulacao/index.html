@@ -1390,6 +1390,16 @@ function normalizarNumeroFilhos() {
   return normalizado;
 }
 
+// O flex do painel pode reduzir o canvas depois que o Chart.js calcula suas
+// dimensoes internas. Converte as coordenadas logicas para pixels da viewport.
+function pontoGraficoNaTela(chart, ponto) {
+  const rect = chart.canvas.getBoundingClientRect();
+  return {
+    cx: rect.left + ponto.x * (rect.width / chart.width),
+    cy: rect.top + ponto.y * (rect.height / chart.height)
+  };
+}
+
 function posicionarTooltip(tooltipEl, cx, cy, resumo) {
   const tw = tooltipEl.offsetWidth || (resumo ? 320 : 420);
   const th = tooltipEl.offsetHeight || (resumo ? 280 : 420);
@@ -2225,6 +2235,21 @@ const pluginFundoNegativoGrafico = {
   }
 };
 
+// O canvas pode ser reduzido pelo flex do painel depois que o Chart.js calcula
+// suas dimensoes internas. Normaliza o evento para que o hit-test use a mesma
+// escala da imagem que o usuario ve na tela.
+const pluginCoordenadasGrafico = {
+  id: "coordenadasGrafico",
+  beforeEvent(chart, args) {
+    if (args.replay || !args.event || args.event.type === "resize") return;
+    const rect = chart.canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height || !chart.width || !chart.height
+      || !Number.isFinite(args.event.x) || !Number.isFinite(args.event.y)) return;
+    args.event.x *= chart.width / rect.width;
+    args.event.y *= chart.height / rect.height;
+  }
+};
+
 function renderHolerite(linha, estado, opcoes = {}) {
   if (linha.simplificado) {
     const horasNoPeriodo = (estado.cargaHorariaSemanal || 0) * ((opcoes.diasTrabalhados || 0) / 5);
@@ -2520,7 +2545,7 @@ function renderizarGrafico(opcoes) {
   __grafico = new Chart(ctx, {
     type: "line",
     data: { labels, datasets },
-    plugins: [pluginFundoNegativoGrafico, pluginDestaqueNaFrente, pluginLegendaNegritoDestaque],
+    plugins: [pluginFundoNegativoGrafico, pluginCoordenadasGrafico, pluginDestaqueNaFrente, pluginLegendaNegritoDestaque],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -2539,9 +2564,7 @@ function renderizarGrafico(opcoes) {
         const item = elements[0];
         const dataset = chart.data.datasets[item.datasetIndex];
         const elemento = chart.getDatasetMeta(item.datasetIndex).data[item.index];
-        const rect = chart.canvas.getBoundingClientRect();
-        const cx = rect.left + elemento.x;
-        const cy = rect.top + elemento.y;
+        const { cx, cy } = pontoGraficoNaTela(chart, elemento);
         aplicarEstiloGrafico(chart, item.datasetIndex);
         __tooltipFixaViaClique = true;
         setTimeout(() => { __tooltipFixaViaClique = false; }, 0);
@@ -2698,9 +2721,7 @@ function renderizarGrafico(opcoes) {
 
             const ds = context.chart.data.datasets[closest.datasetIndex];
             const resumo = ehTelaPequena();
-            const rect = context.chart.canvas.getBoundingClientRect();
-            const cx = rect.left + context.tooltip.caretX;
-            const cy = rect.top + context.tooltip.caretY;
+            const { cx, cy } = pontoGraficoNaTela(context.chart, closest.element);
 
             const chaveHovered = chavePontoTooltip(closest.datasetIndex, closest.dataIndex);
             if (__tooltipFixa) {
