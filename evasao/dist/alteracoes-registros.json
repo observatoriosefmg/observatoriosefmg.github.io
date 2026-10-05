@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-09-23T14:19:04.671Z",
-  "commitCount": 203,
-  "totalChangeCount": 91,
+  "generatedAt": "2026-10-05T09:06:31.227Z",
+  "commitCount": 204,
+  "totalChangeCount": 92,
   "history": [
     {
       "commit": {
@@ -2562,6 +2562,39 @@
             "INSCRICAO": "",
             "NOME": "MAURICIO MOURA MARQUES",
             "SITUACAO": "APOSENTADO",
+            "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "d81617425357be1999ac5244f3adcba87a5c7d30",
+        "date": "2026-10-05T09:05:33Z",
+        "author": "observatoriosefmg",
+        "message": "Exonerações Publicadas, Afastamento, Exonerações"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "5471503",
+          "inscricao": "",
+          "nome": "MARIA APARECIDA BREGALDA GUSSEN",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "5471503",
+            "INSCRICAO": "",
+            "NOME": "MARIA APARECIDA BREGALDA GUSSEN",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "5471503",
+            "INSCRICAO": "",
+            "NOME": "MARIA APARECIDA BREGALDA GUSSEN",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
             "ORGAO_DESTINO": ""
           }
         }
