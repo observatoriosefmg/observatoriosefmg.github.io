@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-10-05T09:06:31.227Z",
-  "commitCount": 204,
-  "totalChangeCount": 92,
+  "generatedAt": "2026-10-29T12:14:22.398Z",
+  "commitCount": 205,
+  "totalChangeCount": 93,
   "history": [
     {
       "commit": {
@@ -2596,6 +2596,39 @@
             "NOME": "MARIA APARECIDA BREGALDA GUSSEN",
             "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
             "ORGAO_DESTINO": ""
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "b337797df18f2be489b0431ef7b3c37e8004f240",
+        "date": "2026-10-29T09:14:03-03:00",
+        "author": "observatoriosefmg",
+        "message": "exonerações publicadas"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "7558562",
+          "inscricao": "266010155",
+          "nome": "VITOR MENDES RIBEIRO",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "EXONERADO",
+          "orgaoDestino": "SEFAZ RJ",
+          "before": {
+            "MASP": "7558562",
+            "INSCRICAO": "266010155",
+            "NOME": "VITOR MENDES RIBEIRO",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "7558562",
+            "INSCRICAO": "266010155",
+            "NOME": "VITOR MENDES RIBEIRO",
+            "SITUACAO": "EXONERADO",
+            "ORGAO_DESTINO": "SEFAZ RJ"
           }
         }
       ]
