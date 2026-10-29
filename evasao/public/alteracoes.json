@@ -1,7 +1,7 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-10-29T12:14:22.399Z",
-  "commitCount": 205,
+  "generatedAt": "2026-10-29T12:20:08.164Z",
+  "commitCount": 206,
   "commits": [
     {
       "hash": "126b0aea7926e595e3e648dd581285ea7ced0d3b",
@@ -1232,6 +1232,12 @@
       "date": "2026-10-29T09:14:03-03:00",
       "author": "observatoriosefmg",
       "message": "exonerações publicadas"
+    },
+    {
+      "hash": "7b61fa3794aeb4f4d557bc0c1586fd37a6f0844c",
+      "date": "2026-10-29T09:19:49-03:00",
+      "author": "observatoriosefmg",
+      "message": "exoneração publicada"
     }
   ]
 }
