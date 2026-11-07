@@ -1,8 +1,8 @@
 {
   "sourceFile": "data/dados.csv",
-  "generatedAt": "2026-10-29T12:31:28.255Z",
-  "commitCount": 207,
-  "totalChangeCount": 93,
+  "generatedAt": "2026-11-07T22:48:40.660Z",
+  "commitCount": 208,
+  "totalChangeCount": 94,
   "history": [
     {
       "commit": {
@@ -2629,6 +2629,39 @@
             "NOME": "VITOR MENDES RIBEIRO",
             "SITUACAO": "EXONERADO",
             "ORGAO_DESTINO": "SEFAZ RJ"
+          }
+        }
+      ]
+    },
+    {
+      "commit": {
+        "hash": "c61c6db7f213616cee0f8854562f73845a73eff8",
+        "date": "2026-11-07T22:48:16Z",
+        "author": "observatoriosefmg",
+        "message": "afastamento"
+      },
+      "changeCount": 1,
+      "changes": [
+        {
+          "masp": "3867488",
+          "inscricao": "",
+          "nome": "VINICIUS FERNANDES MOREIRA",
+          "fromSituacao": "EM EXERCÍCIO",
+          "toSituacao": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+          "orgaoDestino": "",
+          "before": {
+            "MASP": "3867488",
+            "INSCRICAO": "",
+            "NOME": "VINICIUS FERNANDES MOREIRA",
+            "SITUACAO": "EM EXERCÍCIO",
+            "ORGAO_DESTINO": ""
+          },
+          "after": {
+            "MASP": "3867488",
+            "INSCRICAO": "",
+            "NOME": "VINICIUS FERNANDES MOREIRA",
+            "SITUACAO": "AFASTAMENTO PRELIMINAR À APOSENTADORIA",
+            "ORGAO_DESTINO": ""
           }
         }
       ]
