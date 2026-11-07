@@ -1,0 +1,88 @@
+name: Monitorar publicações de AFRE no DOE MG
+
+on:
+  schedule:
+    - cron: '30 8,10,12,14,16 * * 2-6'
+  workflow_dispatch:
+    inputs:
+      doe_date:
+        description: Data da edição a verificar (YYYY-MM-DD); vazio verifica hoje
+        required: false
+        type: string
+
+concurrency:
+  group: monitorar-doe-${{ github.event.inputs.doe_date || 'diario' }}
+  cancel-in-progress: false
+
+jobs:
+  monitorar:
+    runs-on: ubuntu-latest
+    outputs:
+      publication_date: ${{ steps.scan.outputs.publication_date }}
+      proposals: ${{ steps.scan.outputs.proposals }}
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PDF parser
+        run: python -m pip install -r evasao/scripts/requirements-doe.txt
+
+      - name: Test DOE monitor
+        run: python -m unittest discover -s evasao/scripts -p 'test_monitorar_doe.py'
+
+      - name: Scan issue and propose changes
+        id: scan
+        env:
+          DOE_DATE: ${{ inputs.doe_date }}
+          DOE_SCAN_ONLY: '1'
+        run: python evasao/scripts/monitorar_doe.py
+
+  propor-cada-alteracao:
+    needs: monitorar
+    if: needs.monitorar.outputs.proposals != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        proposal: ${{ fromJSON(needs.monitorar.outputs.proposals) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Apply this proposal to its own branch
+        id: proposal
+        env:
+          DOE_PROPOSAL: ${{ toJSON(matrix.proposal) }}
+          DOE_PR_BODY_FILE: ${{ runner.temp }}/doe-pr-body.md
+        run: python evasao/scripts/monitorar_doe.py --apply-proposal
+
+      - name: Create review pull request
+        if: steps.proposal.outcome == 'success'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automacao/doe-${{ matrix.proposal.publication_date }}-${{ matrix.proposal.id }}
+          delete-branch: true
+          add-paths: evasao/data/dados.csv
+          commit-message: "Propõe atualizações do DOE MG"
+          title: "Proposta DOE MG - ${{ matrix.proposal.name }} - ${{ matrix.proposal.kind }}"
+          body-path: ${{ runner.temp }}/doe-pr-body.md
+          draft: true
