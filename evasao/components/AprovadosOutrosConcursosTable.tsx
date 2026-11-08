@@ -34,6 +34,7 @@ interface AprovadosOutrosConcursosTableProps {
 const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps> = ({ data, details = {} }) => {
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [buscaOrgao, setBuscaOrgao] = useState('');
+  const [buscaNome, setBuscaNome] = useState('');
   const [ordenacao, setOrdenacao] = useState<'aprovados' | 'vencimento'>('aprovados');
 
   const analisarDataBrasil = (valor: string): Date | null => {
@@ -216,8 +217,22 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
     .trim();
 
   const termoBusca = normalizarBusca(buscaOrgao);
+  const termoBuscaNome = normalizarBusca(buscaNome);
   const concursosFiltradosEOrdenados = concursosExibidos
-    .filter(({ item }) => !termoBusca || normalizarBusca(item.concurso).includes(termoBusca))
+    .map(({ item, rows, count }) => {
+      const rowsFiltradas = termoBuscaNome
+        ? rows.filter((aud) => normalizarBusca(aud.name).includes(termoBuscaNome))
+        : rows;
+      return {
+        item,
+        rows: rowsFiltradas,
+        count: termoBuscaNome ? rowsFiltradas.length : count,
+      };
+    })
+    .filter(({ item, rows }) =>
+      (!termoBusca || normalizarBusca(item.concurso).includes(termoBusca)) &&
+      (!termoBuscaNome || rows.length > 0),
+    )
     .sort((a, b) => {
       if (ordenacao === 'vencimento') {
         const dataA = a.item.dataVencimentoOrdenacao;
@@ -244,6 +259,19 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
             value={buscaOrgao}
             onChange={(event) => setBuscaOrgao(event.target.value)}
             placeholder="Digite o nome do órgão..."
+            className="w-full px-3 py-2 rounded-lg border border-gray-700 bg-gray-950 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+        </div>
+        <div className="flex-1">
+          <label htmlFor="busca-nome-aprovados" className="block text-sm font-medium text-gray-300 mb-2">
+            Pesquisar por nome
+          </label>
+          <input
+            id="busca-nome-aprovados"
+            type="search"
+            value={buscaNome}
+            onChange={(event) => setBuscaNome(event.target.value)}
+            placeholder="Digite o nome do auditor..."
             className="w-full px-3 py-2 rounded-lg border border-gray-700 bg-gray-950 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
         </div>
@@ -320,7 +348,7 @@ const AprovadosOutrosConcursosTable: React.FC<AprovadosOutrosConcursosTableProps
           {concursosFiltradosEOrdenados.length === 0 && (
             <tr>
               <td colSpan={2} className="px-6 py-6 text-center text-gray-400">
-                Nenhum órgão encontrado.
+                Nenhum resultado encontrado.
               </td>
             </tr>
           )}
