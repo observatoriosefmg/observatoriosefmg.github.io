@@ -1539,6 +1539,16 @@ function getTotalDescontos(linha) {
   return (linha.abateTeto || 0) + (linha.descontoRPPS || 0) + (linha.descontoPrevcom || 0) + (linha.descontoIR || 0);
 }
 
+function formatarCargaHoraria(estado) {
+  return `${estado.cargaHorariaSemanal}h${estado.observacaoCargaHoraria ? "*" : ""}`;
+}
+
+function notaCargaHorariaHtml(estado) {
+  return estado.observacaoCargaHoraria
+    ? `<div class="tooltip-resumo-nota">* ${htmlEsc(estado.observacaoCargaHoraria)}</div>`
+    : "";
+}
+
 function montarResumoTooltip(linha, estado, opcoes = {}) {
   if (linha.simplificado) {
     return `
@@ -1551,6 +1561,7 @@ function montarResumoTooltip(linha, estado, opcoes = {}) {
         </div>
       </div>
       <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}</div>
+      ${notaCargaHorariaHtml(estado)}
       <div class="tooltip-resumo-item"><span>Remuneração Líquida</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.remuneracaoLiquida)}</span></div>
       <div class="tooltip-resumo-item"><span>Remuneração Líquida por Hora</span><span class="tooltip-resumo-valor pos">${formatarMoeda(linha.liquidoPorHora)}</span></div>
     `;
@@ -1571,6 +1582,7 @@ function montarResumoTooltip(linha, estado, opcoes = {}) {
   return `
     <div class="tooltip-resumo-titulo">${htmlEsc(estado.nome)} · ${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}</div>
     ${notaSimplificada}
+    ${notaCargaHorariaHtml(estado)}
     ${itens.map(([rotulo, valor]) => {
       const valorNumerico = Number(valor);
       const possuiValor = Number.isFinite(valorNumerico);
@@ -1673,7 +1685,7 @@ function abrirModalHolerite(linha, estado, opcoes = {}) {
     linha.simplificado
       ? `${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}`
       : `${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"} · ${linha.posicao}`,
-    estado.cargaHorariaSemanal ? `Carga horária semanal: ${estado.cargaHorariaSemanal}h` : null,
+    estado.cargaHorariaSemanal ? `Carga horária semanal: ${formatarCargaHoraria(estado)}` : null,
     dataAtu ? `Atualizado em ${dataAtu}` : null
   ].filter(Boolean);
   subtitulo.innerHTML = topo.map(htmlEsc).join("<br>");
@@ -2257,10 +2269,11 @@ function renderHolerite(linha, estado, opcoes = {}) {
     const header = opcoes.semCabecalho ? "" : `<div class="hol-header">
       <strong>${estado.nome}</strong>
       <span>${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"}</span>
-      ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${estado.cargaHorariaSemanal}h</span>` : ""}
+      ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${formatarCargaHoraria(estado)}</span>` : ""}
       ${estado.ultimaAtualizacao ? `<span style="font-size:0.72rem;opacity:.6">Atualizado em ${estado.ultimaAtualizacao.split("-").reverse().join("/")}</span>` : ""}
     </div>`;
     const html = `<div class="hol-body">
+      ${notaCargaHorariaHtml(estado)}
       <div class="hol-wip">
         <img class="hol-wip-imagem" src="../img/wip.png" alt="" />
         <div class="hol-wip-titulo">Em construção</div>
@@ -2328,10 +2341,10 @@ function renderHolerite(linha, estado, opcoes = {}) {
   const header = opcoes.semCabecalho ? "" : `<div class="hol-header">
     <strong>${estado.nome}</strong>
     <span>${linha.anosServico} ano${ehSingular(linha.anosServico) ? "" : "s"} &nbsp;·&nbsp; ${linha.posicao}</span>
-    ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${estado.cargaHorariaSemanal}h</span>` : ""}
+    ${estado.cargaHorariaSemanal ? `<span style="font-size:0.72rem;opacity:.75">Carga horária semanal: ${formatarCargaHoraria(estado)}</span>` : ""}
     ${dataAtu ? `<span style="font-size:0.72rem;opacity:.6">Atualizado em ${dataAtu}</span>` : ""}
   </div>`;
-  let html = `<div class="hol-body">`;
+  let html = `<div class="hol-body">${notaCargaHorariaHtml(estado)}`;
 
   html += `<div class="hol-secao">Verbas Remuneratórias</div>`;
   remuneratorias.forEach(v => { html += itemVerba(v); });
@@ -3207,6 +3220,7 @@ function renderizarBarras(opcoes) {
       valor: emValorHora ? linha.liquidoPorHora : emAcumulado ? valorAcumulado : linha.remuneracaoLiquida,
       valorAcumulado,
       cargaHoraria: estado.cargaHorariaSemanal,
+      observacaoCargaHoraria: estado.observacaoCargaHoraria,
       linha,
       estado,
     });
@@ -3301,11 +3315,12 @@ function renderizarBarras(opcoes) {
           const item = itens[index];
           if (!item || item.isMedia) return value;
           if (!item.cargaHoraria) return `{uf|${value}}`;
+          const cargaHorariaLabel = `${item.cargaHoraria}h${item.observacaoCargaHoraria ? "*" : ""}`;
           if (item.cargaHoraria < 40) {
             const estilo = item.cargaHoraria === 30 ? "pillDourado" : (item.cargaHoraria === 35 ? "pillPrateado" : "pill");
-            return `{uf|${value}} {bullet|\u00b7} {${estilo}|${item.cargaHoraria}h}`;
+            return `{uf|${value}} {bullet|\u00b7} {${estilo}|${cargaHorariaLabel}}`;
           }
-          return `{uf|${value}} {bullet|\u00b7} {uf|${item.cargaHoraria}h}`;
+          return `{uf|${value}} {bullet|\u00b7} {uf|${cargaHorariaLabel}}`;
         },
         rich: {
           uf: { fontWeight: 600, color: "#334155" },
